@@ -1,7 +1,7 @@
 # LUT & Color Style Matcher — MVP Scope
 
-**Version:** 1.0  
-**Product type:** Browser-based web application  
+**Version:** 2.0 (full-stack: React + FastAPI + SQLite)  
+**Product type:** Full-stack web application (React frontend, FastAPI backend, SQLite)  
 **Primary audience:** Everyday users and beginners  
 **Core goal:** Make it easy to recreate a color style from a reference image and apply it to other photos—without requiring color-grading knowledge.
 
@@ -40,7 +40,7 @@ Professional colorists and filmmakers are not the initial target audience.
 
 ## 3. MVP workflow
 
-1. The user opens the website. No account or login is required.
+1. The user opens the website. No account or login is required to try the tool; an account is needed only to save a look to the Library.
 2. The user uploads a reference image.
 3. The user clicks **Generate Color Style**.
 4. The tool analyzes the reference and creates an estimated color transformation.
@@ -101,7 +101,7 @@ It will use those measurements to construct a reusable 3D LUT.
 
 ### Why
 
-A rule-based approach is easier to implement, debug, benchmark, and run locally in the browser. It also avoids AI inference costs and external services.
+A rule-based approach is easier to implement, debug, benchmark, and run on a plain Python backend. It also avoids AI inference costs and external services.
 
 ### Alternatives considered
 
@@ -246,72 +246,65 @@ The MVP will support both LUT and image exports.
 
 ---
 
-## 10. Browser processing, privacy, and performance
+## 10. Processing, privacy, and performance
 
 ### Decision
 
-Process images locally in the browser. No image-processing backend or cloud storage is required for the MVP.
+Split the work between a small Python backend and the browser:
 
-### Why
+- **Backend (FastAPI):** analyzes the reference image, builds the 33 × 33 × 33 LUT, and applies the four adjustments to it. This is the single source of truth for the color transformation.
+- **Browser:** shows the previews, applies the LUT returned by the backend to the target photo (WebGL, with a CPU Web Worker fallback), and renders the comparison UI.
 
-- Reduces infrastructure and hosting costs.
-- Avoids uploading personal images to the application's server.
-- Makes a no-account experience practical.
-- Keeps the architecture relatively simple.
+### Single source of truth
 
-### Proposed implementation details
+The LUT used for the live preview, the exported `.cube`, and the exported edited image is the same data returned by the backend for the same settings. The browser never re-implements the adjustments.
 
-- Use resized copies for responsive previews where appropriate.
-- Process full-resolution images locally when the device can handle it.
-- Use Web Workers for expensive calculations to keep the interface responsive.
-- Show progress for longer operations.
-- Provide clear errors for unsupported files, memory limits, or processing failures.
-- Test behavior on different browsers and devices.
+### Privacy
+
+- Uploaded images are processed in memory and are never written to disk or to the database.
+- Only a logged-in user who clicks **Save to Library** stores anything: the look's numeric style parameters, its adjustments, and a 256 px JPEG thumbnail of the reference.
+- Guests store nothing.
+
+### Limits and targets
+
+- JPEG / PNG / WebP, up to 15 MB, validated on the server by file signature, not only by extension.
+- Analysis uses a copy downscaled to at most 1024 px on the longest side.
+- **Generate Color Style** finishes in 5 seconds or less for a 15 MB image on a laptop.
+- After a control change, the preview updates in 300 ms or less.
+- Clear messages for unsupported files, too-large files, and processing failures.
 
 ### Alternatives considered
 
-**Server-side processing**
-- More control over compute resources.
-- Requires uploads, backend infrastructure, and additional privacy and security work.
-
-**Hybrid processing**
-- Could be useful if browser performance becomes a limiting factor.
-- Adds complexity before the need has been demonstrated.
+- **Fully in-browser processing:** simpler hosting and maximum privacy, but no server-side library of saved looks.
+- **Server-side adjustments only in the export:** the preview could drift from the exported LUT, which breaks the consistency requirement.
 
 ### Caveat
 
-Local processing does not guarantee identical performance or color output on every device and browser. Cross-browser behavior and color consistency must be tested.
+Color output can differ slightly between browsers and displays. Cross-browser behavior must be tested.
 
 ---
 
-## 11. Proposed technology stack
+## 11. Technology stack
 
 ### Decision
 
-Build a frontend-only application using:
+- **Frontend:** TypeScript + React, Vite, Vitest. Canvas / WebGL for applying the LUT in the preview, Web Worker as CPU fallback.
+- **Backend:** FastAPI on Python 3.12, `uv` for dependencies, numpy + Pillow + opencv-python-headless for analysis and LUT generation, pytest.
+- **Database:** SQLAlchemy 2 ORM + Alembic migrations. SQLite by default, configured through the `DATABASE_URL` environment variable. No SQLite-specific features, so Postgres can replace it later.
+- **Auth:** email + password, hashed with bcrypt, bearer tokens.
+- **Contract:** `openapi.yaml` in the repository root.
 
-- **TypeScript + React** — UI and application logic
-- **Vite** — development server and build tooling
-- **Canvas API** — image preview and pixel processing
-- **Web Workers** — background processing to keep the interface responsive
-- **WebGL or optimized CPU processing** — choose after benchmarking for LUT application
-- **Custom `.cube` exporter** — generate downloadable LUT files
+### Build order
+
+1. Frontend with a mock service layer (no backend).
+2. `openapi.yaml`, derived from the frontend service layer.
+3. Backend with an in-memory store.
+4. Backend with SQLite through the ORM.
+5. Connect frontend and backend, then test end to end.
 
 ### Why
 
-This stack is suitable for a small, interactive browser tool and avoids requiring a backend for the initial feature set.
-
-### Alternatives considered
-
-- Python backend
-- Full-stack application
-- External AI services
-- Desktop application
-- Plugin for DaVinci Resolve or Premiere Pro
-
-These alternatives introduce infrastructure or integration complexity that is not necessary to validate the core idea.
-
-The final choice of rendering and processing approach should be confirmed with a small performance prototype before committing to a more complex implementation.
+A real backend gives a place for the color engine, accounts, and the Look Library, and the ORM keeps the database replaceable.
 
 ---
 
@@ -330,6 +323,7 @@ The page should prioritize:
 - Before/after comparison controls
 - Four adjustment controls
 - Obvious download actions
+- A Library page (saved looks) and a simple login / register page, reachable from a small header menu
 
 ### Why
 
@@ -345,18 +339,17 @@ A creative workspace with a large preview and a side panel for controls. This co
 
 ### Decision
 
-No account, login, or sign-up is required.
+- **Guests can do everything except save:** upload, generate, preview, adjust, and download LUT / image without an account.
+- **Accounts (email + password) exist only for the Look Library.** A logged-in user can save a look, list their looks, open one to apply it to a new target photo, rename it, mark it as favorite, delete it, and download its `.cube` with the saved adjustments.
 
 ### Why
 
-The user should be able to open the website, try the tool, and download a result immediately. Fewer steps reduce friction.
+Guests keep the zero-friction first experience. The Library gives returning users a reason to register and gives the app persistent data.
 
 ### Alternatives considered
 
-- Optional accounts for saved looks and history.
-- Required accounts before use.
-
-Neither is necessary for the first version. Saved histories and accounts can be revisited if they become important.
+- No accounts at all: simplest, but nothing to persist.
+- Required accounts before use: adds friction to the first result.
 
 ---
 
@@ -366,15 +359,14 @@ Do not build these in the initial release:
 
 - Video processing
 - AI-powered extraction
-- A generic preset library
-- User accounts and saved histories
+- A generic preset library (the Library holds only the user's own saved looks)
+- Social login, password reset by email, email verification
+- Sharing looks by public link
 - Advanced manual color-grading controls
-- Cloud processing
+- Cloud image storage
 - Professional editing-software plugins
 - Desktop applications
-- RAW image support
-
-Keeping these out of scope helps the project focus on validating the core extraction algorithm and user experience.
+- RAW and HEIC image support
 
 ---
 
@@ -409,8 +401,8 @@ If the proof of concept cannot produce convincing results, improve the algorithm
 **Product:** LUT & Color Style Matcher  
 **Platform:** Web application  
 **Audience:** Everyday users and beginners  
-**Accounts:** Not required  
-**Processing:** Local browser processing  
+**Accounts:** Optional; needed only to save looks to the Library  
+**Processing:** Python backend builds the LUT; browser applies it for live preview  
 **Reference input:** JPG, PNG, WebP; proposed 15 MB maximum  
 **Generation:** Rule-based analysis; no AI model  
 **Preview:** Before/after slider and side-by-side comparison  
@@ -418,7 +410,7 @@ If the proof of concept cannot produce convincing results, improve the algorithm
 **Adjustments:** Look intensity, contrast, saturation, warmth  
 **LUT export:** `.cube`, initially 33 × 33 × 33  
 **Image export:** PNG and JPEG  
-**Out of scope:** Video, AI extraction, preset library, accounts, advanced controls, cloud processing, desktop apps, and editor plugins
+**Out of scope:** Video, AI extraction, generic presets, social login, public sharing, advanced controls, cloud image storage, editor plugins, desktop apps, RAW / HEIC
 
 ### Core workflow
 
@@ -427,3 +419,12 @@ If the proof of concept cannot produce convincing results, improve the algorithm
 ### Product principle
 
 Build the smallest complete version that can prove the core idea: a beginner can bring a reference image they love and get a useful, reusable approximation of its color style without needing to understand professional color grading.
+
+---
+
+## 17. Data model (MVP)
+
+- **User:** id, email (unique), password_hash, created_at
+- **Look:** id, user_id (foreign key to User), name, style_params (JSON), adjustments (JSON: intensity, contrast, saturation, warmth), thumbnail (256 px JPEG), is_favorite, created_at, updated_at
+
+The API is defined in `openapi.yaml` and derived from the frontend service layer.
