@@ -9,6 +9,7 @@ import { DropZone } from "@/components/DropZone";
 import { CompareView } from "@/components/CompareView";
 import { DEFAULT_ADJUSTMENTS, service, useMe, type Adjustments, type StyleParams } from "@/services";
 import { downloadBlob, loadImage, renderToCanvas } from "@/lib/apply-lut";
+import { referenceThumbnail } from "@/lib/thumbnail";
 import { useRenderedLut } from "@/hooks/use-rendered-lut";
 import { cn } from "@/lib/utils";
 import lake from "@/assets/sample-lake.jpg";
@@ -89,16 +90,19 @@ function Studio() {
       navigate({ to: "/login", search: { redirect: `/?look=${lookId}` } });
       return;
     }
+    let live = true;
     service
       .getLook(lookId)
       .then((l) => {
+        if (!live) return;
         setStyle(l.styleParams);
         setAdj(l.adjustments);
         setRefUrl(l.thumbnail);
         setRefFile(null);
         toast.success(`"${l.name}" loaded — pick a photo to apply it to.`);
       })
-      .catch((e) => toast.error(e.message));
+      .catch((e) => {if (live) toast.error(e.message);});
+    return () => {live = false;};
   }, [lookId, me, navigate]);
 
   useEffect(() => { if (lutError) toast.error(lutError); }, [lutError]);
@@ -165,16 +169,7 @@ function Studio() {
     if (!style) return;
     setSaving(true);
     try {
-      const source = after ?? null;
-      let thumbnail = refUrl ?? "";
-      if (source) {
-        const t = document.createElement("canvas");
-        const s = 480 / Math.max(source.width, source.height);
-        t.width = source.width * s;
-        t.height = source.height * s;
-        t.getContext("2d")!.drawImage(source, 0, 0, t.width, t.height);
-        thumbnail = t.toDataURL("image/jpeg", 0.8);
-      }
+      const thumbnail = await referenceThumbnail(refUrl);
       await service.saveLook({ name: saveName, thumbnail, styleParams: style, adjustments: adj });
       setSaveOpen(false);
       toast.success("Saved to your library.", {

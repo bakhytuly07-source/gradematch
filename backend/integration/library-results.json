@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-10-19T11:56:22.162Z",
+  "browser": "154.0.8037.57",
+  "registration_login_reload_logout": true,
+  "logout_401_clears": true,
+  "six_library_operations": true,
+  "thumbnail_dimensions": [
+    205,
+    256
+  ],
+  "restored_four_adjustments": {
+    "intensity": 81,
+    "contrast": 1,
+    "saturation": 1,
+    "warmth": 1
+  },
+  "saved_cube_float32_parity": true,
+  "blank_rename_rejected": true,
+  "foreign_and_missing_errors_equal": true,
+  "delete_preserved_other_record": true,
+  "signed_out_library_requests_login": true,
+  "page_errors": []
+}

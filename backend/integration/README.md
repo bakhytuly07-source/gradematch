@@ -29,3 +29,25 @@ The browser still applies the backend LUT with the existing CPU canvas renderer;
 no browser adjustment formulas were added. PNG/JPEG exports use the same current
 LUT at original image size up to the existing 6000 px export limit. Export buttons
 wait for current settings and obsolete download results are discarded.
+
+## Accounts and Library (#56)
+
+With the same real migrated backend/frontend running:
+
+```sh
+node backend/integration/library.cjs
+```
+
+`library-results.json` records the actual Chromium scenario: register an account,
+empty Library, generate and explicitly save from the editor, validate a 256 px
+reference JPEG, list/open/rename/favorite/delete, reject a blank rename, reload
+saved state, restore all four controls on a new target, and compare saved-settings
+cube/render float32 samples. Real adapter instances verify every cross-owner
+operation matches missing-id feedback, login after logout, and a second record
+survives deletion. The UI finishes with revoked-token logout (401), a signed-out
+reload, and a Library redirect requesting login. Tokens/passwords are excluded
+from the report. Disposable test accounts/looks remain only in the local test DB.
+
+Library load failures offer Retry. Account changes hide old records immediately;
+obsolete loads/mutations cannot populate the next account. Per-record mutation
+in-flight guards prevent duplicate favorite toggles/Enter-plus-blur renames.

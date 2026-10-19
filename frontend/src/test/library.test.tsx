@@ -1,0 +1,31 @@
+import { act, fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { DEFAULT_ADJUSTMENTS, type Look } from '@/services/types';
+const state=vi.hoisted(()=>({me:{id:'a',email:'a@b.co'} as {id:string;email:string}|null, list:vi.fn(),navigate:vi.fn(),rename:vi.fn()}));
+vi.mock('@/services',()=>({useMe:()=>state.me,service:{listLooks:state.list,renameLook:state.rename}}));
+vi.mock('@tanstack/react-router',async()=>({...(await vi.importActual('@tanstack/react-router')),useNavigate:()=>state.navigate,Link:({children,...props}:any)=><a>{children}</a>}));
+import { Route } from '@/routes/library';
+import type { ComponentType } from 'react';
+const Library = Route.options.component as ComponentType;
+const look=(name:string):Look=>({id:name,name,favorite:false,thumbnail:'',styleParams:{id:'s',shadowTint:[0,0,0],highlightTint:[1,1,1],baseSaturation:1},adjustments:DEFAULT_ADJUSTMENTS,createdAt:1700000000000});
+afterEach(()=>{cleanup();vi.clearAllMocks();state.me={id:'a',email:'a@b.co'};});
+it('ignores stale Library loads across accounts and hides records on logout',async()=>{
+ let a!:(looks:Look[])=>void; let b!:(looks:Look[])=>void;
+ state.list.mockReturnValueOnce(new Promise(r=>{a=r;})).mockReturnValueOnce(new Promise(r=>{b=r;}));
+ const {rerender}=render(<Library/>);
+ state.me={id:'b',email:'b@b.co'};rerender(<Library/>);
+ await act(async()=>{b([look('B private')]);});
+ expect(screen.getByRole('button',{name:'B private'})).toBeTruthy();
+ await act(async()=>{a([look('A private')]);});
+ expect(screen.queryByRole('button',{name:'A private'})).toBeNull();
+ state.me=null;rerender(<Library/>);
+ expect(screen.queryByRole('button',{name:'B private'})).toBeNull();
+ expect(state.navigate).toHaveBeenCalledWith({to:'/login',search:{redirect:'/library'},replace:true});
+});
+it('offers retry after list failure and recovers to an empty usable Library',async()=>{
+ state.list.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce([]);
+ render(<Library/>);
+ await screen.findByRole('alert');expect(screen.getByRole('alert').textContent).toBe('Offline');
+ fireEvent.click(screen.getByRole('button',{name:'Retry'}));
+ await screen.findByText('No saved looks yet.');expect(screen.getByText('Make your first look')).toBeTruthy();
+});
