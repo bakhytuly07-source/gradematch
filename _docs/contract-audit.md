@@ -6,6 +6,11 @@ Each method maps to exactly one operationId of the same name. Routes include `/a
 `Bearer` means `security: [{bearerAuth: []}]`; `Guest` means explicit `security: []`.
 All listed errors carry JSON `Error {code, message}`; error bodies are never null.
 
+## Operation audit table
+
+The following 13 rows are the review artifact for #13. Schema names refer to
+`components/schemas` in the root contract; errors use the shared Error schema.
+
 | Method / operationId | HTTP | Route | Request | Success response | Errors | Security |
 | --- | --- | --- | --- | --- | --- | --- |
 | register | POST | /api/auth/register | JSON RegisterInput | 201 JSON AuthResult | 409, 422, 500 | Guest |
@@ -72,6 +77,12 @@ Error requires code/message; codes are validation/auth/not_found/unknown.
   authenticated saves store numeric settings and an optional 256 px JPEG thumbnail.
 
 ## Verification
+
+Rechecked on 2026-10-20 against the current service interface and root contract:
+13 methods, 13 unique operationIds, all 13 table rows, 68 resolved references and
+13 valid JSON Schemas. The table is tracked in `_docs/contract-audit.md`; its
+[documentation index entry](./README.md) and [root README link](../README.md)
+provide the entry points for review.
 
 From `backend/` after `uv sync --locked`:
 
