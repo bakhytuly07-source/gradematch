@@ -102,3 +102,10 @@ is retained with `GRADEMATCH_STORAGE=orm` and its migration instructions above.
 Bearer tokens are random opaque values; only SHA-256 digests are held by the
 in-memory session repository. Registration returns only the contract's public user
 and bearer envelope. Existing ORM regression tests explicitly select ORM mode.
+
+Memory bearer sessions expire after seven days and are revoked individually by
+logout. Session clocks and TTLs are injectable for deterministic expiry tests.
+Missing, malformed, unknown, expired and revoked tokens return the same 401 auth
+error; logout returns an empty 204. Logging out one session leaves other sessions
+for the same or another account active. The client should clear its local token
+even if logout reports 401, as required by the contract.

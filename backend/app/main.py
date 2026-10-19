@@ -78,9 +78,13 @@ def login(body: schemas.LoginInput, db: Db, request: Request):
 
 
 @router.post("/api/auth/logout", status_code=204, operation_id="logout")
-def logout(db: Db, token: Token):
-    db.delete(token)
-    db.commit()
+def logout(db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        memory.sessions.revoke(token)
+    else:
+        db.delete(token)
+        db.commit()
     return Response(status_code=204)
 
 
