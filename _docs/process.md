@@ -49,3 +49,7 @@ When the human finds a bug while running the app:
 ## Batched mode (deadline)
 
 To fit the deadline the orchestrator may batch: PM grooms all open mvp issues in one session; Engineer implements one milestone per session (one commit per issue); QA verifies one milestone per session but still posts a verdict comment on every issue and closes only the issues that PASS.
+
+## Batched mode (deadline)
+
+To fit the deadline the orchestrator may batch: PM grooms all open mvp issues in one session; Engineer implements one milestone per session (one commit per issue); QA verifies one milestone per session but still posts a verdict comment on every issue and closes only the issues that PASS.
