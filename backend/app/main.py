@@ -16,7 +16,8 @@ from starlette.concurrency import run_in_threadpool
 
 from . import models, schemas
 from .auth import Db, Token, hash_password, issue_token, verify_password
-from .color import MAX_BYTES, analyze, build_lut, cube_text, normalize_thumbnail
+from .color import MAX_BYTES, analyze, build_lut, normalize_thumbnail
+from .cube import write_cube
 from .errors import ApiError
 
 logger = logging.getLogger(__name__)
@@ -152,7 +153,7 @@ def render_lut(body: schemas.LutSettings):
 
 @app.post("/api/download.cube", response_class=PlainTextResponse, operation_id="downloadLutCube")
 def download_cube(body: schemas.LutSettings):
-    return PlainTextResponse(cube_text(body), headers={"Content-Disposition": 'attachment; filename="gradematch-look.cube"'})
+    return PlainTextResponse(write_cube(build_lut(body)), headers={"Content-Disposition": 'attachment; filename="gradematch-look.cube"'})
 
 
 def own_look(id: str, db: Db, token: Token):
