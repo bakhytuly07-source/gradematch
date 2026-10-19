@@ -140,3 +140,11 @@ revocation fails. Storage-disabled browsers fall back to memory. Passwords/user
 records are never stored. `getMe` restores auth before Library requests; network
 and server errors remain distinct from signed-out 401. Auth notifications clear
 immediately on logout and stale restoration results cannot restore a former user.
+
+`CORS_ORIGINS` is a comma-separated list of exact HTTP(S) origins (scheme, host,
+optional port, no trailing slash/path). Default: `http://localhost:5173`; start
+Vite with `--port 5173`. Deployment example:
+`CORS_ORIGINS=https://app.example.com,https://preview.example.com`.
+An explicitly empty value denies all browser origins; wildcards are rejected.
+Authorization/Content-Type and GET/POST/PATCH/DELETE are permitted for allowed
+origins. CORS controls browser response access; API authentication still applies.

@@ -18,6 +18,7 @@ from starlette.concurrency import run_in_threadpool
 from . import models, schemas
 from .auth import Db, Token, issue_token
 from .color import MAX_BYTES, analyze, build_lut
+from .cors import allowed_origins
 from .cube import write_cube
 from .errors import ApiError
 from .users import MemoryUsers, OrmUsers
@@ -283,7 +284,7 @@ def create_app(*, storage="memory", users=None, sessions=None, looks=None, datab
         sessions=sessions if sessions is not None else MemorySessions(),
         looks=looks if looks is not None else MemoryLooks(),
     ) if storage == "memory" else None)
-    application.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
+    application.add_middleware(CORSMiddleware, allow_origins=allowed_origins(),
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type"], expose_headers=["Content-Disposition"])
     for error, handler in [(ApiError, api_error), (RequestValidationError, validation_error),
