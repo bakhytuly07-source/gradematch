@@ -45,7 +45,8 @@ async def http_error(request: Request, exc: HTTPException):
 
 @app.exception_handler(Exception)
 async def unexpected_error(request: Request, exc: Exception):
-    logger.exception("Unhandled API error", exc_info=exc)
+    # Do not log exception messages/tracebacks that may contain request secrets.
+    logger.error("Unhandled API error (%s)", type(exc).__name__)
     return JSONResponse({"code": "unknown", "message": "Unexpected processing or server failure."}, status_code=500)
 
 
