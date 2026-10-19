@@ -17,12 +17,12 @@ from starlette.concurrency import run_in_threadpool
 
 from . import models, schemas
 from .auth import Db, Token, issue_token
-from .color import MAX_BYTES, analyze, build_lut, normalize_thumbnail
+from .color import MAX_BYTES, analyze, build_lut
 from .cube import write_cube
 from .errors import ApiError
 from .users import MemoryUsers, OrmUsers
 from .sessions import MemorySessions
-from .looks import MemoryLooks
+from .looks import MemoryLooks, OrmLooks
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -184,14 +184,7 @@ def save_look(body: schemas.SaveLookInput, db: Db, token: Token, request: Reques
     memory = request.app.state.memory
     if memory is not None:
         return memory.looks.create(token.user_id, body)
-    timestamp = models.now_ms()
-    look = models.Look(user_id=token.user_id, name=body.name.strip() or "Untitled look",
-                       style_params=body.style_params.model_dump(by_alias=True),
-                       adjustments=body.adjustments.model_dump(), thumbnail_url=normalize_thumbnail(body.thumbnail),
-                       is_favorite=False, created_at=timestamp, updated_at=timestamp)
-    db.add(look)
-    db.commit()
-    return look
+    return OrmLooks(db).create(token.user_id, body)
 
 
 @router.get("/api/looks", response_model=list[schemas.Look], operation_id="listLooks")
@@ -199,8 +192,7 @@ def list_looks(db: Db, token: Token, request: Request):
     memory = request.app.state.memory
     if memory is not None:
         return memory.looks.for_owner(token.user_id)
-    return db.scalars(select(models.Look).where(models.Look.user_id == token.user_id)
-                      .order_by(models.Look.created_at.desc(), models.Look.id.desc())).all()
+    return OrmLooks(db).for_owner(token.user_id)
 
 
 @router.get("/api/looks/{id}", response_model=schemas.Look, operation_id="getLook")
@@ -302,4 +294,4 @@ def create_app(*, storage="memory", users=None, sessions=None, looks=None, datab
     return application
 
 
-app = create_app(storage=os.getenv("GRADEMATCH_STORAGE", "memory"))
+app = create_app(storage=os.getenv("GRADEMATCH_STORAGE", "orm"))

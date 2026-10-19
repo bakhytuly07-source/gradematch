@@ -64,3 +64,25 @@ class MemoryLooks:
             self._owned(owner, id)
             # Remove the entire saved record, including thumbnail and settings.
             del self._records[id]
+
+
+class OrmLooks:
+    def __init__(self, db):
+        self.db = db
+
+    def create(self, owner, body):
+        from .models import Look as LookModel, now_ms
+        timestamp = now_ms()
+        look = LookModel(user_id=owner, name=body.name.strip() or 'Untitled look',
+                         style_params=body.style_params.model_dump(by_alias=True),
+                         adjustments=body.adjustments.model_dump(), thumbnail_url=body.thumbnail,
+                         is_favorite=False, created_at=timestamp, updated_at=timestamp)
+        self.db.add(look)
+        self.db.commit()
+        return look
+
+    def for_owner(self, owner):
+        from sqlalchemy import select
+        from .models import Look as LookModel
+        return self.db.scalars(select(LookModel).where(LookModel.user_id == owner)
+            .order_by(LookModel.created_at.desc(), LookModel.id.desc())).all()

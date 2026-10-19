@@ -12,12 +12,12 @@ uv run uvicorn app.main:app --reload --port 8091
 uv run pytest
 ```
 
-The default application uses isolated, process-local **in-memory** accounts,
-sessions and Library records. It opens no database sessions, needs no migrations,
-and loses saved data when the process restarts. Docs: http://localhost:8091/docs.
-CORS permits http://localhost:5173.
+The default application uses persistent ORM storage. Run migrations before
+starting it. Docs: http://localhost:8091/docs. For isolated demos/tests,
+`GRADEMATCH_STORAGE=memory` uses process-local accounts/sessions/Library with
+no database access; data in that mode is lost on restart.
 
-The existing SQLAlchemy 2/Alembic implementation is retained as an explicit mode:
+Initialize SQLAlchemy 2/Alembic storage:
 
 ```sh
 uv run alembic upgrade head
