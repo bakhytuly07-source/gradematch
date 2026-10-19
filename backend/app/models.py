@@ -1,8 +1,8 @@
 from time import time_ns
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Boolean, ForeignKey, JSON, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, validates
+from sqlalchemy import BigInteger, Boolean, ForeignKey, JSON, String, Text, event, inspect
+from sqlalchemy.orm import Mapped, mapped_column, validates, Session
 
 from .database import Base
 
@@ -46,3 +46,23 @@ class Look(Base):
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[int] = mapped_column(BigInteger)
     updated_at: Mapped[int] = mapped_column(BigInteger)
+
+
+@event.listens_for(Session, "before_flush")
+def validate_saved_looks(session, flush_context, instances):
+    # Portable owner validation also works on engines that do not enforce FKs.
+    from .color import normalize_thumbnail
+    from .schemas import LutSettings
+    for look in session.new.union(session.dirty):
+        if not isinstance(look, Look):
+            continue
+        if look in session.new or inspect(look).attrs.user_id.history.has_changes():
+            pending_owner = any(isinstance(user, User) and user.id == look.user_id
+                                for user in session.new)
+            if not pending_owner and session.get(User, look.user_id) is None:
+                raise ValueError("Look owner must exist")
+        if look in session.new or inspect(look).attrs.thumbnail_url.history.has_changes():
+            look.thumbnail_url = normalize_thumbnail(look.thumbnail_url or "")
+        settings = LutSettings(styleParams=look.style_params, adjustments=look.adjustments)
+        look.style_params = settings.style_params.model_dump(by_alias=True)
+        look.adjustments = settings.adjustments.model_dump()
