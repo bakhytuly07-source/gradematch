@@ -15,10 +15,9 @@ export function DropZone({ label, hint, previewUrl, onFile, onError }: Props) {
   const [over, setOver] = useState(false);
 
   const take = (f?: File | null) => {
-    if (!f) return;
     const err = validateImageFile(f);
     if (err) onError(err);
-    else onFile(f);
+    else if (f) onFile(f);
   };
 
   return (

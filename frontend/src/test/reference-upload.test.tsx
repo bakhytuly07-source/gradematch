@@ -52,3 +52,26 @@ it('blocks invalid selections after a valid reference and recovers via picker/dr
   await waitFor(() => expect(state.generate).toHaveBeenCalledTimes(1));
   await screen.findByRole('button', { name: 'Generate again' });
 });
+
+it.each(['picker', 'drop'])('clears a valid reference when the replacement %s contains no file', source => {
+  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
+  vi.spyOn(Route, 'useSearch').mockReturnValue({});
+  vi.stubGlobal('URL', {createObjectURL: () => 'blob:reference'});
+  state.generate.mockClear();
+  render(<Studio />);
+  const input = document.querySelector('input[type=file]')!;
+  const zone = input.closest('button')!;
+  fireEvent.change(input, {target: {files: [file('image/jpeg')]}});
+  const button = screen.getByRole('button', {name: 'Generate Color Style'});
+  expect(button).toBeEnabled();
+  if (source === 'picker') fireEvent.change(input, {target: {files: []}});
+  else fireEvent.drop(zone, {dataTransfer: {files: []}});
+  expect(button).toBeDisabled();
+  expect(screen.getByText('Please choose a photo.')).toBeTruthy();
+  expect(zone.querySelector('img')).toBeNull();
+  fireEvent.click(button);
+  expect(state.generate).not.toHaveBeenCalled();
+  fireEvent.change(input, {target: {files: [file('image/webp')]}});
+  expect(button).toBeEnabled();
+  expect(screen.queryByText('Please choose a photo.')).toBeNull();
+});

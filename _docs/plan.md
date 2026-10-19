@@ -66,6 +66,9 @@ Support these formats for the MVP:
 
 Use a proposed maximum upload size of **15 MB per image**.
 
+An invalid or cleared reference replacement removes the previous reference and
+disables generation. A valid selection clears the error and enables generation.
+
 ### Why
 
 These formats cover many images users download from the web or take on their phones. Limiting formats and file size makes browser compatibility and performance easier to manage.
