@@ -578,7 +578,8 @@ components:
         updated_at:
           type: number
           description: Unix epoch milliseconds; initially equal to created_at, updated on rename or favorite
-            changes.
+            changes. The frontend adapter validates this required field, then omits it from the current
+            Look UI model; created_at maps unchanged to createdAt.
     RenameLookInput:
       type: object
       required:
@@ -611,7 +612,7 @@ components:
         referenceFile:
           type: string
           format: binary
-          description: Actual JPEG, PNG, or WebP file bytes, not FileLike metadata. Maximum 15*1024*1024
+          description: Actual browser File bytes (JPEG, PNG, or WebP), not FileLike metadata. Maximum 15*1024*1024
             = 15728640 bytes inclusive (frontend calls this 15 MB). Validate decoded format and file signature,
             not just filename or declared MIME type.
           x-maxBytes: 15728640
