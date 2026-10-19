@@ -10,7 +10,7 @@ it('routes all Library operations and never parses 204 or retries mutations', as
     .mockResolvedValueOnce(json(look)).mockResolvedValueOnce(json(look)).mockResolvedValueOnce(json(look))
     .mockResolvedValueOnce(new Response(null, {status: 204}));
   vi.stubGlobal('fetch', fetch);
-  const api = new ApiService('https://api.example/');
+  const api = new ApiService('https://api.example/', null);
   await api.saveLook({name: 'L', thumbnail: '', styleParams: style, adjustments: DEFAULT_ADJUSTMENTS});
   await api.listLooks(); await api.getLook('a/b'); await api.renameLook('a/b', 'New'); await api.toggleFavorite('a/b'); await api.deleteLook('a/b');
   expect(fetch.mock.calls.map(([url, init]) => [url, init.method])).toEqual([
@@ -25,7 +25,7 @@ it('only maps getMe HTTP 401 to signed out; errors remain recoverable ServiceErr
     .mockResolvedValueOnce(json({code: 'not_found', message: 'Missing'}, 404))
     .mockResolvedValueOnce(json({code: 'validation', message: 'Bad'}, 422));
   vi.stubGlobal('fetch', fetch);
-  const api = new ApiService();
+  const api = new ApiService(undefined, null);
   await expect(api.getMe()).rejects.toMatchObject({code: 'unknown', status: 500});
   await expect(api.getMe()).rejects.toMatchObject({code: 'unknown'});
   await expect(api.listLooks()).rejects.toMatchObject({code: 'unknown'});

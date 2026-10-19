@@ -16,9 +16,24 @@ export { fromApiLook } from "./mapping";
 export class ApiService implements GradeMatchService {
   private token: string | null = null;
   private readonly baseUrl: string;
+  private readonly storage: Storage | null;
+  private readonly tokenKey: string;
 
-  constructor(baseUrl = "http://localhost:8091") {
+  constructor(baseUrl = "http://localhost:8091", storage?: Storage | null) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
+    this.tokenKey = `gradematch.token:${this.baseUrl}`;
+    try {
+      this.storage = storage === undefined ? (typeof window === "undefined" ? null : window.sessionStorage) : storage;
+      this.token = this.storage?.getItem(this.tokenKey) ?? null;
+    } catch { this.storage = null; }
+  }
+
+  private setToken(token: string | null) {
+    this.token = token;
+    try {
+      if (token) this.storage?.setItem(this.tokenKey, token);
+      else this.storage?.removeItem(this.tokenKey);
+    } catch { /* Unavailable browser storage leaves this session in memory. */ }
   }
 
   private async request(path: string, init: RequestInit = {}): Promise<Response> {
@@ -31,6 +46,7 @@ export class ApiService implements GradeMatchService {
       throw new ServiceError("Could not reach GradeMatch API.", "unknown");
     }
     if (!response.ok) {
+      if (response.status === 401) this.setToken(null);
       const error = await response.json().catch(() => null);
       const code = error?.code;
       throw new ServiceError(
@@ -65,7 +81,7 @@ export class ApiService implements GradeMatchService {
     if (!result || typeof result.access_token !== "string" || !result.access_token ||
         typeof result.user?.id !== "string" || typeof result.user?.email !== "string")
       throw new ServiceError("Invalid authentication response. Please try again.", "unknown");
-    this.token = result.access_token;
+    this.setToken(result.access_token);
     return result.user;
   }
 
@@ -83,7 +99,7 @@ export class ApiService implements GradeMatchService {
     } catch (error) {
       if (!(error instanceof ServiceError && error.status === 401)) throw error;
     } finally {
-      this.token = null;
+      this.setToken(null);
     }
   }
 
@@ -95,7 +111,7 @@ export class ApiService implements GradeMatchService {
       return user;
     } catch (error) {
       if (error instanceof ServiceError && error.status === 401) {
-        this.token = null;
+        this.setToken(null);
         return null;
       }
       throw error;

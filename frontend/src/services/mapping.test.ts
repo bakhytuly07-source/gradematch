@@ -27,7 +27,7 @@ it('maps every Look operation and preserves exact outbound camelCase keys', asyn
   const fetch = vi.fn().mockImplementation(async (url: string, init: RequestInit) =>
     new Response(JSON.stringify(url.endsWith('/looks') && init.method === 'GET' ? [raw] : raw)));
   vi.stubGlobal('fetch', fetch);
-  const api = new ApiService();
+  const api = new ApiService(undefined, null);
   const input = {name: 'Look', thumbnail: '', styleParams: style, adjustments: raw.adjustments};
   const expected = fromApiLook(raw);
   expect(await api.saveLook(input)).toEqual(expected);

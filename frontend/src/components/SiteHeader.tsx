@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { service, useMe } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,9 @@ export function SiteHeader() {
             variant="outline"
             size="sm"
             onClick={async () => {
-              await service.logout();
-              navigate({ to: "/", replace: true });
+              try { await service.logout(); }
+              catch (e) { toast.error((e as Error).message); }
+              finally { navigate({ to: "/", replace: true }); }
             }}
           >
             Log out

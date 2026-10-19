@@ -27,12 +27,16 @@ function Library() {
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
+    setLooks(null);
+    setEditing(null);
     if (me === undefined) return;
     if (!me) {
       navigate({ to: "/login", search: { redirect: "/library" }, replace: true });
       return;
     }
-    service.listLooks().then(setLooks).catch((e) => toast.error(e.message));
+    let live = true;
+    service.listLooks().then(ls => {if (live) setLooks(ls);}).catch((e) => {if (live) toast.error(e.message);});
+    return () => {live = false;};
   }, [me, navigate]);
 
   const replace = (l: Look) => setLooks((ls) => ls?.map((x) => (x.id === l.id ? l : x)) ?? null);
@@ -50,7 +54,7 @@ function Library() {
     <main className="px-4 pb-16 sm:px-8">
       <h1 className="text-4xl sm:text-5xl">Your looks</h1>
       <p className="mt-2 text-muted-foreground">Open a look to use it on a new photo.</p>
-      {!looks ? (
+      {!me ? <p className="mt-8">{me === undefined ? "Restoring session…" : "Log in to view your Library."}</p> : !looks ? (
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="aspect-[4/3] animate-pulse rounded-lg bg-muted" />

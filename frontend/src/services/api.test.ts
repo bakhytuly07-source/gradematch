@@ -29,7 +29,7 @@ describe("ApiService", () => {
       .mockResolvedValueOnce(json({ user: { id: "u", email: "a@b.co" }, access_token: "secret" }))
       .mockResolvedValueOnce(json(apiLook, 201));
     vi.stubGlobal("fetch", fetch);
-    const api = new ApiService();
+    const api = new ApiService(undefined, null);
     expect(await api.login("a@b.co", "password")).toEqual({ id: "u", email: "a@b.co" });
     const input = {
       name: "Look",
@@ -61,7 +61,7 @@ describe("ApiService", () => {
         .mockResolvedValueOnce(json({ size: 33, data: Array.from({length: 107811}, (_, i) => (i % 3) / 10) }))
         .mockResolvedValueOnce(new Response("LUT_3D_SIZE 33")),
     );
-    const api = new ApiService();
+    const api = new ApiService(undefined, null);
     expect(await api.getMe()).toBeNull();
     await expect(api.logout()).resolves.toBeUndefined();
     const lut = await api.renderLut(style, DEFAULT_ADJUSTMENTS);
@@ -72,7 +72,7 @@ describe("ApiService", () => {
   it("uploads actual bytes and rejects metadata-only files", async () => {
     const fetch = vi.fn().mockResolvedValue(json(style));
     vi.stubGlobal("fetch", fetch);
-    const api = new ApiService();
+    const api = new ApiService(undefined, null);
     const file = new File(["bytes"], "sample.png", { type: "image/png" });
     expect(await api.generateLook(file)).toEqual(style);
     expect(fetch.mock.calls[0]![1].body.get("referenceFile").size).toBe(5);

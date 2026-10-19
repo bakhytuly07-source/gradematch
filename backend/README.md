@@ -98,7 +98,7 @@ a padded 15 MiB, 12 MP JPEG on a cloud Xeon, not a laptop or worst-case photo.
 
 From `frontend/`, `VITE_API_URL=http://localhost:8091 npm run dev -- --port 5173`
 selects the real service; otherwise the existing mock remains. The adapter retains
-its token in memory, uses bearer headers, converts LutData to Float32Array and maps
+its token in tab-scoped sessionStorage, uses bearer headers, converts LutData to Float32Array and maps
 Look snake_case responses to UI camelCase. SaveLookInput, LutSettings and nested
 StyleParams remain camelCase on the wire. getMe maps 401 to null.
 
@@ -132,3 +132,11 @@ omits it from the current UI model; creation ordering uses unchanged `created_at
 The adapter validates required response fields, numeric settings and 107,811 LUT
 samples, preserving red-fastest sample order. Nested settings and outbound save
 keys remain camelCase exactly as specified in the contract.
+
+The real browser adapter stores only the opaque access token in **sessionStorage**,
+keyed by API base URL. It survives reload in that tab, expires with the tab/session
+or server token lifetime (seven days), and is removed on 401/logout even when
+revocation fails. Storage-disabled browsers fall back to memory. Passwords/user
+records are never stored. `getMe` restores auth before Library requests; network
+and server errors remain distinct from signed-out 401. Auth notifications clear
+immediately on logout and stale restoration results cannot restore a former user.
