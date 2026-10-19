@@ -1,0 +1,124 @@
+# GradeMatch
+
+Upload a reference photo, estimate its color style, preview it on a target, adjust
+intensity/contrast/saturation/warmth, then export a 33³ `.cube` or PNG/JPEG.
+Guests can try/export; accounts add a private saved-look Library.
+
+**MVP engineering is reviewable; extraction quality is not release-approved.**
+See the [release checks and evidence](./_docs/release-checks.md), including #18's
+NO-GO and pending laptop measurements. Estimates cannot recover an exact original
+grade or separate lighting/scene colors reliably.
+
+## Local setup
+
+Prerequisites: Git, Python **3.12**, [uv](https://docs.astral.sh/uv/), Node.js
+**22.12+** (Node 24 recommended), npm. Node 24.19/npm 11.9 were used for this
+verification. Use the checked-in lockfiles; no external account is needed locally.
+
+```sh
+git clone https://github.com/bakhytuly07-source/gradematch.git
+cd gradematch/backend
+uv sync --locked
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload --port 8091
+```
+
+Keep the API running. In a second terminal, from the repository root:
+
+```sh
+cd frontend
+npm ci
+VITE_API_URL=http://localhost:8091 npm run dev -- --port 5173 --strictPort
+```
+
+Open **http://localhost:5173**. API docs: **http://localhost:8091/docs**.
+First try generation/export without login, then register to save to the Library.
+Do not use production credentials or real user images in disposable test runs.
+
+## Configuration
+
+- Backend `DATABASE_URL` defaults to an absolute SQLite URL for
+  `backend/gradematch.db`, independent of the launch directory. Migrate before
+  startup; tables are not created by startup. Set the same URL for migrations
+  and server. A disposable custom example, run from `backend/`:
+
+  ```sh
+  mkdir -p ../work
+  DATABASE_URL="sqlite:///$(pwd)/../work/local.db" uv run alembic upgrade head
+  DATABASE_URL="sqlite:///$(pwd)/../work/local.db" uv run uvicorn app.main:app --port 8091
+  ```
+
+- `GRADEMATCH_STORAGE=orm` is the persistent default. Optional
+  `GRADEMATCH_STORAGE=memory` runs without a database; accounts/looks disappear
+  on restart. ORM access is SQLAlchemy only. Other database URLs need their
+  appropriate driver; no additional driver is installed by these instructions.
+- `CORS_ORIGINS` defaults to `http://localhost:5173`. Override with exact,
+  comma-separated origins, for example
+  `CORS_ORIGINS=https://app.example.com,https://preview.example.com` before the
+  API command. No trailing slash or path; wildcards are rejected. An empty value
+  denies all browser origins. CORS grants browser access, not authentication.
+- `VITE_API_URL=http://localhost:8091` selects the real frontend adapter. It is
+  a Vite startup/build variable; restart after changing it. To use the mock,
+  leave it unset (also remove it from any local Vite env file):
+  `env -u VITE_API_URL npm run dev -- --port 5173 --strictPort` from `frontend/`.
+  Mock generation is synthetic and its accounts/Library do not survive reload.
+- Real auth stores only the opaque token in tab-scoped sessionStorage keyed by
+  API base URL, restores through getMe, and clears on logout/401 even if server
+  revocation fails. Passwords are never stored. Server sessions last seven days.
+  No secret belongs in frontend build variables.
+
+## Tests and checks
+
+Install both sets of dependencies above first. Tests use generated fixtures and
+disposable migrated databases; the backend/frontend servers are not needed for
+unit/API suites. Run from the named directories:
+
+```sh
+# backend/
+uv run pytest
+uv run python ../_docs/check-contract.py
+# Focused contract/API parity coverage:
+uv run pytest tests/test_api.py tests/test_download.py tests/test_render.py
+
+# frontend/
+npm test
+npx tsc --noEmit
+# Focused upload regressions:
+npm test -- src/test/reference-upload.test.tsx src/services/file.test.ts
+# Production compilation (use VITE_API_URL at build time for real API builds):
+VITE_API_URL=http://localhost:8091 npm run build
+```
+
+Expected: all tests pass, contract check prints PASS, TypeScript exits zero, build
+completes. Current results and pending manual checks are recorded in
+[release-checks.md](./_docs/release-checks.md). Browser scenarios require an
+existing Playwright installation and `/usr/bin/chromium`; they are optional
+integration tooling, not project dependencies. See
+[real browser reproduction](./backend/integration/README.md).
+
+## Data and color limits
+
+References accept JPEG/PNG/WebP up to **15,728,640 bytes inclusive** (UI: 15 MB).
+Frontend metadata validation is followed by server signature/decoder checks,
+with a 24-million-pixel guard and a ≤1024 px analysis copy. Uploaded originals
+stay in memory, never disk/database. Guests create no saved records. Explicit
+logged-in saves retain numeric style/settings, name/favorite/timestamps and an
+optional JPEG reference thumbnail of exactly 256 px longest side.
+
+Backend render/export share the same 33×33×33 float32 LUT, 107,811 interleaved RGB
+samples with red grid index changing fastest. The browser applies those samples
+for preview and edited-image export; `.cube` values round-trip to the same
+float32 samples for the same settings. The mock's six-decimal writer is not real
+API parity evidence. PNG is lossless; JPEG compression can change exported pixels.
+The current canvas renderer previews a scaled image and caps image export at
+6000 px; WebGL/worker rendering is not implemented.
+
+Artistic operations assume encoded **SDR sRGB/Rec.709** values in 0..1, with no
+HDR/log conversion or guarantee of cross-display color matching. A single finished
+reference confounds scene, lighting and grade; current approximate extraction
+has known photographic neutral/cool-transfer failures. Read the
+[comparison boards and NO-GO](./backend/evaluation/README.md) before release.
+
+[Contract](./openapi.yaml) · [13-operation audit](./_docs/contract-audit.md) ·
+[Backend details](./backend/README.md) · [Product scope](./_docs/plan.md) ·
+[Process](./_docs/process.md)
