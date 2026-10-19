@@ -64,6 +64,7 @@ export class ServiceError extends Error {
   constructor(
     message: string,
     public code: "validation" | "auth" | "not_found" | "unknown" = "unknown",
+    public status?: number,
   ) {
     super(message);
   }

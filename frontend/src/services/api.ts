@@ -52,20 +52,27 @@ export class ApiService implements GradeMatchService {
       const error = await response.json().catch(() => null);
       const code = error?.code;
       throw new ServiceError(
-        error?.message ?? "GradeMatch request failed.",
-        ["validation", "auth", "not_found", "unknown"].includes(code) ? code : "unknown",
+        typeof error?.message === "string" ? error.message : "GradeMatch request failed. Please try again.",
+        response.status < 500 && ["validation", "auth", "not_found", "unknown"].includes(code) ? code : "unknown",
+        response.status,
       );
     }
     return response;
   }
 
-  private async json<T>(path: string, method = "GET", body?: unknown): Promise<T> {
+  private async json<T>(path: string, method = "GET", body?: unknown, form?: FormData): Promise<T> {
     const init: RequestInit = { method };
+    if (form) init.body = form;
     if (body !== undefined) {
       init.headers = { "Content-Type": "application/json" };
       init.body = JSON.stringify(body);
     }
-    return (await this.request(path, init)).json();
+    const response = await this.request(path, init);
+    try {
+      return await response.json();
+    } catch {
+      throw new ServiceError("Invalid API response. Please try again.", "unknown");
+    }
   }
 
   private async authenticate(path: string, email: string, password: string): Promise<User> {
@@ -73,6 +80,9 @@ export class ApiService implements GradeMatchService {
       email,
       password,
     });
+    if (!result || typeof result.access_token !== "string" || !result.access_token ||
+        typeof result.user?.id !== "string" || typeof result.user?.email !== "string")
+      throw new ServiceError("Invalid authentication response. Please try again.", "unknown");
     this.token = result.access_token;
     return result.user;
   }
@@ -89,7 +99,7 @@ export class ApiService implements GradeMatchService {
     try {
       await this.request("/auth/logout", { method: "POST" });
     } catch (error) {
-      if (!(error instanceof ServiceError && error.code === "auth")) throw error;
+      if (!(error instanceof ServiceError && error.status === 401)) throw error;
     } finally {
       this.token = null;
     }
@@ -97,9 +107,12 @@ export class ApiService implements GradeMatchService {
 
   async getMe(): Promise<User | null> {
     try {
-      return await this.json<User>("/auth/me");
+      const user = await this.json<User>("/auth/me");
+      if (!user || typeof user.id !== "string" || typeof user.email !== "string")
+        throw new ServiceError("Invalid user response. Please try again.", "unknown");
+      return user;
     } catch (error) {
-      if (error instanceof ServiceError && error.code === "auth") {
+      if (error instanceof ServiceError && error.status === 401) {
         this.token = null;
         return null;
       }
@@ -112,7 +125,7 @@ export class ApiService implements GradeMatchService {
       throw new ServiceError("Choose an actual image file.", "validation");
     const form = new FormData();
     form.append("referenceFile", referenceFile, referenceFile.name);
-    return (await this.request("/generate", { method: "POST", body: form })).json();
+    return this.json<StyleParams>("/generate", "POST", undefined, form);
   }
 
   async renderLut(styleParams: StyleParams, adjustments: Adjustments): Promise<LutData> {
