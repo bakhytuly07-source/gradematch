@@ -2,7 +2,7 @@ from time import time_ns
 from uuid import uuid4
 
 from sqlalchemy import BigInteger, Boolean, ForeignKey, JSON, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from .database import Base
 
@@ -21,6 +21,11 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     created_at: Mapped[int] = mapped_column(BigInteger, default=now_ms)
+
+
+    @validates("email")
+    def normalize_email(self, key, value):
+        return value.strip().lower()
 
 
 class AccessToken(Base):
