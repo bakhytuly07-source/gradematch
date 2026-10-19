@@ -120,3 +120,9 @@ is available for isolated instances). Every request owns a session, closes it on
 completion, and rolls back on exceptions. Writes commit explicitly; an uncommitted
 transaction is discarded when its session closes. Non-SQLite URLs are passed to
 SQLAlchemy unchanged and require an installed driver; no fallback is used.
+
+Migration checks use disposable databases only. `uv run alembic upgrade head`
+creates the shared ORM schema and is safe to repeat. To rebuild a **disposable**
+database, set its `DATABASE_URL`, run `uv run alembic downgrade base`, then
+`uv run alembic upgrade head`. Downgrading deletes account/Library data. The
+migration environment resolves the URL on every invocation, like the app factory.

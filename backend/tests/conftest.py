@@ -15,8 +15,7 @@ def database(tmp_path, monkeypatch):
     url = f"sqlite:///{tmp_path / 'test.db'}"
     engine = make_engine(url)
     # Run the actual migrations, rather than create_all: tests verify deployment schema too.
-    import app.database as module
-    monkeypatch.setattr(module, "engine", engine)
+    monkeypatch.setenv("DATABASE_URL", url)
     config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     command.upgrade(config, "head")
     yield sessionmaker(engine, expire_on_commit=False)
