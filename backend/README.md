@@ -91,3 +91,14 @@ failure. The analysis copy is orientation-correct and at most 1024 px. Generatio
 uses the conservative v2 neutral-anchor estimate evaluated under #18. The user
 explicitly authorized continued engineering despite its documented NO-GO;
 convincing photographic grade recovery and laptop qualification remain unproven.
+
+## In-memory application (#27)
+
+`uv run uvicorn app.main:app --port 8091` now defaults to isolated process-local
+in-memory storage; accounts and sessions reset on restart. No migrations or DB
+sessions are used in this mode. `create_app(users=MemoryUsers(), sessions=...)`
+allows isolated test/application injection. The existing persistent implementation
+is retained with `GRADEMATCH_STORAGE=orm` and its migration instructions above.
+Bearer tokens are random opaque values; only SHA-256 digests are held by the
+in-memory session repository. Registration returns only the contract's public user
+and bearer envelope. Existing ORM regression tests explicitly select ORM mode.

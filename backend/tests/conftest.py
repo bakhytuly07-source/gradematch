@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
 from app.database import get_db, make_engine
-from app.main import app
+from app.main import create_app
 
 
 @pytest.fixture
@@ -25,6 +25,7 @@ def database(tmp_path, monkeypatch):
 
 @pytest.fixture
 def client(database):
+    app = create_app(storage="orm")
     def override_db():
         with database() as db:
             yield db
@@ -32,3 +33,14 @@ def client(database):
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def memory_app():
+    return create_app()
+
+
+@pytest.fixture
+def memory_client(memory_app):
+    with TestClient(memory_app, raise_server_exceptions=False) as client:
+        yield client

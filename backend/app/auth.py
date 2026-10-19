@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -28,9 +28,13 @@ def issue_token(db: Session, user: User) -> AuthResult:
     return AuthResult(user=user, access_token=token)
 
 
-def current_token(db: Db, credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
-    token = db.get(AccessToken, token_digest(credentials.credentials)) if credentials else None
-    if token is None or token.expires_at <= now_ms():
+def current_token(db: Db, request: Request, credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
+    memory = request.app.state.memory
+    if memory is not None:
+        token = memory.sessions.resolve(credentials.credentials) if credentials else None
+    else:
+        token = db.get(AccessToken, token_digest(credentials.credentials)) if credentials else None
+    if token is None or (memory is None and token.expires_at <= now_ms()):
         raise ApiError(401, "Missing, expired or invalid bearer token.", "auth")
     return token
 

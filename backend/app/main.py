@@ -1,7 +1,9 @@
 import logging
+import os
+from types import SimpleNamespace
 from typing import Annotated
 
-from fastapi import FastAPI, Request, Response, Depends
+from fastapi import APIRouter, FastAPI, Request, Response, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -19,40 +21,38 @@ from .auth import Db, Token, hash_password, issue_token, verify_password
 from .color import MAX_BYTES, analyze, build_lut, normalize_thumbnail
 from .cube import write_cube
 from .errors import ApiError
+from .users import MemoryUsers
+from .sessions import MemorySessions
 
 logger = logging.getLogger(__name__)
-app = FastAPI(title="GradeMatch API", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
-                   allow_methods=["GET", "POST", "PATCH", "DELETE"],
-                   allow_headers=["Authorization", "Content-Type"],
-                   expose_headers=["Content-Disposition"])
+router = APIRouter()
 
 
-@app.exception_handler(ApiError)
 async def api_error(request: Request, exc: ApiError):
     return JSONResponse({"code": exc.code, "message": exc.message}, status_code=exc.status)
 
 
-@app.exception_handler(RequestValidationError)
 async def validation_error(request: Request, exc: RequestValidationError):
     return JSONResponse({"code": "validation", "message": "Invalid or missing request fields or settings."}, status_code=422)
 
 
-@app.exception_handler(HTTPException)
 async def http_error(request: Request, exc: HTTPException):
     code = "auth" if exc.status_code == 401 else "not_found" if exc.status_code == 404 else "validation"
     return JSONResponse({"code": code, "message": str(exc.detail)}, status_code=exc.status_code)
 
 
-@app.exception_handler(Exception)
 async def unexpected_error(request: Request, exc: Exception):
     # Do not log exception messages/tracebacks that may contain request secrets.
     logger.error("Unhandled API error (%s)", type(exc).__name__)
     return JSONResponse({"code": "unknown", "message": "Unexpected processing or server failure."}, status_code=500)
 
 
-@app.post("/api/auth/register", response_model=schemas.AuthResult, status_code=201, operation_id="register")
-def register(body: schemas.RegisterInput, db: Db):
+@router.post("/api/auth/register", response_model=schemas.AuthResult, status_code=201, operation_id="register")
+def register(body: schemas.RegisterInput, db: Db, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        user = memory.users.create(body.email, body.password)
+        return schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
     user = models.User(email=body.email.strip().lower(), password_hash=hash_password(body.password))
     db.add(user)
     try:
@@ -63,7 +63,7 @@ def register(body: schemas.RegisterInput, db: Db):
     return issue_token(db, user)
 
 
-@app.post("/api/auth/login", response_model=schemas.AuthResult, operation_id="login")
+@router.post("/api/auth/login", response_model=schemas.AuthResult, operation_id="login")
 def login(body: schemas.LoginInput, db: Db):
     user = db.scalar(select(models.User).where(models.User.email == body.email.strip().lower()))
     if user is None or not verify_password(body.password, user.password_hash):
@@ -71,15 +71,21 @@ def login(body: schemas.LoginInput, db: Db):
     return issue_token(db, user)
 
 
-@app.post("/api/auth/logout", status_code=204, operation_id="logout")
+@router.post("/api/auth/logout", status_code=204, operation_id="logout")
 def logout(db: Db, token: Token):
     db.delete(token)
     db.commit()
     return Response(status_code=204)
 
 
-@app.get("/api/auth/me", response_model=schemas.User, operation_id="getMe")
-def get_me(db: Db, token: Token):
+@router.get("/api/auth/me", response_model=schemas.User, operation_id="getMe")
+def get_me(db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        user = memory.users.get(token.user_id)
+        if user is None:
+            raise ApiError(401, "Missing, expired or invalid bearer token.", "auth")
+        return user.public()
     return db.get(models.User, token.user_id)
 
 
@@ -104,7 +110,7 @@ class MemoryMultipartParser(MultiPartParser):
         self.complete = True
 
 
-@app.post("/api/generate", response_model=schemas.StyleParams, operation_id="generateLook", openapi_extra={
+@router.post("/api/generate", response_model=schemas.StyleParams, operation_id="generateLook", openapi_extra={
     "requestBody": {"required": True, "content": {"multipart/form-data": {"schema": {
         "type": "object", "required": ["referenceFile"], "properties": {
             "referenceFile": {"type": "string", "format": "binary"}}}}}}})
@@ -146,12 +152,12 @@ async def generate(request: Request):
             file.close()
 
 
-@app.post("/api/render-lut", response_model=schemas.LutData, operation_id="renderLut")
+@router.post("/api/render-lut", response_model=schemas.LutData, operation_id="renderLut")
 def render_lut(body: schemas.LutSettings):
     return {"size": 33, "data": build_lut(body).ravel().tolist()}
 
 
-@app.post("/api/download.cube", response_class=PlainTextResponse, operation_id="downloadLutCube")
+@router.post("/api/download.cube", response_class=PlainTextResponse, operation_id="downloadLutCube")
 def download_cube(body: schemas.LutSettings):
     return PlainTextResponse(write_cube(build_lut(body)), headers={"Content-Disposition": 'attachment; filename="gradematch-look.cube"'})
 
@@ -166,7 +172,7 @@ def own_look(id: str, db: Db, token: Token):
 OwnLook = Annotated[models.Look, Depends(own_look)]
 
 
-@app.post("/api/looks", response_model=schemas.Look, status_code=201, operation_id="saveLook")
+@router.post("/api/looks", response_model=schemas.Look, status_code=201, operation_id="saveLook")
 def save_look(body: schemas.SaveLookInput, db: Db, token: Token):
     timestamp = models.now_ms()
     look = models.Look(user_id=token.user_id, name=body.name.strip() or "Untitled look",
@@ -178,18 +184,18 @@ def save_look(body: schemas.SaveLookInput, db: Db, token: Token):
     return look
 
 
-@app.get("/api/looks", response_model=list[schemas.Look], operation_id="listLooks")
+@router.get("/api/looks", response_model=list[schemas.Look], operation_id="listLooks")
 def list_looks(db: Db, token: Token):
     return db.scalars(select(models.Look).where(models.Look.user_id == token.user_id)
                       .order_by(models.Look.created_at.desc(), models.Look.id.desc())).all()
 
 
-@app.get("/api/looks/{id}", response_model=schemas.Look, operation_id="getLook")
+@router.get("/api/looks/{id}", response_model=schemas.Look, operation_id="getLook")
 def get_look(look: OwnLook):
     return look
 
 
-@app.patch("/api/looks/{id}", response_model=schemas.Look, operation_id="renameLook")
+@router.patch("/api/looks/{id}", response_model=schemas.Look, operation_id="renameLook")
 def rename_look(body: schemas.RenameLookInput, look: OwnLook, db: Db):
     look.name = body.name.strip()
     look.updated_at = max(models.now_ms(), look.updated_at + 1)
@@ -197,7 +203,7 @@ def rename_look(body: schemas.RenameLookInput, look: OwnLook, db: Db):
     return look
 
 
-@app.post("/api/looks/{id}/favorite", response_model=schemas.Look, operation_id="toggleFavorite")
+@router.post("/api/looks/{id}/favorite", response_model=schemas.Look, operation_id="toggleFavorite")
 def toggle_favorite(look: OwnLook, db: Db):
     timestamp = models.now_ms()
     db.execute(update(models.Look).where(models.Look.id == look.id, models.Look.user_id == look.user_id)
@@ -210,7 +216,7 @@ def toggle_favorite(look: OwnLook, db: Db):
     return look
 
 
-@app.delete("/api/looks/{id}", status_code=204, operation_id="deleteLook")
+@router.delete("/api/looks/{id}", status_code=204, operation_id="deleteLook")
 def delete_look(look: OwnLook, db: Db):
     db.delete(look)
     db.commit()
@@ -219,7 +225,7 @@ def delete_look(look: OwnLook, db: Db):
 
 # FastAPI otherwise documents its default HTTPValidationError even though our
 # handlers return the contract's Error shape. Keep interactive docs accurate.
-def contract_openapi():
+def contract_openapi(app: FastAPI):
     if app.openapi_schema is not None:
         return app.openapi_schema
     document = get_openapi(title=app.title, version=app.version, routes=app.routes)
@@ -248,4 +254,23 @@ def contract_openapi():
     return document
 
 
-app.openapi = contract_openapi
+def create_app(*, storage="memory", users=None, sessions=None):
+    if storage not in {"memory", "orm"}:
+        raise ValueError("storage must be memory or orm")
+    application = FastAPI(title="GradeMatch API", version="1.0.0")
+    application.state.memory = (SimpleNamespace(
+        users=users if users is not None else MemoryUsers(),
+        sessions=sessions if sessions is not None else MemorySessions(),
+    ) if storage == "memory" else None)
+    application.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
+        allow_headers=["Authorization", "Content-Type"], expose_headers=["Content-Disposition"])
+    for error, handler in [(ApiError, api_error), (RequestValidationError, validation_error),
+                           (HTTPException, http_error), (Exception, unexpected_error)]:
+        application.add_exception_handler(error, handler)
+    application.include_router(router)
+    application.openapi = lambda: contract_openapi(application)
+    return application
+
+
+app = create_app(storage=os.getenv("GRADEMATCH_STORAGE", "memory"))

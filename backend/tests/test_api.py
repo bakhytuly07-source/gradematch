@@ -40,8 +40,11 @@ def test_all_contract_operations_are_implemented():
     expected = {(path, method.upper(), operation["operationId"])
                 for path, item in CONTRACT["paths"].items() for method, operation in item.items()
                 if method != "parameters"}
-    actual = {(route.path, method, route.operation_id) for route in app.routes
-              if hasattr(route, "operation_id") for method in route.methods}
+    # Included routers may be lazy; inspect the generated public API rather
+    # than relying on FastAPI's internal flat route representation.
+    actual = {(path, method.upper(), operation["operationId"])
+              for path, item in app.openapi()["paths"].items()
+              for method, operation in item.items() if "operationId" in operation}
     assert expected == actual
 
 
