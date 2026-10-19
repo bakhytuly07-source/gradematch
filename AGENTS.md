@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # GradeMatch (LUT & Color Style Matcher)
 
 Web app: upload a reference photo, generate its color style as a 33x33x33 `.cube` 3D LUT, preview it on another photo, adjust 4 controls (look intensity, contrast, saturation, warmth), export the LUT or the edited image. Spec: `_docs/plan.md`.
@@ -42,19 +41,3 @@ Frontend (run in `frontend/`):
 - `_docs/brainstorm.md` - the brainstorm chat that produced the plan
 
 When the user corrects you, update the relevant document so the same correction is not needed twice.
-=======
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
-
-## Architecture rules
-- All backend calls go through `src/services/` (`GradeMatchService` interface, currently `MockService`); UI never calls fetch directly — so the real backend can be swapped in one place.
-- The preview applies only the LUT returned by `renderLut`; never re-implement color adjustments in the UI — keeps preview and exported .cube identical.
->>>>>>> a901fab826a96edaae69177ceb522c29ba65090e
