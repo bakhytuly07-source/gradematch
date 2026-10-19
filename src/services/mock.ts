@@ -60,7 +60,7 @@ export function buildLut(style: StyleParams, adj: Adjustments, size = LUT_SIZE):
 export function lutToCube(lut: LutData, title = "GradeMatch Look"): string {
   const lines = [`TITLE "${title}"`, `LUT_3D_SIZE ${lut.size}`, "DOMAIN_MIN 0.0 0.0 0.0", "DOMAIN_MAX 1.0 1.0 1.0"];
   for (let i = 0; i < lut.data.length; i += 3) {
-    lines.push(`${lut.data[i].toFixed(6)} ${lut.data[i + 1].toFixed(6)} ${lut.data[i + 2].toFixed(6)}`);
+    lines.push(`${lut.data[i]!.toFixed(6)} ${lut.data[i + 1]!.toFixed(6)} ${lut.data[i + 2]!.toFixed(6)}`);
   }
   return lines.join("\n") + "\n";
 }

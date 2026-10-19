@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label";
 import { service } from "@/services";
 import { validateEmail, validatePassword } from "@/services/validation";
 
-export function AuthForm({ mode, redirect }: { mode: "login" | "register"; redirect?: string }) {
+export function AuthForm({ mode, redirect }: { mode: "login" | "register"; redirect?: string | undefined }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string | undefined; password?: string | undefined; form?: string | undefined }>({});
   const [busy, setBusy] = useState(false);
   const isLogin = mode === "login";
 
@@ -62,7 +62,7 @@ export function AuthForm({ mode, redirect }: { mode: "login" | "register"; redir
       </form>
       <p className="mt-6 text-sm text-muted-foreground">
         {isLogin ? "New here? " : "Already have an account? "}
-        <Link to={isLogin ? "/register" : "/login"} search={{ redirect }} className="text-primary underline-offset-4 hover:underline">
+        <Link to={isLogin ? "/register" : "/login"} search={redirect ? { redirect } : {}} className="text-primary underline-offset-4 hover:underline">
           {isLogin ? "Create an account" : "Log in"}
         </Link>
       </p>

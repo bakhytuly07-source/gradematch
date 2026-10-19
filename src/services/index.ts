@@ -18,7 +18,7 @@ export const service: GradeMatchService = {
   ...Object.fromEntries(
     Object.getOwnPropertyNames(Object.getPrototypeOf(base))
       .filter((k) => k !== "constructor")
-      .map((k) => [k, (base as never as Record<string, (...a: unknown[]) => unknown>)[k].bind(base)]),
+      .map((k) => [k, (base as never as Record<string, (...a: unknown[]) => unknown>)[k]!.bind(base)]),
   ),
   register: async (e: string, p: string) => {
     const u = await base.register(e, p);

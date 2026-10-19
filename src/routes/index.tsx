@@ -37,7 +37,7 @@ const cache: {
 } = {};
 
 export const Route = createFileRoute("/")({
-  validateSearch: (s: Record<string, unknown>): { look?: string } => ({ look: typeof s.look === "string" ? s.look : undefined }),
+  validateSearch: (s: Record<string, unknown>): { look?: string | undefined } => ({ look: typeof s["look"] === "string" ? s["look"] : undefined }),
   head: () => ({
     meta: [
       { title: "GradeMatch — Copy the colors of a photo you love" },

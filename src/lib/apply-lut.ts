@@ -7,11 +7,11 @@ export function applyLutToPixels(px: Uint8ClampedArray, lut: LutData) {
   const m = n - 1;
   const s = m / 255;
   for (let i = 0; i < px.length; i += 4) {
-    const r = px[i] * s, g = px[i + 1] * s, b = px[i + 2] * s;
+    const r = px[i]! * s, g = px[i + 1]! * s, b = px[i + 2]! * s;
     const r0 = Math.min(r | 0, m - 1), g0 = Math.min(g | 0, m - 1), b0 = Math.min(b | 0, m - 1);
     const fr = r - r0, fg = g - g0, fb = b - b0;
     for (let c = 0; c < 3; c++) {
-      const at = (rr: number, gg: number, bb: number) => d[((bb * n + gg) * n + rr) * 3 + c];
+      const at = (rr: number, gg: number, bb: number) => d[((bb * n + gg) * n + rr) * 3 + c]!;
       const c00 = at(r0, g0, b0) * (1 - fr) + at(r0 + 1, g0, b0) * fr;
       const c10 = at(r0, g0 + 1, b0) * (1 - fr) + at(r0 + 1, g0 + 1, b0) * fr;
       const c01 = at(r0, g0, b0 + 1) * (1 - fr) + at(r0 + 1, g0, b0 + 1) * fr;

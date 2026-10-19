@@ -42,8 +42,8 @@ describe("MockService", () => {
     const style = await s.generateLook(jpg);
     const lut = buildLut(style, { intensity: 0, contrast: 0, saturation: 0, warmth: 0 });
     const last = lut.data.length - 3;
-    expect(lut.data[last]).toBeCloseTo(1);
-    expect(lut.data[3]).toBeCloseTo(1 / 32);
+    expect(lut.data[last]!).toBeCloseTo(1);
+    expect(lut.data[3]!).toBeCloseTo(1 / 32);
   });
 
   it("warmth raises red and lowers blue", async () => {
@@ -53,8 +53,8 @@ describe("MockService", () => {
     const mid = ((16 * 33 + 16) * 33 + 16) * 3;
     const a = buildLut(style, n).data;
     const b = buildLut(style, { ...n, warmth: 50 }).data;
-    expect(b[mid]).toBeGreaterThan(a[mid]);
-    expect(b[mid + 2]).toBeLessThan(a[mid + 2]);
+    expect(b[mid]!).toBeGreaterThan(a[mid]!);
+    expect(b[mid + 2]!).toBeLessThan(a[mid + 2]!);
   });
 
   it("cube file has header and 35937 rows", async () => {
