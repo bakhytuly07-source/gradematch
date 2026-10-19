@@ -1,0 +1,50 @@
+{
+  "host": "AMD EPYC 9V74 80-Core Processor",
+  "browser": "154.0.8037.57",
+  "method": "Headless Chromium UI, real HTTP backend, 15MiB padded JPEG; preview includes control debounce, HTTP and enabled current export. Cloud hardware, not laptop qualification.",
+  "generate_ms": 291,
+  "preview_ms": [
+    241,
+    252,
+    259,
+    247
+  ],
+  "settings": {
+    "styleParams": {
+      "id": "2349c1cfe5a4e497182e6e59",
+      "shadowTint": [
+        0.49909716054297387,
+        0.4982668449525294,
+        0.5026359945044967
+      ],
+      "highlightTint": [
+        0.5005081488237071,
+        0.4982855618043859,
+        0.501206289371907
+      ],
+      "baseSaturation": 0.9164491033459323
+    },
+    "adjustments": {
+      "intensity": 81,
+      "contrast": 1,
+      "saturation": 1,
+      "warmth": 3
+    }
+  },
+  "cube_samples": 107811,
+  "float32_cube_matches": true,
+  "image_exports": {
+    "PNG": {
+      "width": 1024,
+      "height": 1280,
+      "mean_absolute_channel_error": 0
+    },
+    "JPEG": {
+      "width": 1024,
+      "height": 1280,
+      "mean_absolute_channel_error": 0.4386768341064453
+    }
+  },
+  "guest_created_no_library_records": true,
+  "page_errors": []
+}

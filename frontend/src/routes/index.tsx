@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropZone } from "@/components/DropZone";
 import { CompareView } from "@/components/CompareView";
-import { DEFAULT_ADJUSTMENTS, service, useMe, type Adjustments, type LutData, type StyleParams } from "@/services";
+import { DEFAULT_ADJUSTMENTS, service, useMe, type Adjustments, type StyleParams } from "@/services";
 import { downloadBlob, loadImage, renderToCanvas } from "@/lib/apply-lut";
+import { useRenderedLut } from "@/hooks/use-rendered-lut";
 import { cn } from "@/lib/utils";
 import lake from "@/assets/sample-lake.jpg";
 import portrait from "@/assets/sample-portrait.jpg";
@@ -66,8 +67,12 @@ function Studio() {
   const [img, setImg] = useState<HTMLImageElement | null>(null);
 
   const [adj, setAdj] = useState<Adjustments>(cache.adj ?? DEFAULT_ADJUSTMENTS);
-  const [debAdj, setDebAdj] = useState(adj);
-  const [lut, setLut] = useState<LutData | null>(null);
+  const {result, ready, error: lutError} = useRenderedLut(style, adj);
+  const lut = result?.lut ?? null;
+  const currentResult = useRef(result);
+  currentResult.current = ready ? result : null;
+  const currentFile = useRef(refFile);
+  currentFile.current = refFile;
   const [mode, setMode] = useState<"slider" | "split">("slider");
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
@@ -89,7 +94,6 @@ function Studio() {
       .then((l) => {
         setStyle(l.styleParams);
         setAdj(l.adjustments);
-        setDebAdj(l.adjustments);
         setRefUrl(l.thumbnail);
         setRefFile(null);
         toast.success(`"${l.name}" loaded — pick a photo to apply it to.`);
@@ -97,24 +101,13 @@ function Studio() {
       .catch((e) => toast.error(e.message));
   }, [lookId, me, navigate]);
 
-  // Debounce slider changes by 150ms
-  useEffect(() => {
-    const t = setTimeout(() => setDebAdj(adj), 150);
-    return () => clearTimeout(t);
-  }, [adj]);
-
-  useEffect(() => {
-    if (!style) return setLut(null);
-    let live = true;
-    service.renderLut(style, debAdj).then((l) => live && setLut(l));
-    return () => {
-      live = false;
-    };
-  }, [style, debAdj]);
+  useEffect(() => { if (lutError) toast.error(lutError); }, [lutError]);
 
   useEffect(() => {
     if (!targetUrl) return setImg(null);
-    loadImage(targetUrl).then(setImg).catch((e) => setTargetError(e.message));
+    let live = true;
+    loadImage(targetUrl).then(image => {if (live) setImg(image);}).catch((e) => {if (live) setTargetError(e.message);});
+    return () => {live = false;};
   }, [targetUrl]);
 
   const before = useMemo(() => (img ? renderToCanvas(img, null) : null), [img]);
@@ -122,16 +115,18 @@ function Studio() {
 
   async function generate() {
     if (!refFile) return;
+    setRefError(null);
     setGenerating(true);
     setProgress(5);
     const tick = setInterval(() => setProgress((p) => Math.min(92, p + 8)), 150);
     try {
       const s = await service.generateLook(refFile);
+      if (currentFile.current !== refFile) return;
       setStyle(s);
       setProgress(100);
       toast.success("Color style ready. Now pick a photo to apply it to.");
     } catch (e) {
-      setRefError((e as Error).message);
+      if (currentFile.current === refFile) setRefError((e as Error).message);
     } finally {
       clearInterval(tick);
       setGenerating(false);
@@ -139,14 +134,20 @@ function Studio() {
   }
 
   async function downloadImage(type: "png" | "jpeg") {
-    if (!img || !lut) return;
-    const c = renderToCanvas(img, lut, 6000);
-    c.toBlob((b) => b && downloadBlob(b, `gradematch.${type === "png" ? "png" : "jpg"}`), `image/${type}`, 0.92);
+    const snapshot = currentResult.current;
+    if (!img || !snapshot) return;
+    const c = renderToCanvas(img, snapshot.lut, 6000);
+    c.toBlob((b) => b && currentResult.current === snapshot && downloadBlob(b, `gradematch.${type === "png" ? "png" : "jpg"}`), `image/${type}`, 0.92);
   }
 
   async function downloadCube() {
-    if (!style) return;
-    downloadBlob(await service.downloadLutCube(style, adj), "gradematch-look.cube");
+    const snapshot = currentResult.current;
+    if (!snapshot) return;
+    try {
+      const blob = await service.downloadLutCube(snapshot.style, snapshot.adjustments);
+      if (currentResult.current === snapshot) downloadBlob(blob, "gradematch-look.cube");
+      else toast("Settings changed. Download again when the preview is ready.");
+    } catch (e) { toast.error((e as Error).message); }
   }
 
   function startSave() {
@@ -186,8 +187,8 @@ function Studio() {
     }
   }
 
-  const canExport = !!style;
-  const canExportImage = !!style && !!img && !!lut;
+  const canExport = ready;
+  const canExportImage = ready && !!img;
 
   return (
     <main className="grid gap-6 px-4 pb-12 sm:px-8 lg:grid-cols-[minmax(0,1fr)_380px]">

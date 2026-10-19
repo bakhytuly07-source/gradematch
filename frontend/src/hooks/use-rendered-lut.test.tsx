@@ -1,0 +1,34 @@
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { useRenderedLut } from './use-rendered-lut';
+import { DEFAULT_ADJUSTMENTS, type LutData, type StyleParams } from '@/services/types';
+const style: StyleParams = {id:'s',shadowTint:[0,0,0],highlightTint:[1,1,1],baseSaturation:1};
+afterEach(() => vi.useRealTimers());
+it('debounces controls, rejects stale results and pairs the latest LUT with its settings', async () => {
+  vi.useFakeTimers();
+  const pending: ((value:LutData) => void)[] = [];
+  const api = {renderLut: vi.fn(() => new Promise<LutData>(resolve => pending.push(resolve)))};
+  const {result, rerender} = renderHook(({adj}) => useRenderedLut(style,adj,api), {initialProps:{adj:DEFAULT_ADJUSTMENTS}});
+  await act(async () => {vi.advanceTimersByTime(150);});
+  const latest = {...DEFAULT_ADJUSTMENTS,warmth:30};
+  rerender({adj:latest}); expect(result.current.ready).toBe(false);
+  await act(async () => {vi.advanceTimersByTime(150);});
+  const lut = {size:33,data:new Float32Array([1])};
+  await act(async () => {pending[1]!(lut);});
+  expect(result.current.ready).toBe(true);
+  expect(result.current.result).toEqual({style,adjustments:latest,lut});
+  await act(async () => {pending[0]!({size:33,data:new Float32Array([0])});});
+  expect(result.current.result?.lut).toBe(lut);
+  rerender({adj:{...latest,contrast:5}});
+  expect(result.current.ready).toBe(false);
+});
+it('reports failure and recovers after another control change', async () => {
+  vi.useFakeTimers();
+  const api = {renderLut:vi.fn().mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce({size:33,data:new Float32Array(107811)})};
+  const {result,rerender} = renderHook(({adj}) => useRenderedLut(style,adj,api),{initialProps:{adj:DEFAULT_ADJUSTMENTS}});
+  await act(async () => {vi.advanceTimersByTime(150);});
+  expect(result.current.error).toBe('Offline');
+  rerender({adj:{...DEFAULT_ADJUSTMENTS,contrast:1}});
+  await act(async () => {vi.advanceTimersByTime(150);});
+  expect(result.current.error).toBeNull(); expect(result.current.ready).toBe(true);
+});
