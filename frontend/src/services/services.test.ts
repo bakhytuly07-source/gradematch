@@ -3,7 +3,7 @@ import { MockService, buildLut, lutToCube } from "./mock";
 import { DEFAULT_ADJUSTMENTS } from "./types";
 import { validateImageFile, MAX_FILE_BYTES } from "./validation";
 
-const jpg = { name: "a.jpg", type: "image/jpeg", size: 1000 };
+const jpg = new File([new Uint8Array(1000)], "a.jpg", {type: "image/jpeg"});
 const svc = () => new MockService(() => 0);
 
 describe("upload validation", () => {
@@ -16,8 +16,8 @@ describe("upload validation", () => {
     expect(validateImageFile({ name: "x.gif", type: "image/gif", size: 10 })).toMatch(/JPG, PNG or WebP/);
   });
   it("allows exactly 15 MB and rejects more", () => {
-    expect(validateImageFile({ ...jpg, size: MAX_FILE_BYTES })).toBeNull();
-    expect(validateImageFile({ ...jpg, size: MAX_FILE_BYTES + 1 })).toMatch(/15 MB/);
+    expect(validateImageFile({ name: jpg.name, type: jpg.type, size: MAX_FILE_BYTES })).toBeNull();
+    expect(validateImageFile({ name: jpg.name, type: jpg.type, size: MAX_FILE_BYTES + 1 })).toMatch(/15 MB/);
   });
   it("rejects missing file", () => {
     expect(validateImageFile(null)).not.toBeNull();
@@ -26,7 +26,7 @@ describe("upload validation", () => {
 
 describe("MockService", () => {
   it("generateLook validates the file", async () => {
-    await expect(svc().generateLook({ ...jpg, type: "application/pdf" })).rejects.toThrow();
+    await expect(svc().generateLook(new File(["bad"], "a.pdf", {type: "application/pdf"}))).rejects.toThrow();
     await expect(svc().generateLook(jpg)).resolves.toHaveProperty("id");
   });
 

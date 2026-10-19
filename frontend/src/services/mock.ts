@@ -1,7 +1,6 @@
 import {
   ServiceError,
   type Adjustments,
-  type FileLike,
   type GradeMatchService,
   type Look,
   type LutData,
@@ -124,7 +123,7 @@ export class MockService implements GradeMatchService {
     return this.current;
   }
 
-  async generateLook(file: FileLike): Promise<StyleParams> {
+  async generateLook(file: File): Promise<StyleParams> {
     const err = validateImageFile(file);
     if (err) throw new ServiceError(err, "validation");
     await this.wait();

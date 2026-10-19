@@ -75,7 +75,7 @@ export interface GradeMatchService {
   login(email: string, password: string): Promise<User>;
   logout(): Promise<void>;
   getMe(): Promise<User | null>;
-  generateLook(referenceFile: FileLike): Promise<StyleParams>;
+  generateLook(referenceFile: File): Promise<StyleParams>;
   renderLut(styleParams: StyleParams, adjustments: Adjustments): Promise<LutData>;
   saveLook(input: SaveLookInput): Promise<Look>;
   listLooks(): Promise<Look[]>;

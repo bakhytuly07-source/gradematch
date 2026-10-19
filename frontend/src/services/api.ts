@@ -1,7 +1,6 @@
 import {
   ServiceError,
   type Adjustments,
-  type FileLike,
   type GradeMatchService,
   type Look,
   type LutData,
@@ -10,6 +9,7 @@ import {
   type User,
 } from "./types";
 
+import { validateImageFile } from "./validation";
 import { fromApiLook, fromApiLooks, fromApiLut, fromApiStyle } from "./mapping";
 export { fromApiLook } from "./mapping";
 
@@ -102,9 +102,11 @@ export class ApiService implements GradeMatchService {
     }
   }
 
-  async generateLook(referenceFile: FileLike): Promise<StyleParams> {
+  async generateLook(referenceFile: File): Promise<StyleParams> {
     if (!(referenceFile instanceof Blob))
       throw new ServiceError("Choose an actual image file.", "validation");
+    const error = validateImageFile(referenceFile);
+    if (error) throw new ServiceError(error, "validation");
     const form = new FormData();
     form.append("referenceFile", referenceFile, referenceFile.name);
     return fromApiStyle(await this.json("/generate", "POST", undefined, form));

@@ -76,8 +76,6 @@ describe("ApiService", () => {
     const file = new File(["bytes"], "sample.png", { type: "image/png" });
     expect(await api.generateLook(file)).toEqual(style);
     expect(fetch.mock.calls[0]![1].body.get("referenceFile").size).toBe(5);
-    await expect(api.generateLook({ name: "x", type: "image/png", size: 5 })).rejects.toMatchObject(
-      { code: "validation" },
-    );
+
   });
 });
