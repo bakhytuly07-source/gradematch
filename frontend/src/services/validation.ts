@@ -3,7 +3,7 @@ import type { FileLike } from "./types";
 export const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_FILE_BYTES = 15 * 1024 * 1024;
 
-/** Returns a friendly error message, or null when the file is OK. */
+/** Returns a friendly error message, or null when metadata passes (bytes may still be undecodable). */
 export function validateImageFile(file: FileLike | null | undefined): string | null {
   if (!file) return "Please choose a photo.";
   if (!ACCEPTED_TYPES.includes(file.type)) {

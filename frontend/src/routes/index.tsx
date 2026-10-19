@@ -229,7 +229,12 @@ function Studio() {
               setRefUrl(URL.createObjectURL(f));
               setStyle(null);
             }}
-            onError={setRefError}
+            onError={(message) => {
+              setRefError(message);
+              setRefFile(null);
+              setRefUrl(null);
+              setStyle(null);
+            }}
           />
           {refError && <p className="text-sm text-destructive">{refError}</p>}
           <Button size="lg" className="w-full" disabled={!refFile || generating} onClick={generate}>
