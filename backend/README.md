@@ -153,3 +153,9 @@ Pending login/register responses are invalidated by logout or a newer sign-in.
 Logout clears the local bearer immediately after capturing it for server
 revocation. Obsolete responses (including logout 401) cannot restore an old token
 or clear a newer account's credentials/notifications.
+
+Studio drafts loaded from Library are tagged with their account owner. They are
+not rendered while authentication is unresolved or restored for another user.
+An account change remounts the editor, invalidating pending private loads and
+exports; a save waiting for thumbnail construction is cancelled before dispatch.
+Public guest-generated drafts can still carry through sign-in for saving.

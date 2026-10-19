@@ -51,3 +51,15 @@ from the report. Disposable test accounts/looks remain only in the local test DB
 Library load failures offer Retry. Account changes hide old records immediately;
 obsolete loads/mutations cannot populate the next account. Per-record mutation
 in-flight guards prevent duplicate favorite toggles/Enter-plus-blur renames.
+
+Account-switch regression (#56), using the same disposable migrated API/frontend:
+
+```sh
+node backend/integration/studio-session.cjs
+```
+
+This opens A's saved private settings (warmth 41), leaves Studio, logs out,
+registers B and returns without a page reload. B must see default controls, no
+private preview and disabled LUT export. Component tests additionally exercise
+mounted account changes, unresolved authentication, stale private responses and
+guest draft preservation through sign-in.

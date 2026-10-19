@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropZone } from "@/components/DropZone";
 import { CompareView } from "@/components/CompareView";
-import { DEFAULT_ADJUSTMENTS, service, useMe, type Adjustments, type StyleParams } from "@/services";
+import { DEFAULT_ADJUSTMENTS, service, useMe, type Adjustments, type StyleParams, type User } from "@/services";
 import { downloadBlob, loadImage, renderToCanvas } from "@/lib/apply-lut";
 import { referenceThumbnail } from "@/lib/thumbnail";
 import { useRenderedLut } from "@/hooks/use-rendered-lut";
@@ -31,6 +31,7 @@ const SLIDERS: { key: keyof Adjustments; label: string; min: number; max: number
 
 // Keeps studio work alive while visiting other pages (in-memory only).
 const cache: {
+  ownerId?: string | null;
   refUrl?: string | null;
   refFile?: File | null;
   style?: StyleParams | null;
@@ -52,22 +53,31 @@ export const Route = createFileRoute("/")({
 });
 
 function Studio() {
+  const me = useMe();
+  // Remount account-owned editor state before rendering for another session.
+  return <StudioEditor key={me === undefined ? "loading" : me?.id ?? "guest"} me={me} />;
+}
+
+function StudioEditor({ me }: { me: User | null | undefined }) {
   const { look: lookId } = Route.useSearch();
   const navigate = useNavigate();
-  const me = useMe();
+  // Public generated drafts survive sign-in; saved looks belong to their owner.
+  const initial = !cache.ownerId || cache.ownerId === me?.id ? cache : {};
+  const [ownerId, setOwnerId] = useState<string | null>(initial.ownerId ?? null);
+  const active = useRef(true);
 
-  const [refFile, setRefFile] = useState<File | null>(cache.refFile ?? null);
-  const [refUrl, setRefUrl] = useState<string | null>(cache.refUrl ?? null);
+  const [refFile, setRefFile] = useState<File | null>(initial.refFile ?? null);
+  const [refUrl, setRefUrl] = useState<string | null>(initial.refUrl ?? null);
   const [refError, setRefError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [style, setStyle] = useState<StyleParams | null>(cache.style ?? null);
+  const [style, setStyle] = useState<StyleParams | null>(initial.style ?? null);
 
-  const [targetUrl, setTargetUrl] = useState<string | null>(cache.targetUrl ?? null);
+  const [targetUrl, setTargetUrl] = useState<string | null>(initial.targetUrl ?? null);
   const [targetError, setTargetError] = useState<string | null>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
 
-  const [adj, setAdj] = useState<Adjustments>(cache.adj ?? DEFAULT_ADJUSTMENTS);
+  const [adj, setAdj] = useState<Adjustments>(initial.adj ?? DEFAULT_ADJUSTMENTS);
   const {result, ready, error: lutError} = useRenderedLut(style, adj);
   const lut = result?.lut ?? null;
   const currentResult = useRef(result);
@@ -80,8 +90,17 @@ function Studio() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    Object.assign(cache, { refFile, refUrl, style, targetUrl, adj });
-  }, [refFile, refUrl, style, targetUrl, adj]);
+    if (me !== undefined) Object.assign(cache, { ownerId, refFile, refUrl, style, targetUrl, adj });
+  }, [me, ownerId, refFile, refUrl, style, targetUrl, adj]);
+
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+      currentResult.current = null;
+      currentFile.current = null;
+    };
+  }, []);
 
   // Load a saved look from the library
   useEffect(() => {
@@ -95,6 +114,7 @@ function Studio() {
       .getLook(lookId)
       .then((l) => {
         if (!live) return;
+        setOwnerId(me.id);
         setStyle(l.styleParams);
         setAdj(l.adjustments);
         setRefUrl(l.thumbnail);
@@ -170,7 +190,9 @@ function Studio() {
     setSaving(true);
     try {
       const thumbnail = await referenceThumbnail(refUrl);
+      if (!active.current) return;
       await service.saveLook({ name: saveName, thumbnail, styleParams: style, adjustments: adj });
+      if (!active.current) return;
       setSaveOpen(false);
       toast.success("Saved to your library.", {
         action: { label: "Open library", onClick: () => navigate({ to: "/library" }) },
