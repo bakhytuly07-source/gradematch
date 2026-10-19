@@ -38,7 +38,10 @@ class MemoryLooks:
 
     def for_owner(self, owner: str) -> list[Look]:
         with self._lock:
-            return [look.model_copy(deep=True) for user, look in self._records.values() if user == owner]
+            # Newest created first; opaque id descending provides a stable tie-break.
+            looks = [look for user, look in self._records.values() if user == owner]
+            return [look.model_copy(deep=True) for look in
+                    sorted(looks, key=lambda item: (item.created_at, item.id), reverse=True)]
 
     # Preserve the already-existing get/rename/favorite routes in memory mode.
     def rename(self, owner: str, id: str, name: str) -> Look:

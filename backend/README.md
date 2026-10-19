@@ -122,3 +122,8 @@ contract. Repository inputs and returned nested settings are independent copies;
 missing and foreign-owned look ids use identical 404 responses. Existing get,
 rename and favorite routes also work with this repository; favorite inversions
 are locked and are not safe for automatic retries.
+
+Lists are newest-created first. Equal creation timestamps use opaque id descending
+as a stable tie-breaker (matching ORM mode). Rename/favorite updates do not reorder
+creation order. Each returned Look has the complete public schema and independent
+nested values; owner identifiers and credentials never appear in list responses.
