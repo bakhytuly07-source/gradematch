@@ -53,3 +53,27 @@ class MemoryUsers:
         if user is not None and verify_password(password, user.password_hash):
             return user
         return None
+
+
+class OrmUsers:
+    """Request-scoped account repository; the caller owns the transaction."""
+    def __init__(self, db):
+        self.db = db
+
+    def create(self, email, password):
+        from sqlalchemy.exc import IntegrityError
+        from .models import User as UserModel
+        user = UserModel(email=email, password_hash=hash_password(password))
+        self.db.add(user)
+        try:
+            self.db.flush()
+        except IntegrityError:
+            self.db.rollback()
+            raise ApiError(409, "An account with this email already exists.") from None
+        return user
+
+    def authenticate(self, email, password):
+        from sqlalchemy import select
+        from .models import User as UserModel
+        user = self.db.scalar(select(UserModel).where(UserModel.email == MemoryUsers.normalize(email)))
+        return user if user is not None and verify_password(password, user.password_hash) else None

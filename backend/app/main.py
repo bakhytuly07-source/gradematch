@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.openapi.utils import get_openapi
 from sqlalchemy import case, select, update
-from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException
 from starlette.formparsers import MultiPartParser, MultiPartException
 from python_multipart.exceptions import MultipartParseError
@@ -17,11 +16,11 @@ from starlette.datastructures import UploadFile
 from starlette.concurrency import run_in_threadpool
 
 from . import models, schemas
-from .auth import Db, Token, hash_password, issue_token, verify_password
+from .auth import Db, Token, issue_token
 from .color import MAX_BYTES, analyze, build_lut, normalize_thumbnail
 from .cube import write_cube
 from .errors import ApiError
-from .users import MemoryUsers
+from .users import MemoryUsers, OrmUsers
 from .sessions import MemorySessions
 from .looks import MemoryLooks
 
@@ -54,13 +53,7 @@ def register(body: schemas.RegisterInput, db: Db, request: Request):
     if memory is not None:
         user = memory.users.create(body.email, body.password)
         return schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
-    user = models.User(email=body.email.strip().lower(), password_hash=hash_password(body.password))
-    db.add(user)
-    try:
-        db.flush()
-    except IntegrityError:
-        db.rollback()
-        raise ApiError(409, "An account with this email already exists.") from None
+    user = OrmUsers(db).create(body.email, body.password)
     return issue_token(db, user)
 
 
@@ -72,8 +65,8 @@ def login(body: schemas.LoginInput, db: Db, request: Request):
         if user is None:
             raise ApiError(401, "Email or password is incorrect.", "auth")
         return schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
-    user = db.scalar(select(models.User).where(models.User.email == body.email.strip().lower()))
-    if user is None or not verify_password(body.password, user.password_hash):
+    user = OrmUsers(db).authenticate(body.email, body.password)
+    if user is None:
         raise ApiError(401, "Email or password is incorrect.", "auth")
     return issue_token(db, user)
 
