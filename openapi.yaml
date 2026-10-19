@@ -1,0 +1,689 @@
+openapi: 3.1.0
+info:
+  title: GradeMatch API
+  version: 1.0.0
+  license:
+    name: MIT
+  description: 'Backend contract derived from frontend/src/services/types.ts and MockService. All paths
+    include /api. Each operation explicitly declares bearer requirements. Operations without requestBody
+    accept no body; 204 responses contain no body. Every error response uses Error {code, message}, including
+    framework validation and unexpected errors.
+
+
+    Known TypeScript boundaries: Look uses style_params/thumbnail_url/is_favorite/created_at rather than
+    styleParams/thumbnail/favorite/createdAt, and adds required updated_at. All are required; timestamps
+    remain epoch milliseconds. SaveLookInput and nested StyleParams retain TypeScript names. LutData.data
+    is a JSON number array converted to Float32Array by the adapter; size is fixed at 33. Upload uses
+    actual bytes rather than FileLike metadata. Register and login return AuthResult JSON bodies; the
+    adapter retains access_token and returns the nested user to satisfy the TypeScript interface. Protected
+    getMe returns 401 when unauthenticated, which the adapter maps to null. logout revokes the server token and the adapter clears local state. All 13 GradeMatchService
+    methods have operationIds matching their method names.'
+servers:
+- url: http://localhost:8091
+  description: Local development
+tags:
+- name: Auth
+  description: Account registration, sign-in, and bearer token management.
+- name: Color
+  description: Reference image analysis, LUT rendering, and LUT export.
+- name: Library
+  description: Manage the signed-in user's saved looks and favorites.
+paths:
+  /api/auth/register:
+    post:
+      operationId: register
+      summary: Create an account and sign in
+      tags:
+      - Auth
+      security: []
+      responses:
+        '201':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      description: No bearer token required. Returns AuthResult as JSON with user, access_token, and
+        token_type set to bearer. The real service adapter retains access_token, sends it as a bearer
+        credential on protected requests, and returns user; MockService uses only in-memory current-user state.
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Sign in
+      tags:
+      - Auth
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      description: No bearer token required. Returns AuthResult as JSON with user, access_token, and
+        token_type set to bearer. The real service adapter retains access_token, sends it as a bearer
+        credential on protected requests, and returns user; MockService uses only in-memory current-user state.
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Revoke the current bearer token
+      tags:
+      - Auth
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Token revoked; no request or response body. The client clears its token locally
+            even when the server returns 401.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/auth/me:
+    get:
+      operationId: getMe
+      summary: Get the signed-in user
+      tags:
+      - Auth
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      description: 'No request body. Missing or invalid credentials return 401; the service adapter maps
+        this to null to satisfy getMe(): Promise<User | null>.'
+  /api/generate:
+    post:
+      operationId: generateLook
+      summary: Analyze a reference image
+      tags:
+      - Color
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleParams'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedImage'
+        '422':
+          $ref: '#/components/responses/UnreadableImage'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      description: Guest access; no bearer token. Process the original in memory, downscale the analysis
+        copy to at most 1024 px on the longest side, and persist nothing. A missing multipart field or
+        malformed multipart request also returns 422 with the shared Error schema.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GenerateInput'
+            encoding:
+              referenceFile:
+                contentType: image/jpeg, image/png, image/webp
+  /api/render-lut:
+    post:
+      operationId: renderLut
+      summary: Render the adjusted 33-point LUT
+      tags:
+      - Color
+      security: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LutData'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LutSettings'
+      description: Guest access; no bearer token. Deterministic LUT for these exact styleParams and adjustments.
+        This is the single source of truth for browser previews and image exports. Samples use normalized
+        SDR sRGB/Rec.709 RGB input and output in 0..1; no HDR or log encoding.
+  /api/download.cube:
+    post:
+      operationId: downloadLutCube
+      summary: Download the adjusted LUT as a .cube file
+      tags:
+      - Color
+      security: []
+      responses:
+        '200':
+          description: Standard .cube 3D LUT; normalized SDR sRGB/Rec.709 RGB, identical to render-lut
+            for the same settings.
+          headers:
+            Content-Disposition:
+              description: Attachment filename with .cube extension.
+              schema:
+                type: string
+              example: attachment; filename="gradematch-look.cube"
+          content:
+            text/plain:
+              schema:
+                type: string
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LutSettings'
+      description: Guest access; no bearer token. Uses exactly the same LUT construction and settings
+        as renderLut. Emit TITLE, LUT_3D_SIZE 33, DOMAIN_MIN 0.0 0.0 0.0, DOMAIN_MAX 1.0 1.0 1.0, then
+        35937 RGB rows with red grid index changing fastest. Numeric samples parsed from the file must
+        equal render-lut data for identical settings (after conversion to float32); use enough decimal
+        precision to round-trip every float32 value without loss. The frontend receives text as a Blob.
+        A Library user downloads a saved look by passing its settings here; this endpoint does not read
+        Library records.
+  /api/looks:
+    post:
+      operationId: saveLook
+      summary: Save a look to the current user's Library
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Look'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveLookInput'
+      description: Trim name; if empty use "Untitled look". Initially is_favorite is false. Store only
+        settings and the reference thumbnail (JPEG, 256 px longest side); never store the original uploaded
+        reference. SaveLookInput retains the frontend field names; Look responses use the explicitly required
+        API names.
+    get:
+      operationId: listLooks
+      summary: List the current user's saved looks
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Look'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      description: No request body or pagination parameters. Return only the token owner's looks, newest
+        created_at first. Empty Library returns [].
+  /api/looks/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Opaque Look id; never assumed to be a UUID.
+    get:
+      operationId: getLook
+      summary: Open a look owned by the current user
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Look'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    patch:
+      operationId: renameLook
+      summary: Rename an owned look
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Look'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameLookInput'
+    delete:
+      operationId: deleteLook
+      summary: Delete an owned look
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Success; no response body.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/looks/{id}/favorite:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      operationId: toggleFavorite
+      summary: Toggle favorite status on an owned look
+      tags:
+      - Library
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Look'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      description: No request body. Atomically invert is_favorite and update updated_at. This toggle is
+        not idempotent; clients must not retry automatically.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Access token issued in the AuthResult JSON body by register or login, with token_type
+        set to bearer. Send Authorization: Bearer <access_token> on protected requests.'
+  schemas:
+    AuthResult:
+      type: object
+      required:
+      - user
+      - access_token
+      - token_type
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        access_token:
+          type: string
+        token_type:
+          type: string
+          const: bearer
+    User:
+      type: object
+      required:
+      - id
+      - email
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+    RegisterInput:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          description: Trimmed and lowercased before storage; must match the frontend email validation
+            pattern.
+          pattern: ^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$
+        password:
+          type: string
+          minLength: 8
+          writeOnly: true
+    LoginInput:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          description: Trimmed and lowercased for lookup.
+        password:
+          type: string
+          writeOnly: true
+    StyleParams:
+      type: object
+      required:
+      - id
+      - shadowTint
+      - highlightTint
+      - baseSaturation
+      properties:
+        id:
+          type: string
+        shadowTint:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: number
+            minimum: 0
+            maximum: 1
+          description: Exactly three channels in RGB order, each in 0..1.
+        highlightTint:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: number
+            minimum: 0
+            maximum: 1
+          description: Exactly three channels in RGB order, each in 0..1.
+        baseSaturation:
+          type: number
+          description: Base saturation multiplier; the TypeScript contract specifies no range.
+    Adjustments:
+      type: object
+      required:
+      - intensity
+      - contrast
+      - saturation
+      - warmth
+      properties:
+        intensity:
+          type: number
+          minimum: 0
+          maximum: 100
+          default: 80
+        contrast:
+          type: number
+          minimum: -50
+          maximum: 50
+          default: 0
+        saturation:
+          type: number
+          minimum: -50
+          maximum: 50
+          default: 0
+        warmth:
+          type: number
+          minimum: -50
+          maximum: 50
+          default: 0
+    LutSettings:
+      type: object
+      required:
+      - styleParams
+      - adjustments
+      properties:
+        styleParams:
+          $ref: '#/components/schemas/StyleParams'
+        adjustments:
+          $ref: '#/components/schemas/Adjustments'
+    LutData:
+      type: object
+      required:
+      - size
+      - data
+      properties:
+        size:
+          type: integer
+          const: 33
+        data:
+          type: array
+          minItems: 107811
+          maxItems: 107811
+          items:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 1
+          description: 33*33*33*3 float32 samples, interleaved RGB. Red grid index changes fastest, then
+            green, then blue. Channel c at grid (r,g,b) is data[3*((b*33+g)*33+r)+c]. Convert this JSON
+            array to Float32Array for the frontend.
+    SaveLookInput:
+      type: object
+      required:
+      - name
+      - thumbnail
+      - styleParams
+      - adjustments
+      properties:
+        name:
+          type: string
+        thumbnail:
+          type: string
+          description: Reference thumbnail data URL produced by the frontend (JPEG, 256 px longest side).
+            An empty string is allowed by the TypeScript interface and mock. Only this thumbnail and numeric
+            settings may be persisted, never the original uploaded image.
+        styleParams:
+          $ref: '#/components/schemas/StyleParams'
+        adjustments:
+          $ref: '#/components/schemas/Adjustments'
+    Look:
+      type: object
+      required:
+      - id
+      - name
+      - style_params
+      - adjustments
+      - thumbnail_url
+      - is_favorite
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        style_params:
+          $ref: '#/components/schemas/StyleParams'
+        adjustments:
+          $ref: '#/components/schemas/Adjustments'
+        thumbnail_url:
+          type: string
+          description: Thumbnail URL or data URL; may be empty when saved without a thumbnail. Contains
+            only the saved thumbnail, never the full reference image.
+        is_favorite:
+          type: boolean
+        created_at:
+          type: number
+          description: Unix epoch milliseconds, matching the numeric unit of frontend Look.createdAt.
+        updated_at:
+          type: number
+          description: Unix epoch milliseconds; initially equal to created_at, updated on rename or favorite
+            changes.
+    RenameLookInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          pattern: \S
+          description: Must contain a non-whitespace character; trimmed before saving.
+    Error:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - validation
+          - auth
+          - not_found
+          - unknown
+        message:
+          type: string
+    GenerateInput:
+      type: object
+      required:
+      - referenceFile
+      properties:
+        referenceFile:
+          type: string
+          format: binary
+          description: Actual JPEG, PNG, or WebP file bytes, not FileLike metadata. Maximum 15*1024*1024
+            = 15728640 bytes inclusive (frontend calls this 15 MB). Validate decoded format and file signature,
+            not just filename or declared MIME type.
+          x-maxBytes: 15728640
+  responses:
+    ValidationError:
+      description: Invalid or missing request fields or settings.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation
+            message: Invalid or missing request fields or settings.
+    Unauthorized:
+      description: Missing, invalid, expired, or revoked bearer token, or incorrect login credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: auth
+            message: Missing, invalid, expired, or revoked bearer token, or incorrect login credentials.
+    NotFound:
+      description: Look does not exist or is owned by another user; do not disclose other users' looks.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: not_found
+            message: Look does not exist or is owned by another user; do not disclose other users' looks.
+    Conflict:
+      description: An account with this normalized email already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation
+            message: An account with this normalized email already exists.
+    TooLarge:
+      description: Reference image exceeds 15728640 bytes (15 MB); exactly the limit is accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation
+            message: Reference image exceeds 15728640 bytes (15 MB); exactly the limit is accepted.
+    UnsupportedImage:
+      description: Reference file is not JPEG, PNG, or WebP, based on file signature and decoded format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation
+            message: Reference file is not JPEG, PNG, or WebP, based on file signature and decoded format.
+    UnreadableImage:
+      description: Reference image is empty, corrupt, truncated, or cannot be decoded.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: validation
+            message: Reference image is empty, corrupt, truncated, or cannot be decoded.
+    InternalError:
+      description: Unexpected processing or server failure.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: unknown
+            message: Unexpected processing or server failure.
