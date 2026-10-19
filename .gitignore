@@ -4,3 +4,8 @@ node_modules/
 __pycache__/
 *.db
 .env
+/work/
+.pytest_cache/
+*.db-journal
+*.db-wal
+*.db-shm
