@@ -15,6 +15,7 @@ export { fromApiLook } from "./mapping";
 
 export class ApiService implements GradeMatchService {
   private token: string | null = null;
+  private authGeneration = 0;
   private readonly baseUrl: string;
   private readonly storage: Storage | null;
   private readonly tokenKey: string;
@@ -37,6 +38,7 @@ export class ApiService implements GradeMatchService {
   }
 
   private async request(path: string, init: RequestInit = {}): Promise<Response> {
+    const generation = this.authGeneration;
     const headers = new Headers(init.headers);
     if (this.token) headers.set("Authorization", `Bearer ${this.token}`);
     let response: Response;
@@ -46,7 +48,7 @@ export class ApiService implements GradeMatchService {
       throw new ServiceError("Could not reach GradeMatch API.", "unknown");
     }
     if (!response.ok) {
-      if (response.status === 401) this.setToken(null);
+      if (response.status === 401 && generation === this.authGeneration) this.setToken(null);
       const error = await response.json().catch(() => null);
       const code = error?.code;
       throw new ServiceError(
@@ -74,6 +76,7 @@ export class ApiService implements GradeMatchService {
   }
 
   private async authenticate(path: string, email: string, password: string): Promise<User> {
+    const generation = ++this.authGeneration;
     const result = await this.json<{ user: User; access_token: string }>(path, "POST", {
       email,
       password,
@@ -81,6 +84,8 @@ export class ApiService implements GradeMatchService {
     if (!result || typeof result.access_token !== "string" || !result.access_token ||
         typeof result.user?.id !== "string" || typeof result.user?.email !== "string")
       throw new ServiceError("Invalid authentication response. Please try again.", "unknown");
+    if (generation !== this.authGeneration)
+      throw new ServiceError("Sign-in was cancelled. Please try again.", "unknown");
     this.setToken(result.access_token);
     return result.user;
   }
@@ -94,12 +99,14 @@ export class ApiService implements GradeMatchService {
   }
 
   async logout(): Promise<void> {
+    ++this.authGeneration;
+    // Capture the current bearer for revocation, then clear locally immediately.
+    const revocation = this.request("/auth/logout", { method: "POST" });
+    this.setToken(null);
     try {
-      await this.request("/auth/logout", { method: "POST" });
+      await revocation;
     } catch (error) {
       if (!(error instanceof ServiceError && error.status === 401)) throw error;
-    } finally {
-      this.setToken(null);
     }
   }
 
@@ -111,7 +118,6 @@ export class ApiService implements GradeMatchService {
       return user;
     } catch (error) {
       if (error instanceof ServiceError && error.status === 401) {
-        this.setToken(null);
         return null;
       }
       throw error;

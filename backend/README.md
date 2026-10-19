@@ -148,3 +148,8 @@ Vite with `--port 5173`. Deployment example:
 An explicitly empty value denies all browser origins; wildcards are rejected.
 Authorization/Content-Type and GET/POST/PATCH/DELETE are permitted for allowed
 origins. CORS controls browser response access; API authentication still applies.
+
+Pending login/register responses are invalidated by logout or a newer sign-in.
+Logout clears the local bearer immediately after capturing it for server
+revocation. Obsolete responses (including logout 401) cannot restore an old token
+or clear a newer account's credentials/notifications.

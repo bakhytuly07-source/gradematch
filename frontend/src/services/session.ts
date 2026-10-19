@@ -17,7 +17,7 @@ export function createSessionService(base: GradeMatchService) {
   const service: GradeMatchService = {
     register: async (email, password) => { const g = ++generation; const user = await base.register(email, password); if (g === generation) emit(user); return user; },
     login: async (email, password) => { const g = ++generation; const user = await base.login(email, password); if (g === generation) emit(user); return user; },
-    logout: async () => { generation++; emit(null); try { await base.logout(); } finally { emit(null); } },
+    logout: async () => { const g = ++generation; emit(null); try { await base.logout(); } finally { if (g === generation) emit(null); } },
     getMe: async () => { const g = generation; const user = await base.getMe(); if (g === generation) emit(user); return g === generation ? user : current; },
     generateLook: f => base.generateLook(f),
     renderLut: (s, a) => base.renderLut(s, a),
