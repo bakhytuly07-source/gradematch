@@ -76,7 +76,7 @@ def test_auth_validation_and_revocation(client, database):
 def test_library_crud_ownership_thumbnail_and_persistence(client, database):
     owner = register(client)
     outsider = register(client, "other@example.com")
-    thumb = "data:image/jpeg;base64," + base64.b64encode(image_bytes("JPEG", (600, 400))).decode()
+    thumb = "data:image/jpeg;base64," + base64.b64encode(image_bytes("JPEG", (256, 171))).decode()
     saved = assert_schema(client.post("/api/looks", headers=owner,
                           json={**SETTINGS, "name": "  My look  ", "thumbnail": thumb}), "Look", 201)
     assert saved["name"] == "My look" and not saved["is_favorite"]

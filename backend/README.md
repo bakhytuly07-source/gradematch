@@ -109,3 +109,16 @@ Missing, malformed, unknown, expired and revoked tokens return the same 401 auth
 error; logout returns an empty 204. Logging out one session leaves other sessions
 for the same or another account active. The client should clear its local token
 even if logout reports 401, as required by the contract.
+
+## In-memory Library (#30)
+
+Each application owns an isolated MemoryLooks repository, injectable through
+`create_app(looks=...)`. Only explicit authenticated saves retain data: owner/id,
+name, favorite/timestamps, numeric style/controls and an optional JPEG thumbnail.
+Nonempty thumbnails must have exactly 256 px on their longest side; invalid
+sizes/formats are rejected rather than silently accepting a full original.
+Re-encoding strips metadata. Empty thumbnails and blank-name defaults follow the
+contract. Repository inputs and returned nested settings are independent copies;
+missing and foreign-owned look ids use identical 404 responses. Existing get,
+rename and favorite routes also work with this repository; favorite inversions
+are locked and are not safe for automatic retries.

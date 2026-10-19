@@ -23,6 +23,7 @@ from .cube import write_cube
 from .errors import ApiError
 from .users import MemoryUsers
 from .sessions import MemorySessions
+from .looks import MemoryLooks
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -172,7 +173,10 @@ def download_cube(body: schemas.LutSettings):
     return PlainTextResponse(write_cube(build_lut(body)), headers={"Content-Disposition": 'attachment; filename="gradematch-look.cube"'})
 
 
-def own_look(id: str, db: Db, token: Token):
+def own_look(id: str, db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        return memory.looks.get(token.user_id, id)
     look = db.scalar(select(models.Look).where(models.Look.id == id, models.Look.user_id == token.user_id))
     if look is None:
         raise ApiError(404, "Look was not found.", "not_found")
@@ -183,7 +187,10 @@ OwnLook = Annotated[models.Look, Depends(own_look)]
 
 
 @router.post("/api/looks", response_model=schemas.Look, status_code=201, operation_id="saveLook")
-def save_look(body: schemas.SaveLookInput, db: Db, token: Token):
+def save_look(body: schemas.SaveLookInput, db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        return memory.looks.create(token.user_id, body)
     timestamp = models.now_ms()
     look = models.Look(user_id=token.user_id, name=body.name.strip() or "Untitled look",
                        style_params=body.style_params.model_dump(by_alias=True),
@@ -195,7 +202,10 @@ def save_look(body: schemas.SaveLookInput, db: Db, token: Token):
 
 
 @router.get("/api/looks", response_model=list[schemas.Look], operation_id="listLooks")
-def list_looks(db: Db, token: Token):
+def list_looks(db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        return memory.looks.for_owner(token.user_id)
     return db.scalars(select(models.Look).where(models.Look.user_id == token.user_id)
                       .order_by(models.Look.created_at.desc(), models.Look.id.desc())).all()
 
@@ -206,7 +216,10 @@ def get_look(look: OwnLook):
 
 
 @router.patch("/api/looks/{id}", response_model=schemas.Look, operation_id="renameLook")
-def rename_look(body: schemas.RenameLookInput, look: OwnLook, db: Db):
+def rename_look(body: schemas.RenameLookInput, look: OwnLook, db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        return memory.looks.rename(token.user_id, look.id, body.name)
     look.name = body.name.strip()
     look.updated_at = max(models.now_ms(), look.updated_at + 1)
     db.commit()
@@ -214,7 +227,10 @@ def rename_look(body: schemas.RenameLookInput, look: OwnLook, db: Db):
 
 
 @router.post("/api/looks/{id}/favorite", response_model=schemas.Look, operation_id="toggleFavorite")
-def toggle_favorite(look: OwnLook, db: Db):
+def toggle_favorite(look: OwnLook, db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        return memory.looks.toggle_favorite(token.user_id, look.id)
     timestamp = models.now_ms()
     db.execute(update(models.Look).where(models.Look.id == look.id, models.Look.user_id == look.user_id)
                .values(is_favorite=~models.Look.is_favorite,
@@ -264,13 +280,14 @@ def contract_openapi(app: FastAPI):
     return document
 
 
-def create_app(*, storage="memory", users=None, sessions=None):
+def create_app(*, storage="memory", users=None, sessions=None, looks=None):
     if storage not in {"memory", "orm"}:
         raise ValueError("storage must be memory or orm")
     application = FastAPI(title="GradeMatch API", version="1.0.0")
     application.state.memory = (SimpleNamespace(
         users=users if users is not None else MemoryUsers(),
         sessions=sessions if sessions is not None else MemorySessions(),
+        looks=looks if looks is not None else MemoryLooks(),
     ) if storage == "memory" else None)
     application.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
         allow_methods=["GET", "POST", "PATCH", "DELETE"],

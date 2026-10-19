@@ -58,9 +58,13 @@ def normalize_thumbnail(value: str) -> str:
         image = decode_image(data)
     except ApiError:
         raise ApiError(422, "Invalid thumbnail image.") from None
-    image.thumbnail((256, 256))
-    output = BytesIO()
-    image.save(output, format="JPEG", quality=85)
+    # Save accepts only the contract's exact 256 px longest-side thumbnail.
+    # It must never silently retain/resize an uploaded original passed as a thumb.
+    with image:
+        if max(image.size) != 256:
+            raise ApiError(422, "Thumbnail longest side must be 256 px.")
+        output = BytesIO()
+        image.save(output, format="JPEG", quality=85)
     return prefix + base64.b64encode(output.getvalue()).decode("ascii")
 
 
