@@ -64,7 +64,13 @@ def register(body: schemas.RegisterInput, db: Db, request: Request):
 
 
 @router.post("/api/auth/login", response_model=schemas.AuthResult, operation_id="login")
-def login(body: schemas.LoginInput, db: Db):
+def login(body: schemas.LoginInput, db: Db, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        user = memory.users.authenticate(body.email, body.password)
+        if user is None:
+            raise ApiError(401, "Email or password is incorrect.", "auth")
+        return schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
     user = db.scalar(select(models.User).where(models.User.email == body.email.strip().lower()))
     if user is None or not verify_password(body.password, user.password_hash):
         raise ApiError(401, "Email or password is incorrect.", "auth")
