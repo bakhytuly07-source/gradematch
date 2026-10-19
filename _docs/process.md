@@ -45,3 +45,7 @@ When the human finds a bug while running the app:
 3. QA adds test cases that fail because of the bug
 4. Engineer fixes it
 5. QA verifies and closes it on PASS
+
+## Batched mode (deadline)
+
+To fit the deadline the orchestrator may batch: PM grooms all open mvp issues in one session; Engineer implements one milestone per session (one commit per issue); QA verifies one milestone per session but still posts a verdict comment on every issue and closes only the issues that PASS.
