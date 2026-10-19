@@ -6,7 +6,7 @@ Guests can try/export; accounts add a private saved-look Library.
 
 **MVP engineering is reviewable; extraction quality is not release-approved.**
 See the [release checks and evidence](./_docs/release-checks.md), including #18's
-NO-GO and pending laptop measurements. Estimates cannot recover an exact original
+NO-GO, the current Library startup/upload timing failure, and pending laptop measurements. Estimates cannot recover an exact original
 grade or separate lighting/scene colors reliably.
 
 ## Local setup
@@ -18,7 +18,7 @@ verification. Use the checked-in lockfiles; no external account is needed locall
 ```sh
 git clone https://github.com/bakhytuly07-source/gradematch.git
 cd gradematch/backend
-uv sync --locked
+uv sync --locked --python 3.12
 uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8091
 ```
@@ -33,6 +33,9 @@ VITE_API_URL=http://localhost:8091 npm run dev -- --port 5173 --strictPort
 
 Open **http://localhost:5173**. API docs: **http://localhost:8091/docs**.
 First try generation/export without login, then register to save to the Library.
+After account navigation, wait for authentication restoration before uploading;
+if a selection is lost and Generate remains disabled, select the reference again.
+The current startup/upload timing limitation is recorded in the release checks.
 Do not use production credentials or real user images in disposable test runs.
 
 ## Configuration
@@ -74,13 +77,15 @@ disposable migrated databases; the backend/frontend servers are not needed for
 unit/API suites. Run from the named directories:
 
 ```sh
-# backend/
+# From the repository root:
+cd backend
 uv run pytest
 uv run python ../_docs/check-contract.py
 # Focused contract/API parity coverage:
 uv run pytest tests/test_api.py tests/test_download.py tests/test_render.py
 
-# frontend/
+# Switch from backend/ to frontend/:
+cd ../frontend
 npm test
 npx tsc --noEmit
 # Focused upload regressions:
@@ -89,12 +94,21 @@ npm test -- src/test/reference-upload.test.tsx src/services/file.test.ts
 VITE_API_URL=http://localhost:8091 npm run build
 ```
 
+Focused auth/account regressions, from `frontend/`:
+
+```sh
+npm test -- src/services/session.test.ts src/test/studio-session.test.tsx
+```
+
 Expected: all tests pass, contract check prints PASS, TypeScript exits zero, build
 completes. Current results and pending manual checks are recorded in
 [release-checks.md](./_docs/release-checks.md). Browser scenarios require an
 existing Playwright installation and `/usr/bin/chromium`; they are optional
 integration tooling, not project dependencies. See
-[real browser reproduction](./backend/integration/README.md).
+[real browser reproduction](./backend/integration/README.md). The current
+[verification run](./_docs/release-checks.md#current-verification-run) records
+commands, results and artifact locations. Browse the [documentation index](./_docs/README.md)
+for the contract audit and release evidence.
 
 ## Data and color limits
 

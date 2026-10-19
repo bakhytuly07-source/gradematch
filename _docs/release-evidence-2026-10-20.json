@@ -1,0 +1,122 @@
+{
+  "recorded_at": "2026-10-19T20:40:04.191451+00:00",
+  "source_commit": "dc31343b520f3c02002c43559b5b8e17cc32b6b2",
+  "python": "3.12.14",
+  "node": "v24.19.0",
+  "npm": "11.9.0",
+  "os": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "tests": {
+    "frontend_full": 51,
+    "frontend_upload_focused": 11,
+    "frontend_auth_studio_focused": 15,
+    "backend_full": 168,
+    "backend_api_render_download_focused": 41,
+    "typescript": "PASS",
+    "production_build": "PASS",
+    "contract_audit": "PASS: 13 mappings, 68 refs, 13 schemas"
+  },
+  "setup": {
+    "locked_dependency_install": "PASS",
+    "disposable_migration_twice": "PASS",
+    "frontend_5173_html": "PASS",
+    "api_8091_openapi_guest_generate_auth_cors": "PASS"
+  },
+  "guest": {
+    "host": "AMD EPYC 9V45 96-Core Processor",
+    "browser": "154.0.8037.57",
+    "method": "Headless Chromium UI, real HTTP backend, 15MiB padded JPEG; preview includes control debounce, HTTP and enabled current export. Cloud hardware, not laptop qualification.",
+    "generate_ms": 207,
+    "preview_ms": [
+      191,
+      169,
+      173,
+      171
+    ],
+    "settings": {
+      "styleParams": {
+        "id": "2349c1cfe5a4e497182e6e59",
+        "shadowTint": [
+          0.49909716054297387,
+          0.4982668449525294,
+          0.5026359945044967
+        ],
+        "highlightTint": [
+          0.5005081488237071,
+          0.4982855618043859,
+          0.501206289371907
+        ],
+        "baseSaturation": 0.9164491033459323
+      },
+      "adjustments": {
+        "intensity": 81,
+        "contrast": 1,
+        "saturation": 1,
+        "warmth": 3
+      }
+    },
+    "cube_samples": 107811,
+    "float32_cube_matches": true,
+    "image_exports": {
+      "PNG": {
+        "width": 1024,
+        "height": 1280,
+        "mean_absolute_channel_error": 0
+      },
+      "JPEG": {
+        "width": 1024,
+        "height": 1280,
+        "mean_absolute_channel_error": 0.4386768341064453
+      }
+    },
+    "guest_created_no_library_records": true,
+    "page_errors": []
+  },
+  "image_dimensions": {
+    "backend/evaluation/reference-neutral.jpg": [
+      1024,
+      1280
+    ],
+    "frontend/src/assets/sample-portrait.jpg": [
+      1024,
+      1280
+    ]
+  },
+  "generation_reference_bytes": 15728640,
+  "library_unmodified": {
+    "status": "FAIL",
+    "reason": "Generate remained disabled after early upload during Studio auth restoration; timed out before generation."
+  },
+  "qualification": "Cloud development server, single run; not laptop, production deployment or cross-browser qualification.",
+  "library_auth_ready_diagnostic": {
+    "status": "PASS",
+    "method": "Copy of library.cjs in work/, absolute repository root; after Studio navigation wait for Generate control to mount and await service.getMe() before selecting a reference. Original runner remains unchanged.",
+    "results": {
+      "recorded_at": "2026-10-19T20:40:43.055Z",
+      "browser": "154.0.8037.57",
+      "registration_login_reload_logout": true,
+      "logout_401_clears": true,
+      "six_library_operations": true,
+      "thumbnail_dimensions": [
+        205,
+        256
+      ],
+      "restored_four_adjustments": {
+        "intensity": 81,
+        "contrast": 1,
+        "saturation": 1,
+        "warmth": 1
+      },
+      "saved_cube_float32_parity": true,
+      "blank_rename_rejected": true,
+      "foreign_and_missing_errors_equal": true,
+      "delete_preserved_other_record": true,
+      "signed_out_library_requests_login": true,
+      "page_errors": []
+    }
+  },
+  "studio_session": {
+    "status": "PASS",
+    "method": "Unmodified backend/integration/studio-session.cjs; real migrated backend and Chromium account switch",
+    "output": "PASS: real migrated API / Chromium account switch discards private Studio settings"
+  }
+}
