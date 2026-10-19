@@ -8,14 +8,17 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .cube import write_cube
 from .errors import ApiError
-from .models import new_id
+from .extraction import extract_style
 from .schemas import LutSettings, StyleParams
 
 MAX_BYTES = 15 * 1024 * 1024
 FORMATS = {"JPEG", "PNG", "WEBP"}
+MAX_PIXELS = 24_000_000
 
 
 def decode_image(data: bytes) -> Image.Image:
+    if len(data) > MAX_BYTES:
+        raise ApiError(413, "Reference image exceeds 15 MB.")
     if not data:
         raise ApiError(422, "Image is empty or unreadable.")
     supported = data.startswith(b"\xff\xd8\xff") or data.startswith(b"\x89PNG\r\n\x1a\n") or (
@@ -29,6 +32,10 @@ def decode_image(data: bytes) -> Image.Image:
             with Image.open(BytesIO(data)) as image:
                 if image.format not in FORMATS:
                     raise ApiError(415, "Use JPEG, PNG or WebP.")
+                if image.width * image.height > MAX_PIXELS:
+                    raise ApiError(422, "Decoded image exceeds 24 megapixels.")
+                image.verify()
+            with Image.open(BytesIO(data)) as image:
                 image.load()
                 return ImageOps.exif_transpose(image).convert("RGB")
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError, Image.DecompressionBombWarning):
@@ -58,19 +65,9 @@ def normalize_thumbnail(value: str) -> str:
 
 
 def analyze(data: bytes) -> StyleParams:
-    image = decode_image(data)
-    image.thumbnail((1024, 1024))
-    pixels = np.asarray(image, dtype=np.float64).reshape(-1, 3) / 255
-    luminance = pixels @ np.array([0.2126, 0.7152, 0.0722])
-    low, high = np.quantile(luminance, [0.25, 0.75])
-    shadows = pixels[luminance <= low].mean(axis=0)
-    highlights = pixels[luminance >= high].mean(axis=0)
-    # Estimate relative channel balance, rather than using absolute brightness as tint.
-    shadows = np.clip(0.5 + shadows - shadows.mean(), 0, 1)
-    highlights = np.clip(0.5 + highlights - highlights.mean(), 0, 1)
-    chroma = np.mean(pixels.max(axis=1) - pixels.min(axis=1))
-    return StyleParams(id=new_id(), shadowTint=shadows.tolist(), highlightTint=highlights.tolist(),
-                       baseSaturation=float(np.clip(0.8 + chroma, 0.8, 1.5)))
+    # Evaluated conservative v2 estimate; #18 documents unresolved quality limits.
+    with decode_image(data) as image:
+        return extract_style(image)
 
 
 def build_lut(settings: LutSettings | dict) -> np.ndarray:

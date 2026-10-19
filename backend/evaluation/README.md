@@ -145,3 +145,12 @@ complete generation/control-to-preview measurements on laptop hardware.
 
 Unit tests protect determinism, bounds, analysis size and the achromatic control;
 they do not label failed photographic transfers as passing quality tests.
+
+## Authorized continuation after this experiment
+
+The user explicitly instructed continued implementation of the remaining M3
+issues after reviewing this no-go. #23 now integrates the conservative v2
+neutral-anchor prototype as an estimate; the calibrated v3 remains experimental.
+This supersedes the historical statement above that production is unchanged,
+and the pause on later issues. It does not establish extraction quality or
+laptop performance; the evidence and NO-GO findings above remain applicable.

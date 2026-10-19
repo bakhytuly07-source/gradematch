@@ -1,0 +1,17 @@
+{
+  "host": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "cpu": "model name\t: INTEL(R) XEON(R) PLATINUM 8573C",
+  "input_dimensions": [
+    4000,
+    3000
+  ],
+  "bytes": 15728640,
+  "endpoint_ms": [
+    541.9333670000697,
+    449.0910439999425,
+    455.4236859999037,
+    451.5872900000204,
+    444.90456500000164
+  ],
+  "method": "TestClient ASGI multipart request to response; padded synthetic JPEG; cloud host, not laptop qualification"
+}

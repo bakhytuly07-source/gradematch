@@ -81,3 +81,13 @@ intensity with the other controls zero is exact identity on the 1/32 grid;
 other comparisons permit float32 rounding (absolute tolerance 1e-7).
 The render and .cube paths both use this builder. Extraction quality remains
 limited as documented in evaluation/README.md; the user authorized proceeding.
+
+## Generation limits (#23)
+
+Uploads are bounded to 15,728,640 bytes, with at most 1 MiB of multipart overhead,
+and 24 million decoded pixels. JPEG/PNG/WebP signatures and decoded contents are
+verified; malformed or incomplete multipart is rejected and all handles close on
+failure. The analysis copy is orientation-correct and at most 1024 px. Generation
+uses the conservative v2 neutral-anchor estimate evaluated under #18. The user
+explicitly authorized continued engineering despite its documented NO-GO;
+convincing photographic grade recovery and laptop qualification remain unproven.

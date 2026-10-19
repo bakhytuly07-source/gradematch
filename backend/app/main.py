@@ -85,6 +85,21 @@ class MemoryMultipartParser(MultiPartParser):
     # The bounded stream below rejects oversized requests before this threshold.
     # Starlette's default 1MB spool would otherwise write uploaded originals to disk.
     spool_max_size = MAX_BYTES + 1024 * 1024 + 1
+    complete = False
+
+    def on_part_begin(self):
+        super().on_part_begin()
+        self.file_bytes = 0
+
+    def on_part_data(self, data, start, end):
+        if self._current_part.file is not None:
+            self.file_bytes += end - start
+            if self.file_bytes > MAX_BYTES:
+                raise MultiPartException("too_large")
+        super().on_part_data(data, start, end)
+
+    def on_end(self):
+        self.complete = True
 
 
 @app.post("/api/generate", response_model=schemas.StyleParams, operation_id="generateLook", openapi_extra={
@@ -113,6 +128,8 @@ async def generate(request: Request):
             raise ApiError(413, "Reference image exceeds 15 MB.") from None
         raise ApiError(422, "Missing or malformed referenceFile upload.") from None
     try:
+        if not parser.complete:
+            raise ApiError(422, "Incomplete multipart upload.")
         upload = form.get("referenceFile")
         if not isinstance(upload, UploadFile):
             raise ApiError(422, "Missing referenceFile upload.")
@@ -122,6 +139,9 @@ async def generate(request: Request):
         return await run_in_threadpool(analyze, data)
     finally:
         await form.close()
+        # Incomplete parts may have a handle without an entry in FormData.
+        for file in parser._files_to_close_on_error:
+            file.close()
 
 
 @app.post("/api/render-lut", response_model=schemas.LutData, operation_id="renderLut")
