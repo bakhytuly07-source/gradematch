@@ -70,23 +70,23 @@ Label: mvp
 Goal: Keep the mock service a dependable frontend test boundary.
 Description: Extend frontend/src/services/services.test.ts with duplicate accounts, cross-user access and immutable returned-look checks. Use zero injected latency and verify logout removes access to private Library actions.
 
-## 13. Establish the 13-operation OpenAPI contract
+## 13. Audit the 13-operation OpenAPI contract
 Milestone: M2
 Label: mvp
-Goal: Define the missing root openapi.yaml from the service interface.
-Description: Inventory all 13 GradeMatchService methods and map each to an explicit operationId, HTTP method and route. Document any client-only logout behavior and choose its API operation deliberately so the contract covers all 13 operations.
+Goal: Verify root openapi.yaml covers the existing service interface.
+Description: Audit all 13 GradeMatchService operationIds against their existing /api routes, HTTP methods and security requirements in openapi.yaml. Verify POST /api/auth/logout revokes the current bearer token and document that the client clears its token even after a 401.
 
 ## 14. Specify API schemas and field conventions
 Milestone: M2
 Label: mvp
 Goal: Make wire payloads unambiguous for both implementations.
-Description: Define snake_case user, style, adjustment, look and auth schemas including access_token and timestamp representations. Specify numeric ranges, defaults, favorite semantics and the exact red-fastest 33-cubed LUT array layout.
+Description: Audit the existing Look response snake_case fields, required updated_at, epoch-millisecond timestamps and AuthResult access_token envelope. Verify camelCase SaveLookInput and nested StyleParams remain unchanged, adjustment ranges match the service and LUT samples use the specified red-fastest layout.
 
 ## 15. Specify uploads, downloads and API errors
 Milestone: M2
 Label: mvp
 Goal: Describe binary transfers and failure behavior in the contract.
-Description: Define multipart reference uploads, the 15 MB limit, JPEG/PNG/WebP signatures and text .cube download responses. Specify bearer security, owner-scoped 404s, validation errors and getMe 401 without restricting guest color operations.
+Description: Audit multipart referenceFile uploads, the inclusive 15728640-byte limit, image signatures and text .cube download responses in openapi.yaml. Verify shared Error bodies, owner-scoped 404s, getMe 401, save-name defaults, empty thumbnail allowance and exact float32 export round trips.
 
 ## 16. Validate contract examples against services
 Milestone: M2
@@ -110,7 +110,7 @@ Description: Build a small deterministic analyzer and 33-cubed LUT prototype, th
 Milestone: M3
 Label: mvp
 Goal: Export the same numeric transformation used for preview.
-Description: Implement a pure red-fastest .cube writer with title, size and domain headers for 33 x 33 x 33 data. Check 35937 rows, finite bounded channels and identity round-trip fixtures before adding endpoints.
+Description: Implement a pure red-fastest .cube writer with title, size and domain headers for 33 x 33 x 33 data. Check 35937 rows, finite bounded channels and lossless float32 round-trip precision against renderLut before adding endpoints.
 
 ## 20. Define validated backend request models
 Milestone: M3
@@ -176,7 +176,7 @@ Description: Add shared bearer validation and implement getMe plus the contracte
 Milestone: M3
 Label: mvp
 Goal: Save only explicitly requested Library data.
-Description: Implement saveLook for authenticated users in an in-memory owner-scoped repository. Store numeric style parameters, adjustments and a validated 256 px JPEG thumbnail only, rejecting full-size or malformed thumbnail payloads.
+Description: Implement saveLook for authenticated users in an in-memory owner-scoped repository. Store numeric style parameters, adjustments and a validated 256 px longest-side JPEG data URL only, allowing an empty thumbnail and defaulting a blank name to Untitled look as contracted.
 
 ## 31. Implement listLooks operation
 Milestone: M3
@@ -200,7 +200,7 @@ Description: Implement the contracted renameLook operation with trimmed nonempty
 Milestone: M3
 Label: mvp
 Goal: Update an owned look’s favorite status.
-Description: Implement toggleFavorite according to the contract’s toggle or explicit-state semantics. Test repeated requests and owner isolation while preserving all other saved fields.
+Description: Implement POST /api/looks/{id}/favorite as an atomic inversion of is_favorite with an updated updated_at timestamp and no request body. Test repeated requests and owner isolation while preserving other fields and document that automatic retries are unsafe.
 
 ## 35. Implement deleteLook operation
 Milestone: M3
@@ -296,7 +296,7 @@ Description: Implement a GradeMatchService HTTP adapter for all contracted opera
 Milestone: M5
 Label: mvp
 Goal: Preserve the existing frontend model interface.
-Description: Add explicit request and response conversions for style_params, base_saturation, tint channels, is_favorite and timestamps as contracted. Test both directions and convert LUT arrays to Float32Array without altering sample ordering.
+Description: Map Look response style_params, thumbnail_url, is_favorite and created_at into styleParams, thumbnail, favorite and createdAt while handling required updated_at explicitly. Preserve camelCase SaveLookInput and nested StyleParams, test both directions and convert LUT arrays to Float32Array without changing ordering.
 
 ## 51. Use File instead of FileLike in generateLook
 Milestone: M5
@@ -308,7 +308,7 @@ Description: Change generateLook to accept browser File across the shared interf
 Milestone: M5
 Label: mvp
 Goal: Keep API authentication consistent across reloads.
-Description: Consume register and login auth envelopes, store access_token using the documented browser storage strategy and attach Bearer headers centrally. Restore user state on reload and clear the stored token and auth notification state on logout.
+Description: Consume register and login auth envelopes, store access_token using the documented browser storage strategy and attach Bearer headers centrally. Restore user state on reload and clear the stored token and auth notification state on logout even when server revocation returns 401.
 
 ## 53. Map getMe 401 to null
 Milestone: M5
@@ -332,7 +332,7 @@ Description: Exercise real generateLook, renderLut and downloadLutCube from the 
 Milestone: M5
 Label: mvp
 Goal: Make saved-look workflows survive browser reloads.
-Description: Exercise registration, login, logout and all seven Library actions through the real adapter. Verify owner isolation, favorites, rename, deletion and reopening a look on a new target with saved adjustments.
+Description: Exercise registration, login, logout and all six Library operations plus saved-settings LUT download through the real adapter. Verify owner isolation, favorites, rename, deletion and reopening a look on a new target with saved adjustments.
 
 ## 57. Complete backend-LUT preview and image export rendering
 Milestone: M5
