@@ -469,6 +469,7 @@ components:
           description: Base saturation multiplier; the TypeScript contract specifies no range.
     Adjustments:
       type: object
+      additionalProperties: false
       required:
       - intensity
       - contrast

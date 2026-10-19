@@ -51,6 +51,12 @@ class StyleParams(Schema):
 
 
 class Adjustments(Schema):
+    model_config = ConfigDict(extra="forbid")
+
+    @classmethod
+    def defaults(cls):
+        return cls(intensity=80, contrast=0, saturation=0, warmth=0)
+
     intensity: float = Field(ge=0, le=100)
     contrast: float = Field(ge=-50, le=50)
     saturation: float = Field(ge=-50, le=50)

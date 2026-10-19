@@ -67,3 +67,17 @@ The supported engineering runtime is Python 3.12. `uv sync --locked` installs th
 reproducible environment. `uv run pytest tests/test_startup.py` exercises ASGI
 startup and shutdown without database access. The existing product routes and ORM
 implementation from main are retained; the smoke test does not require migrations.
+
+## LUT composition (#22)
+
+One builder validates settings, constructs a B/G/R grid (red changes fastest),
+adds luminance-weighted shadow/highlight tint scaled by look intensity, applies
+Rec.709-weighted saturation (style multiplier blended by intensity, then the
+saturation control), contrast about encoded 0.5, and red/blue warmth. It clips
+once and returns float32 SDR sRGB/Rec.709 RGB in 0..1. This is an artistic
+operation on encoded SDR values, not a scene-linear/HDR color transform.
+Default controls are 80/0/0/0; all four are required in API requests. Zero
+intensity with the other controls zero is exact identity on the 1/32 grid;
+other comparisons permit float32 rounding (absolute tolerance 1e-7).
+The render and .cube paths both use this builder. Extraction quality remains
+limited as documented in evaluation/README.md; the user authorized proceeding.

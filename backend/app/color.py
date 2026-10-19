@@ -73,7 +73,10 @@ def analyze(data: bytes) -> StyleParams:
                        baseSaturation=float(np.clip(0.8 + chroma, 0.8, 1.5)))
 
 
-def build_lut(settings: LutSettings) -> np.ndarray:
+def build_lut(settings: LutSettings | dict) -> np.ndarray:
+    # Revalidate model instances too: callers may have mutated their fields.
+    payload = settings.model_dump(by_alias=True) if isinstance(settings, LutSettings) else settings
+    settings = LutSettings.model_validate(payload)
     style, adj = settings.style_params, settings.adjustments
     # Mesh axes are B,G,R, so flattened cube rows change R fastest.
     b, g, r = np.meshgrid(*([np.linspace(0, 1, 33)] * 3), indexing="ij")
@@ -84,8 +87,10 @@ def build_lut(settings: LutSettings) -> np.ndarray:
     rgb += (np.array(style.shadow_tint) - 0.5) * (1 - lum) * 0.25 * k
     rgb += (np.array(style.highlight_tint) - 0.5) * lum * 0.25 * k
     lum = (rgb @ weights)[:, None]
-    sat = (style.base_saturation * k + 1 - k) * (1 + adj.saturation / 50)
-    rgb = lum + (rgb - lum) * sat
+    # longdouble prevents intermediate overflow for the contract's unbounded,
+    # finite baseSaturation. Saturation zero remains achromatic at any style.
+    sat = (np.longdouble(style.base_saturation) * k + 1 - k) * (1 + adj.saturation / 50)
+    rgb = lum.astype(np.longdouble) + (rgb - lum).astype(np.longdouble) * sat
     rgb = (rgb - 0.5) * (1 + adj.contrast / 50) + 0.5
     rgb += np.array([1, 0, -1]) * (adj.warmth / 50) * 0.08
     return np.clip(rgb, 0, 1).astype(np.float32)
