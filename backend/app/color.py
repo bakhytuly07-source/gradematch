@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from .cube import write_cube
 from .errors import ApiError
 from .models import new_id
 from .schemas import LutSettings, StyleParams
@@ -91,6 +92,4 @@ def build_lut(settings: LutSettings) -> np.ndarray:
 
 
 def cube_text(settings: LutSettings) -> str:
-    lut = build_lut(settings)
-    header = 'TITLE "GradeMatch Look"\nLUT_3D_SIZE 33\nDOMAIN_MIN 0.0 0.0 0.0\nDOMAIN_MAX 1.0 1.0 1.0\n'
-    return header + "\n".join(" ".join(format(float(v), ".9g") for v in row) for row in lut) + "\n"
+    return write_cube(build_lut(settings))

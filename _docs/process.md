@@ -53,3 +53,12 @@ To fit the deadline the orchestrator may batch: PM grooms all open mvp issues in
 ## Batched mode (deadline)
 
 To fit the deadline the orchestrator may batch: PM grooms all open mvp issues in one session; Engineer implements one milestone per session (one commit per issue); QA verifies one milestone per session but still posts a verdict comment on every issue and closes only the issues that PASS.
+
+## Authorized M3 continuation (2026-10-19)
+
+The user instructed the Engineer to continue implementing the remaining open M3
+MVP issues after reviewing #18's no-go report. This authorizes proceeding past
+that gate for this batch; it does not turn the failed extraction experiment into
+a pass. Preserve the evidence and limitations, implement in issue-number order,
+write tests and one commit per issue, comment on every addressed issue, leave
+issues open, and push to main at the end.
