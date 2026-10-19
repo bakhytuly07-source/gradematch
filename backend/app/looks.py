@@ -58,3 +58,9 @@ class MemoryLooks:
             look.is_favorite = not look.is_favorite
             look.updated_at = max(self.clock(), look.updated_at + 1)
             return look.model_copy(deep=True)
+
+    def delete(self, owner: str, id: str) -> None:
+        with self._lock:
+            self._owned(owner, id)
+            # Remove the entire saved record, including thumbnail and settings.
+            del self._records[id]

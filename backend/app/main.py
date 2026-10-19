@@ -243,9 +243,13 @@ def toggle_favorite(look: OwnLook, db: Db, token: Token, request: Request):
 
 
 @router.delete("/api/looks/{id}", status_code=204, operation_id="deleteLook")
-def delete_look(look: OwnLook, db: Db):
-    db.delete(look)
-    db.commit()
+def delete_look(look: OwnLook, db: Db, token: Token, request: Request):
+    memory = request.app.state.memory
+    if memory is not None:
+        memory.looks.delete(token.user_id, look.id)
+    else:
+        db.delete(look)
+        db.commit()
     return Response(status_code=204)
 
 
