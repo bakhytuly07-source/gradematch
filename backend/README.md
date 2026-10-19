@@ -114,3 +114,9 @@ On 2026-10-19 the user approved FastAPI, Uvicorn, NumPy, Pillow,
 opencv-python-headless, bcrypt, python-multipart, pytest and HTTPX, including
 uv-locked transitive dependencies. Existing SQLAlchemy/Alembic and contract-test
 dependencies were retained from main; this M3 continuation added no packages.
+
+Each ORM app resolves `DATABASE_URL` when constructed (`create_app(database_url=...)`
+is available for isolated instances). Every request owns a session, closes it on
+completion, and rolls back on exceptions. Writes commit explicitly; an uncommitted
+transaction is discarded when its session closes. Non-SQLite URLs are passed to
+SQLAlchemy unchanged and require an installed driver; no fallback is used.

@@ -284,10 +284,15 @@ def contract_openapi(app: FastAPI):
     return document
 
 
-def create_app(*, storage="memory", users=None, sessions=None, looks=None):
+def create_app(*, storage="memory", users=None, sessions=None, looks=None, database_url=None):
     if storage not in {"memory", "orm"}:
         raise ValueError("storage must be memory or orm")
+    from .database import make_engine
+    from sqlalchemy.orm import sessionmaker
     application = FastAPI(title="GradeMatch API", version="1.0.0")
+    application.state.engine = make_engine(database_url) if storage == "orm" else None
+    application.state.session_factory = (sessionmaker(application.state.engine, expire_on_commit=False)
+                                         if storage == "orm" else None)
     application.state.memory = (SimpleNamespace(
         users=users if users is not None else MemoryUsers(),
         sessions=sessions if sessions is not None else MemorySessions(),

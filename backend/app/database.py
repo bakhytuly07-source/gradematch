@@ -13,11 +13,15 @@ class Base(DeclarativeBase):
 DEFAULT_URL = f"sqlite:///{Path(__file__).resolve().parents[1] / 'gradematch.db'}"
 
 
-def make_engine(url: str):
-    return create_engine(url)
+def database_url():
+    return os.getenv("DATABASE_URL", DEFAULT_URL)
 
 
-engine = make_engine(os.getenv("DATABASE_URL", DEFAULT_URL))
+def make_engine(url: str | None = None):
+    return create_engine(database_url() if url is None else url)
+
+
+engine = make_engine()
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 
@@ -26,5 +30,9 @@ def get_db(request: Request):
     if request.app.state.memory is not None:
         yield None
         return
-    with SessionLocal() as session:
-        yield session
+    with request.app.state.session_factory() as session:
+        try:
+            yield session
+        except BaseException:
+            session.rollback()
+            raise
