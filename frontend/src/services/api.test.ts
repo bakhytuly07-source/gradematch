@@ -58,7 +58,7 @@ describe("ApiService", () => {
         .fn()
         .mockResolvedValueOnce(json({ code: "auth", message: "Expired" }, 401))
         .mockResolvedValueOnce(new Response(null, { status: 204 }))
-        .mockResolvedValueOnce(json({ size: 33, data: [0.1, 0.2, 0.3] }))
+        .mockResolvedValueOnce(json({ size: 33, data: Array.from({length: 107811}, (_, i) => (i % 3) / 10) }))
         .mockResolvedValueOnce(new Response("LUT_3D_SIZE 33")),
     );
     const api = new ApiService();

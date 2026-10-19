@@ -126,3 +126,9 @@ creates the shared ORM schema and is safe to repeat. To rebuild a **disposable**
 database, set its `DATABASE_URL`, run `uv run alembic downgrade base`, then
 `uv run alembic upgrade head`. Downgrading deletes account/Library data. The
 migration environment resolves the URL on every invocation, like the app factory.
+
+Look response mapping requires `updated_at` as epoch milliseconds but deliberately
+omits it from the current UI model; creation ordering uses unchanged `created_at`.
+The adapter validates required response fields, numeric settings and 107,811 LUT
+samples, preserving red-fastest sample order. Nested settings and outbound save
+keys remain camelCase exactly as specified in the contract.

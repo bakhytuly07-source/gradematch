@@ -10,26 +10,8 @@ import {
   type User,
 } from "./types";
 
-interface ApiLook {
-  id: string;
-  name: string;
-  style_params: StyleParams;
-  adjustments: Adjustments;
-  thumbnail_url: string;
-  is_favorite: boolean;
-  created_at: number;
-  updated_at: number;
-}
-
-export const fromApiLook = (look: ApiLook): Look => ({
-  id: look.id,
-  name: look.name,
-  styleParams: look.style_params,
-  adjustments: look.adjustments,
-  thumbnail: look.thumbnail_url,
-  favorite: look.is_favorite,
-  createdAt: look.created_at,
-});
+import { fromApiLook, fromApiLooks, fromApiLut, fromApiStyle } from "./mapping";
+export { fromApiLook } from "./mapping";
 
 export class ApiService implements GradeMatchService {
   private token: string | null = null;
@@ -125,7 +107,7 @@ export class ApiService implements GradeMatchService {
       throw new ServiceError("Choose an actual image file.", "validation");
     const form = new FormData();
     form.append("referenceFile", referenceFile, referenceFile.name);
-    return this.json<StyleParams>("/generate", "POST", undefined, form);
+    return fromApiStyle(await this.json("/generate", "POST", undefined, form));
   }
 
   async renderLut(styleParams: StyleParams, adjustments: Adjustments): Promise<LutData> {
@@ -133,30 +115,30 @@ export class ApiService implements GradeMatchService {
       styleParams,
       adjustments,
     });
-    return { size: lut.size, data: new Float32Array(lut.data) };
+    return fromApiLut(lut);
   }
 
   async saveLook(input: SaveLookInput): Promise<Look> {
-    return fromApiLook(await this.json<ApiLook>("/looks", "POST", input));
+    return fromApiLook(await this.json<unknown>("/looks", "POST", input));
   }
 
   async listLooks(): Promise<Look[]> {
-    return (await this.json<ApiLook[]>("/looks")).map(fromApiLook);
+    return fromApiLooks(await this.json("/looks"));
   }
 
   async getLook(id: string): Promise<Look> {
-    return fromApiLook(await this.json<ApiLook>(`/looks/${encodeURIComponent(id)}`));
+    return fromApiLook(await this.json<unknown>(`/looks/${encodeURIComponent(id)}`));
   }
 
   async renameLook(id: string, name: string): Promise<Look> {
     return fromApiLook(
-      await this.json<ApiLook>(`/looks/${encodeURIComponent(id)}`, "PATCH", { name }),
+      await this.json<unknown>(`/looks/${encodeURIComponent(id)}`, "PATCH", { name }),
     );
   }
 
   async toggleFavorite(id: string): Promise<Look> {
     return fromApiLook(
-      await this.json<ApiLook>(`/looks/${encodeURIComponent(id)}/favorite`, "POST"),
+      await this.json<unknown>(`/looks/${encodeURIComponent(id)}/favorite`, "POST"),
     );
   }
 
