@@ -34,3 +34,23 @@ interface. Mock accounts/Library are in memory only. Actual uploaded originals
 are processed in memory; only explicit authenticated saves persist thumbnail and
 numeric settings. See the root guide for privacy, token lifetime, SDR assumptions
 and the unresolved extraction quality NO-GO.
+
+## Docker
+
+Build and run from the repository root:
+
+```sh
+docker build -t gradematch-frontend --build-arg VITE_API_URL=http://localhost:8091 ./frontend
+docker run --rm -p 3000:3000 gradematch-frontend
+```
+
+Open http://localhost:3000; direct requests to http://localhost:3000/login
+also work. The multi-stage image builds the TanStack Start app with the Nitro
+Node server preset and serves only the generated `.output` using Node 22 as
+a non-root user, listening on `0.0.0.0:3000`.
+
+`VITE_API_URL` is a build-time value and defaults to `http://localhost:8091`
+when `--build-arg` is omitted. Set it to the backend URL reachable by the user's
+browser. Changing it requires rebuilding the image; a runtime environment
+override does not change the bundled value. Configure the backend's
+`CORS_ORIGINS` to allow the frontend origin (locally `http://localhost:3000`).
