@@ -1,21 +1,21 @@
-// Run with the environment's existing Playwright/Chromium; no project dependency.
-// Start real backend (disposable migrated DB) and VITE_API_URL frontend first.
-const {chromium} = require('playwright');
+// Guest workflow against Compose with Playwright-managed Chromium.
+const {launch, prepare, FRONTEND_URL} = require('./support.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const os = require('node:os');
 const root = path.resolve(__dirname, '../..');
 (async () => {
- const browser = await chromium.launch({executablePath:'/usr/bin/chromium', headless:true,args:['--no-sandbox']});
+ const browser = await launch();
  try {
   const page = await browser.newPage({acceptDownloads:true});
   const errors=[]; page.on('pageerror', e => errors.push(e.message));
   let latestLut, latestSettings; const operations=[];
   page.on('request', r => {if(r.url().includes(':8091/api/')) operations.push(r.method()+' '+new URL(r.url()).pathname);});
   page.on('response', async r => {if(r.url().endsWith('/api/render-lut') && r.ok()) {latestLut=await r.json();latestSettings=r.request().postDataJSON();}});
+  await prepare(page);
   const restored=page.waitForResponse(r=>r.url().endsWith('/api/auth/me'));
-  await page.goto('http://localhost:5173', {waitUntil:'domcontentloaded'});
+  await page.goto(FRONTEND_URL, {waitUntil:'domcontentloaded'});
   await restored;
   await page.getByRole('button',{name:'Generate Color Style',exact:true}).waitFor();
   const input = page.locator('input[type=file]').first();
@@ -41,7 +41,12 @@ const root = path.resolve(__dirname, '../..');
   await page.getByAltText('Lake sample').click();
   await page.locator('canvas').first().waitFor();
   await page.getByRole('button',{name:'Side by side',exact:true}).click();
+  assert.equal(await page.locator('figure canvas').count(),2);
+  assert.equal(await page.getByRole('slider',{name:'Before and after divider',exact:true}).count(),0);
   await page.getByRole('button',{name:'Before / after',exact:true}).click();
+  const divider=page.getByRole('slider',{name:'Before and after divider',exact:true});
+  await divider.focus(); await divider.press('ArrowRight');
+  assert.equal(await divider.inputValue(),'51');
   await page.locator('input[type=file]').nth(1).setInputFiles(path.join(root,'frontend/src/assets/sample-portrait.jpg'));
   const previewMs=[];
   for (const label of ['Look intensity','Contrast','Saturation','Warmth']) {
@@ -58,6 +63,7 @@ const root = path.resolve(__dirname, '../..');
   await page.waitForTimeout(400);
   const downloadEvent=page.waitForEvent('download'); await cubeButton.click(); const download=await downloadEvent;
   const cube=fs.readFileSync(await download.path(),'utf8');
+  assert.match(cube, /^LUT_3D_SIZE 33$/m);
   const samples=cube.trim().split('\n').slice(4).flatMap(row=>row.trim().split(/\s+/).map(Number));
   assert.equal(samples.length,107811);
   assert.deepEqual(new Float32Array(samples),new Float32Array(latestLut.data));
@@ -86,7 +92,7 @@ const root = path.resolve(__dirname, '../..');
   assert.ok(previewMs.every(ms => ms <= 300), 'preview target exceeded');
   assert.ok(!operations.some(x=>x==='POST /api/looks'));
   assert.deepEqual(errors,[]);
-  const result={host:os.cpus()[0].model,browser:await browser.version(),method:'Headless Chromium UI, real HTTP backend, 15MiB padded JPEG; preview includes control debounce, HTTP and enabled current export. Cloud hardware, not laptop qualification.',generate_ms:generateMs,preview_ms:previewMs,settings:latestSettings,cube_samples:samples.length,float32_cube_matches:true,image_exports:imageExports,guest_created_no_library_records:true,page_errors:errors};
-  fs.writeFileSync(path.join(__dirname,'guest-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));
+  const result={host:os.cpus()[0].model,browser:await browser.version(),method:'Headless Chromium UI, real HTTP backend, 15MiB padded JPEG; preview includes control debounce, HTTP and enabled current export. Host-specific fixture timing, not general performance qualification.',generate_ms:generateMs,preview_ms:previewMs,settings:latestSettings,cube_samples:samples.length,float32_cube_matches:true,image_exports:imageExports,guest_created_no_library_records:true,page_errors:errors};
+  fs.writeFileSync(path.join(root,'work/e2e/guest-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

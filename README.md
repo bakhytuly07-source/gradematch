@@ -81,6 +81,49 @@ Integration runs preserve database volumes on success and failure, so consecutiv
 runs can use the same database. Stop services afterward with `make down`, which
 also preserves volumes.
 
+## Browser E2E tests against Compose
+
+Requires Docker Compose, Make, Node **22.12+**, `frontend/node_modules` (`cd
+frontend && npm ci`), and the existing external Playwright tooling. No project
+package or lockfile changes are needed. Point Node at an installed Playwright
+package directory (the directory containing `playwright/`):
+
+```sh
+export NODE_PATH=/absolute/path/to/tooling/node_modules
+node "$NODE_PATH/playwright/cli.js" install --no-shell chromium
+# On Linux, install browser system libraries if needed:
+node "$NODE_PATH/playwright/cli.js" install-deps chromium
+make e2e
+```
+
+If no external Playwright installation exists, provision it in a separate tooling
+directory, for example `npm install --prefix /tmp/gradematch-e2e --no-save
+playwright@1.62.1`, then use `/tmp/gradematch-e2e/node_modules` for `NODE_PATH`.
+The CLI and required module must come from that same installation so the managed
+browser revision matches. No machine-specific browser executable is required.
+
+`make e2e` invokes `make up`, waits up to 90 seconds total for
+**http://localhost:3000** and **http://localhost:8091/docs**, then runs guest,
+account/Library, and Studio account-switch scenarios headlessly against the real
+API and Compose database. Override the HTTP readiness budget with
+`E2E_READY_TIMEOUT_MS=120000 make e2e`. The scripts use these fixed Compose URLs.
+
+Success prints `E2E PASS guest`, `E2E PASS library`, `E2E PASS studio-session`, and
+`E2E PASS all scenarios`. Failures exit nonzero with `E2E FAIL <scenario>` and the
+assertion/Playwright call log; unavailable services print `Readiness timeout at
+<URL>`. Missing Playwright or Chromium prints Node's module error or Playwright's
+browser installation instruction. Browsers close in `finally` on assertion
+success/failure. Reports go to ignored `work/e2e/`. Individual scenarios can also
+run with `node backend/integration/guest.cjs` (or `library.cjs` /
+`studio-session.cjs`) after `make up`.
+
+Run twice against the same stack to check repeatability. Each run uses unique
+accounts and deletes their saved looks, including after assertion failure where
+the API remains reachable. Accounts remain because the API has no deletion
+endpoint; failed cleanup is reported and may leave only this run's records.
+Volumes and unrelated data are preserved. Avoid concurrent manual use of the
+stack during E2E. Stop afterward with `make down`.
+
 ## Local setup without Docker
 
 Prerequisites: Git, Python **3.12**, [uv](https://docs.astral.sh/uv/), Node.js
@@ -174,10 +217,8 @@ npm test -- src/services/session.test.ts src/test/studio-session.test.tsx
 
 Expected: all tests pass, contract check prints PASS, TypeScript exits zero, build
 completes. Current results and pending manual checks are recorded in
-[release-checks.md](./_docs/release-checks.md). Browser scenarios require an
-existing Playwright installation and `/usr/bin/chromium`; they are optional
-integration tooling, not project dependencies. See
-[real browser reproduction](./backend/integration/README.md). The current
+[release-checks.md](./_docs/release-checks.md). Browser scenarios run against Compose via `make e2e`; see the setup below and
+[scenario details](./backend/integration/README.md). The current
 [verification run](./_docs/release-checks.md#current-verification-run) records
 commands, results and artifact locations. Browse the [documentation index](./_docs/README.md)
 for the contract audit and release evidence.
