@@ -9,7 +9,43 @@ See the [release checks and evidence](./_docs/release-checks.md), including #18'
 NO-GO, the current Library startup/upload timing failure, and pending laptop measurements. Estimates cannot recover an exact original
 grade or separate lighting/scene colors reliably.
 
-## Local setup
+## Run the whole stack with Docker
+
+Prerequisites: Git and Docker with the Docker Compose plugin (Docker Desktop
+includes both). Start Docker first. Make is optional for the shortcuts below.
+From the repository root, optionally copy the database configuration:
+
+```sh
+cp .env.example .env
+```
+
+Compose works without `.env`: `POSTGRES_DB`, `POSTGRES_USER`, and
+`POSTGRES_PASSWORD` each default to `gradematch`. Edit `.env` to override them
+before the first startup. Use URL-safe values because they are interpolated into
+the backend connection URL. `.env` is ignored by Git. PostgreSQL initializes
+credentials only for a new volume; changing `.env` does not update an existing
+database's credentials.
+
+```sh
+docker compose up --build -d   # make up
+docker compose ps            # make ps
+docker compose logs -f       # make logs (Ctrl-C stops following logs)
+docker compose down          # make down
+```
+
+Open the application at **http://localhost:3000** and API docs at
+**http://localhost:8091/docs**. The three services are PostgreSQL 16 (`db`),
+`backend`, and `frontend`. PostgreSQL is available only inside the Compose
+network. The backend waits for PostgreSQL health, runs migrations, and serves
+the API; the frontend waits for backend health. Allow up to 90 seconds after
+startup for health checks to settle.
+
+Accounts and saved looks persist in the named `postgres_data` volume across
+backend restarts and `docker compose down` / `docker compose up -d`.
+**`docker compose down -v` removes the database volume and all accounts and
+saved looks.** The next startup initializes an empty database.
+
+## Local setup without Docker
 
 Prerequisites: Git, Python **3.12**, [uv](https://docs.astral.sh/uv/), Node.js
 **22.12+** (Node 24 recommended), npm. Node 24.19/npm 11.9 were used for this

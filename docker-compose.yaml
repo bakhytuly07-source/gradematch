@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gradematch}
+      POSTGRES_USER: ${POSTGRES_USER:-gradematch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gradematch}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-gradematch}:${POSTGRES_PASSWORD:-gradematch}@db:5432/${POSTGRES_DB:-gradematch}
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8091:8091"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; response = urllib.request.urlopen('http://localhost:8091/docs', timeout=3); raise SystemExit(0 if response.status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8091
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
