@@ -4,7 +4,7 @@ from urllib.parse import urlsplit
 
 
 def allowed_origins():
-    origins = [value.strip() for value in os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',') if value.strip()]
+    origins = [value.strip() for value in os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:8080').split(',') if value.strip()]
     for origin in origins:
         parsed = urlsplit(origin)
         if (parsed.scheme not in {'http', 'https'} or not parsed.hostname or '*' in origin

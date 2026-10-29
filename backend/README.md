@@ -134,7 +134,7 @@ a padded 15 MiB, 12 MP JPEG on a cloud Xeon, not a laptop or worst-case photo.
 
 ## Frontend adapter and verification
 
-From `frontend/`, `VITE_API_URL=http://localhost:8091 npm run dev -- --port 5173`
+From `frontend/`, `VITE_API_URL=http://localhost:8091 npm run dev -- --port 8080`
 selects the real service; otherwise the existing mock remains. The adapter retains
 its token in tab-scoped sessionStorage, uses bearer headers, converts LutData to Float32Array and maps
 Look snake_case responses to UI camelCase. SaveLookInput, LutSettings and nested
@@ -180,8 +180,10 @@ and server errors remain distinct from signed-out 401. Auth notifications clear
 immediately on logout and stale restoration results cannot restore a former user.
 
 `CORS_ORIGINS` is a comma-separated list of exact HTTP(S) origins (scheme, host,
-optional port, no trailing slash/path). Default: `http://localhost:5173`; start
-Vite with `--port 5173`. Deployment example:
+optional port, no trailing slash/path). When unset, it allows both
+`http://localhost:5173` and `http://localhost:8080`; start Vite with either
+`--port 5173` or `--port 8080`. An explicit environment value replaces the default
+list rather than extending it. Deployment example:
 `CORS_ORIGINS=https://app.example.com,https://preview.example.com`.
 An explicitly empty value denies all browser origins; wildcards are rejected.
 Authorization/Content-Type and GET/POST/PATCH/DELETE are permitted for allowed

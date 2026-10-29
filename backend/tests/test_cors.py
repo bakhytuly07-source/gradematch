@@ -6,7 +6,7 @@ from app.cors import allowed_origins
 
 def test_default_override_and_wildcard_rejection(monkeypatch):
     monkeypatch.delenv('CORS_ORIGINS', raising=False)
-    assert allowed_origins() == ['http://localhost:5173']
+    assert allowed_origins() == ['http://localhost:5173', 'http://localhost:8080']
     for invalid in ['*', 'https://*.example.com', 'https://example.com/path']:
         monkeypatch.setenv('CORS_ORIGINS', invalid)
         with pytest.raises(ValueError):
@@ -39,3 +39,28 @@ def test_preflight_and_error_headers(monkeypatch):
         denied = client.get('/api/auth/me', headers={'Origin':'https://evil.example'})
         assert denied.status_code == 401
         assert 'access-control-allow-origin' not in denied.headers
+
+
+@pytest.mark.parametrize('override', [False, True])
+@pytest.mark.parametrize('origin', ['http://localhost:5173', 'http://localhost:8080',
+                                   'http://localhost:9999', 'https://app.example.com'])
+def test_login_default_and_override_cors(monkeypatch, override, origin):
+    if override:
+        monkeypatch.setenv('CORS_ORIGINS', 'https://app.example.com')
+        assert allowed_origins() == ['https://app.example.com']
+        allowed = origin == 'https://app.example.com'
+    else:
+        monkeypatch.delenv('CORS_ORIGINS', raising=False)
+        allowed = origin in ['http://localhost:5173', 'http://localhost:8080']
+    with TestClient(create_app()) as client:
+        preflight = client.options('/api/auth/login', headers={
+            'Origin': origin,
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'content-type',
+        })
+        assert preflight.status_code == (200 if allowed else 400)
+        assert preflight.headers.get('access-control-allow-origin') == (origin if allowed else None)
+        response = client.post('/api/auth/login', headers={'Origin': origin},
+                               json={'email': 'missing@example.com', 'password': 'wrong-password'})
+        assert response.status_code == 401
+        assert response.headers.get('access-control-allow-origin') == (origin if allowed else None)
