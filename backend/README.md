@@ -29,6 +29,44 @@ Default SQLite path is `backend/gradematch.db`, independent of the working
 directory. Tables are created by migrations, never at application startup.
 Database operations use ORM sessions; ORM regression tests remain in the suite.
 
+## PostgreSQL
+
+The included `psycopg[binary]` driver supports URLs in the form
+`postgresql+psycopg://USER:PASSWORD@HOST:PORT/DATABASE`. SQLite remains the default.
+For a local disposable database, start PostgreSQL with Docker (or create an empty
+database and user with equivalent credentials on your local PostgreSQL server):
+
+```sh
+docker run --detach --rm --name gradematch-postgres \
+  -e POSTGRES_USER=gradematch -e POSTGRES_PASSWORD=gradematch \
+  -e POSTGRES_DB=gradematch -p 127.0.0.1:5432:5432 postgres:16-alpine
+```
+
+Wait until `docker exec gradematch-postgres pg_isready -U gradematch` succeeds.
+From `backend/`, apply migrations and run the ORM API against the same URL:
+
+```sh
+DATABASE_URL=postgresql+psycopg://gradematch:gradematch@localhost:5432/gradematch uv run alembic upgrade head
+DATABASE_URL=postgresql+psycopg://gradematch:gradematch@localhost:5432/gradematch GRADEMATCH_STORAGE=orm uv run uvicorn app.main:app --port 8091
+```
+
+The opt-in integration module requires a separate, empty disposable database.
+Run it on the container above **before** applying application migrations, or use
+another fresh container/database. Tests may reset its data: they apply the actual
+migrations and remove their tables afterward. Existing tables are rejected; never
+point this variable at an application or shared database.
+
+```sh
+TEST_DATABASE_URL=postgresql+psycopg://gradematch:gradematch@localhost:5432/gradematch uv run pytest tests/test_postgres.py
+```
+
+Only `TEST_DATABASE_URL` selects the integration database; an unrelated
+`DATABASE_URL` is ignored by this module. Invalid URLs, connection errors and
+migration failures fail the test. With `TEST_DATABASE_URL` unset, the module is
+collected and skipped without a PostgreSQL connection. The normal `uv run pytest`
+suite requires neither Docker nor PostgreSQL. Remove the disposable container
+with `docker stop gradematch-postgres` when finished.
+
 ## Injection and authentication
 
 `create_app(users=MemoryUsers(), sessions=MemorySessions(...), looks=MemoryLooks(...))`
