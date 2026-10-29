@@ -1,4 +1,4 @@
-.PHONY: up down logs ps
+.PHONY: up down logs ps integration
 
 up:
 	docker compose up --build -d
@@ -11,3 +11,7 @@ logs:
 
 ps:
 	docker compose ps
+
+integration:
+	docker compose up -d --build --wait
+	cd backend && uv run pytest tests_integration

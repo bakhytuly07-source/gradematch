@@ -45,6 +45,42 @@ backend restarts and `docker compose down` / `docker compose up -d`.
 **`docker compose down -v` removes the database volume and all accounts and
 saved looks.** The next startup initializes an empty database.
 
+## Docker integration tests
+
+From the repository root, run `make up` to start the stack, or run the complete
+build, health wait, and HTTP integration suite with:
+
+```sh
+make integration
+```
+
+This requires the local Python/uv dependencies as well as Docker. Startup or test
+failures return a nonzero exit code. To run only the suite against a running stack:
+
+```sh
+cd backend
+uv run pytest tests_integration
+# Optional HTTP target overrides (these are the defaults):
+BASE_URL=http://localhost:8091 FRONTEND_URL=http://localhost:3000 uv run pytest tests_integration
+```
+
+`BASE_URL` changes the API target; `FRONTEND_URL` changes the frontend target.
+A shared readiness gate fails within 10 seconds when services are unavailable,
+printing `Integration stack unavailable` and an instruction to run `make up`.
+Default `uv run pytest` collects only `tests/`, excluding integration scenarios.
+
+The suite checks real HTTP services and uses local Compose for a read-only
+Postgres registration check and a backend restart. Overrides must therefore point
+to that same Compose stack. The persistence test restarts the backend, waits for
+health, and checks the saved look with the original token. Avoid concurrent work
+against this stack while it runs. Each account uses a unique email; tests delete
+their own saved looks and revoke tokens where practical. Test accounts remain
+because the API has no account deletion endpoint.
+
+Integration runs preserve database volumes on success and failure, so consecutive
+runs can use the same database. Stop services afterward with `make down`, which
+also preserves volumes.
+
 ## Local setup without Docker
 
 Prerequisites: Git, Python **3.12**, [uv](https://docs.astral.sh/uv/), Node.js
