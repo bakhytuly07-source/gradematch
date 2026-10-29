@@ -67,6 +67,82 @@ collected and skipped without a PostgreSQL connection. The normal `uv run pytest
 suite requires neither Docker nor PostgreSQL. Remove the disposable container
 with `docker stop gradematch-postgres` when finished.
 
+## Backend Docker image
+
+Build from the repository root:
+
+```sh
+docker build -t gradematch-backend ./backend
+```
+
+The Python 3.12 slim image installs locked production dependencies into
+`/opt/venv` and runs as UID 10001. Only runtime source, migration files and
+locked dependency inputs are copied. Tests, uploads, local environments,
+databases and `.env` files are excluded.
+
+Prerequisites: Docker and a running Postgres instance with an existing database
+and user, and port 5432 published to the host. The disposable Postgres example
+above can be used, or use your existing container. Wait for `pg_isready` first.
+Replace the placeholders below; URL-encode special characters in credentials:
+
+```sh
+export DATABASE_URL='postgresql+psycopg://<user>:<password>@host.docker.internal:5432/<database>'
+export CORS_ORIGINS='http://localhost:8080'
+docker run --detach --name gradematch-backend -p 8091:8091 \
+  -e DATABASE_URL -e CORS_ORIGINS -e GRADEMATCH_STORAGE=orm \
+  gradematch-backend
+```
+
+Docker Desktop provides `host.docker.internal`. On Linux Docker Engine, add
+`--add-host=host.docker.internal:host-gateway` to the run command and ensure
+Postgres's published port is reachable from that gateway (a loopback-only bind
+may need changing). Postgres must accept connections from Docker's network.
+
+All deployment configuration is supplied at runtime: `DATABASE_URL` selects the
+external writable database, `CORS_ORIGINS` selects exact allowed browser origins,
+and `GRADEMATCH_STORAGE=orm` explicitly selects persistence. Change the database
+or allowed origins by recreating the container with new environment values;
+no rebuild is needed. Do not put credentials in the image or build arguments.
+The root-owned application directory is intentionally not writable by the server.
+
+Each startup runs `alembic upgrade head` before starting Uvicorn on
+`0.0.0.0:8091`. Migration failure exits non-zero and prevents serving.
+Restarting against an already migrated database is safe. The server runs through
+`exec` so it receives container stop signals directly.
+
+Verify startup, registration and browser access:
+
+```sh
+docker logs gradematch-backend
+curl --fail http://localhost:8091/docs
+# Use a fresh email for each run; replace the password placeholder.
+curl --fail-with-body -i http://localhost:8091/api/auth/register \
+  -H 'Content-Type: application/json' -H "Origin: $CORS_ORIGINS" \
+  --data '{"email":"docker-check@example.com","password":"<unique-password>"}'
+```
+
+Expect HTTP 200 for `/docs`, HTTP 201 for registration, and
+`Access-Control-Allow-Origin: http://localhost:8080`. If several origins are
+configured, send just one matching origin in the request header. Confirm a row
+in the same Postgres database using the ORM without printing credentials:
+
+```sh
+docker exec -i gradematch-backend python - <<'PY'
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from app.database import make_engine
+from app.models import User
+with Session(make_engine()) as session:
+    user = session.scalar(select(User).where(User.email == "docker-check@example.com"))
+    assert user is not None
+    print(user.id, user.email)
+PY
+
+docker restart gradematch-backend
+# Wait for the startup log, then verify /docs again.
+curl --fail http://localhost:8091/docs
+```
+
 ## Injection and authentication
 
 `create_app(users=MemoryUsers(), sessions=MemorySessions(...), looks=MemoryLooks(...))`

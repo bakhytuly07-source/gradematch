@@ -1,0 +1,25 @@
+# Allowlist runtime inputs; uploads and local configuration stay outside.
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!alembic.ini
+!start.sh
+!app/
+!app/**
+!migrations/
+!migrations/**
+**/tests
+**/tests/**
+**/.venv
+**/.venv/**
+**/*.db
+**/.env
+**/.env.*
+**/__pycache__
+**/*.pyc
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.webp
