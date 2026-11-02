@@ -1,5 +1,7 @@
 # GradeMatch
 
+[![CI](https://github.com/bakhytuly07-source/gradematch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bakhytuly07-source/gradematch/actions/workflows/ci.yml?query=branch%3Amain)
+
 Upload a reference photo, estimate its color style, preview it on a target, adjust
 intensity/contrast/saturation/warmth, then export a 33³ `.cube` or PNG/JPEG.
 Guests can try/export; accounts add a private saved-look Library.

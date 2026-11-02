@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --locked
+      - run: uv run pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+      - run: npm run build
+
+  stack:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Unique runner-local network and volume; cleanup removes all CI data.
+      COMPOSE_PROJECT_NAME: ci-${{ github.run_id }}-${{ github.run_attempt }}
+      NODE_PATH: ${{ github.workspace }}/e2e/node_modules
+      E2E_OUTPUT_DIR: ${{ github.workspace }}/work/e2e/test-results
+      # Add HTML alongside the configured list reporter without editing tests.
+      PW_TEST_REPORTER: html
+      PLAYWRIGHT_HTML_OUTPUT_DIR: ${{ github.workspace }}/work/e2e/html-report
+      PLAYWRIGHT_HTML_OPEN: never
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
+      - run: uv sync --locked
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: npm ci
+        working-directory: e2e
+      - run: npx playwright install --with-deps chromium
+        working-directory: e2e
+      - run: docker compose up -d --build --wait
+      - run: make integration
+      - run: make e2e
+      - name: Print stack logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ github.run_id }}-${{ github.run_attempt }}
+          path: work/e2e/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Remove stack and isolated database
+        if: always()
+        run: docker compose down -v
