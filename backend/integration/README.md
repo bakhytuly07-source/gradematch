@@ -91,3 +91,22 @@ On Apple M5 with Playwright 1.62.1 / managed Chromium 151.0.7922.34:
 
 Local run logs: `/tmp/gradematch-94-e2e-first.log` and
 `/tmp/gradematch-94-e2e-second.log`; regenerated reports: `work/e2e/`.
+
+## Feature specs (#96–#101)
+
+Install the approved test runner with `npm ci --prefix e2e`. The existing
+`NODE_PATH` Playwright tooling and managed Chromium are still used by legacy
+scenarios. Feature specs use the same Chromium channel, Compose URL and existing
+reference/sample assets, with fresh Playwright contexts per test.
+
+`make e2e` runs legacy scenarios followed by all `e2e/tests/*.spec.ts` files.
+Select one spec through that same readiness runner:
+
+```sh
+E2E_SPEC=e2e/tests/reference-upload-validation.spec.ts make e2e
+```
+
+Read-only canvas inspection uses CSS canvas selectors because canvases have no
+accessible name. File inputs are scoped to the visible heading's section; no
+application test IDs are needed. Divider coordinate assertions allow one
+percentage point for CSS pixel rounding. Traces on failure go to `work/e2e/`.

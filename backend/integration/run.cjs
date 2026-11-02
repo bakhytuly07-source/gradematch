@@ -20,12 +20,18 @@ async function ready(urls = [FRONTEND_URL, API_URL + "/docs"], timeout = Number(
 async function main() {
   await ready();
   fs.mkdirSync('work/e2e', {recursive:true});
-  for (const name of ['guest', 'library', 'studio-session']) {
+  const filter = process.env.E2E_SPEC;
+  for (const name of filter ? [] : ['guest', 'library', 'studio-session']) {
     console.log(`E2E START ${name}`);
     const result = spawnSync(process.execPath, [`backend/integration/${name}.cjs`], {stdio:'inherit'});
     if (result.error || result.status !== 0) throw new Error(`E2E FAIL ${name}: ${result.error?.message || `exit ${result.status}, signal ${result.signal || 'none'}`}`);
     console.log(`E2E PASS ${name}`);
   }
+  const cli = require.resolve('../../e2e/node_modules/@playwright/test/cli');
+  const args = [cli, 'test', '--config=e2e/playwright.config.ts'];
+  if (filter) args.push(filter);
+  const specs = spawnSync(process.execPath, args, {stdio: 'inherit'});
+  if (specs.error || specs.status !== 0) throw new Error(`E2E FAIL specs: ${specs.error?.message || specs.status}`);
   console.log('E2E PASS all scenarios');
 }
 module.exports = {ready};
