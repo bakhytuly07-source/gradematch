@@ -1,10 +1,12 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ApiService } from './api';
 import { MockService } from './mock';
 import { createSessionService } from './session';
 const user = {id:'u', email:'a@b.co'};
 const json = (data: unknown, status=200) => new Response(JSON.stringify(data), {status});
-afterEach(() => {vi.unstubAllGlobals(); localStorage.clear();});
+// Node's experimental localStorage shadows jsdom's storage on newer Node.
+beforeEach(() => vi.stubGlobal('localStorage', window.sessionStorage));
+afterEach(() => {window.localStorage.clear(); vi.unstubAllGlobals();});
 it('restores a stored token on a new adapter and clears expired sessions', async () => {
   const fetch = vi.fn().mockResolvedValueOnce(json({user, access_token:'secret', token_type:'bearer'}))
     .mockResolvedValueOnce(json(user)).mockResolvedValueOnce(json({code:'auth',message:'Expired'},401));
@@ -14,7 +16,7 @@ it('restores a stored token on a new adapter and clears expired sessions', async
   expect(await reload.getMe()).toEqual(user);
   expect(new Headers(fetch.mock.calls[1]![1].headers).get('Authorization')).toBe('Bearer secret');
   expect(await reload.getMe()).toBeNull();
-  expect(localStorage.length).toBe(0);
+  expect(window.localStorage.length).toBe(0);
 });
 it.each([204,401,500,'offline'])('clears local credentials and auth notifications on logout %s', async status => {
   const fetch = vi.fn().mockResolvedValueOnce(json({user,access_token:'secret',token_type:'bearer'}));
@@ -27,7 +29,7 @@ it.each([204,401,500,'offline'])('clears local credentials and auth notification
   await session.service.login(user.email,'password123');
   await session.service.logout().catch(() => {});
   expect(listener).toHaveBeenLastCalledWith(null);
-  expect(localStorage.length).toBe(0);
+  expect(window.localStorage.length).toBe(0);
   expect(await new ApiService().getMe()).toBeNull();
   expect(new Headers(fetch.mock.calls[2]![1].headers).has('Authorization')).toBe(false);
 });
@@ -56,7 +58,7 @@ it.each(['login', 'register'] as const)('ignores a pending %s result after logou
   complete(json({user, access_token:'late-secret', token_type:'bearer'}));
   await outcome;
   expect(listener).toHaveBeenLastCalledWith(null);
-  expect(localStorage.length).toBe(0);
+  expect(window.localStorage.length).toBe(0);
   expect(await new ApiService().getMe()).toBeNull();
   expect(new Headers(fetch.mock.calls[2]![1].headers).has('Authorization')).toBe(false);
 });
@@ -85,7 +87,7 @@ it('keeps a new login when an earlier logout finishes with 401', async () => {
   const listener = vi.fn(); session.subscribe(listener);
   await session.service.login(user.email,'password123');
   const logout = session.service.logout();
-  expect(localStorage.length).toBe(0);
+  expect(window.localStorage.length).toBe(0);
   await session.service.login(user.email,'password123');
   complete(json({code:'auth',message:'Revoked'},401)); await logout;
   expect(listener).toHaveBeenLastCalledWith(user);

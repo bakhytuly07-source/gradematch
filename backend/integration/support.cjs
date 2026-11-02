@@ -26,7 +26,7 @@ async function launch() {
     try {
       // Revoke still-signed-in UI sessions before opening temporary cleanup sessions.
       for (const context of browser.contexts()) for (const page of context.pages()) {
-        const token = await page.evaluate(api => sessionStorage.getItem(`gradematch.token:${api}`), BROWSER_API_URL).catch(() => null);
+        const token = await page.evaluate(api => localStorage.getItem(`gradematch.token:${api}`), BROWSER_API_URL).catch(() => null);
         if (token) await fetch(API_URL + '/api/auth/logout', {method:'POST', headers:{Authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(10000)});
       }
       for (const credentials of browser.e2eAccounts) {
