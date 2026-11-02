@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import path from 'node:path';
-export const reference = path.resolve('backend/evaluation/reference-neutral.jpg');
+export const reference = path.resolve('e2e/fixtures/reference-warm.jpg');
 export const success = 'Color style ready. Now pick a photo to apply it to.';
 export const section = (page: Page, title: string) => page.locator('section').filter({ has: page.getByRole('heading', { name: new RegExp('^\\d+ ' + title + '$') }) });
 export async function openStudio(page: Page) {
@@ -29,30 +29,40 @@ export async function sample(page: Page, name = 'Lake') {
   await exportsReady(page);
 }
 export const preview = (page: Page) => page.locator('section').filter({ has: page.getByRole('button', { name: 'Before / after', exact: true }) });
+// Hash every pixel to compare full-size samples without transferring millions
+// of numbers through the browser protocol. Samples also quantify color change.
+const summarize = async (c: HTMLCanvasElement) => {
+  const bytes = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data;
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const samples = Array.from({ length: 192 }, (_, i) => bytes[Math.floor(i / 3 * bytes.length / 64 / 4) * 4 + i % 3]);
+  return { width: c.width, height: c.height,
+    data: Array.from(new Uint8Array(digest)).map(v => v.toString(16).padStart(2, '0')).join(''),
+    nonempty: bytes.some((v, i) => i % 4 !== 3 && v > 0), samples };
+};
 export async function pixels(page: Page) {
-  return preview(page).locator('canvas').evaluateAll(nodes => nodes.map(node => {
-    const c = node as HTMLCanvasElement;
-    return { width: c.width, height: c.height, data: Array.from(c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data) };
-  }));
+  return preview(page).locator('canvas').evaluateAll(async (nodes, code) => {
+    const summarize = new Function('return (' + code + ')')();
+    return Promise.all(nodes.map(c => summarize(c)));
+  }, summarize.toString());
 }
 export async function styledPreview(page: Page) {
   await expect(preview(page).getByText('Before', { exact: true })).toBeVisible();
   await expect(preview(page).getByText('After', { exact: true })).toBeVisible();
   await expect.poll(async () => {
     const cs = await pixels(page);
-    return cs.length === 2 && cs.every(c => c.width > 0 && c.height > 0 && c.data.some((v, i) => i % 4 !== 3 && v > 0)) && cs[0].data.some((v, i) => i % 4 !== 3 && Math.abs(v - cs[1].data[i]) > 2);
+    return cs.length === 2 && cs.every(c => c.width > 0 && c.height > 0 && c.nonempty) && cs[0].samples.some((v: number, i: number) => Math.abs(v - cs[1].samples[i]) > 2);
   }).toBe(true);
   return pixels(page);
 }
 export async function sourcePixels(page: Page, src: string) {
-  return page.evaluate(async src => {
+  return page.evaluate(async ({src, code}) => {
     const img = new Image(); img.src = src; await img.decode();
     const c = document.createElement('canvas');
     const scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
     c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
     c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-    return { width: c.width, height: c.height, data: Array.from(c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data) };
-  }, src);
+    return new Function('return (' + code + ')')()(c);
+  }, {src, code: summarize.toString()});
 }
 export async function dragDivider(page: Page, percent: number) {
   const divider = page.getByRole('slider', { name: 'Before and after divider', exact: true });
@@ -84,15 +94,34 @@ export async function expectedStyled(page: Page, src: string, lut: any) {
   const renderer = ts.transpileModule(fs.readFileSync('frontend/src/lib/apply-lut.ts', 'utf8'), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
   }).outputText.replaceAll('export ', '');
-  return page.evaluate(async ({ renderer, src, lut }) => {
+  return page.evaluate(async ({ renderer, src, lut, code }) => {
     const { loadImage, renderToCanvas } = new Function(renderer + ';return {loadImage,renderToCanvas}')();
     lut.data = new Float32Array(lut.data);
     const c = renderToCanvas(await loadImage(src), lut);
-    return { width: c.width, height: c.height, data: Array.from(c.getContext('2d').getImageData(0, 0, c.width, c.height).data) };
-  }, { renderer, src, lut });
+    return new Function('return (' + code + ')')()(c);
+  }, { renderer, src, lut, code: summarize.toString() });
 }
 export function observeLut(page: Page) {
   let latest: any;
   page.on('response', async r => { if (r.url().endsWith('/api/render-lut') && r.ok()) latest = await r.json(); });
   return async () => { await expect.poll(() => !!latest).toBe(true); return latest; };
+}
+export async function fullImages(page: Page, expected: Awaited<ReturnType<typeof pixels>>) {
+  const figures = preview(page).getByRole('figure');
+  await expect(figures).toHaveCount(2);
+  for (const [i, caption] of ['Before', 'After'].entries()) {
+    await expect(figures.nth(i).getByText(caption, { exact: true })).toBeVisible();
+    const canvas = figures.nth(i).locator('canvas');
+    const rendering = await canvas.evaluate(c => {
+      const r = c.getBoundingClientRect(), style = getComputedStyle(c);
+      return { width: r.width, height: r.height, clip: style.clipPath, objectFit: style.objectFit };
+    });
+    expect(rendering.clip).toBe('none');
+    expect(rendering.objectFit).not.toBe('cover');
+    expect(Math.abs(rendering.width / rendering.height - expected[i].width / expected[i].height)).toBeLessThan(0.01);
+  }
+  expect(await pixels(page)).toEqual(expected);
+  const left = await figures.nth(0).boundingBox(), right = await figures.nth(1).boundingBox();
+  expect(left!.x + left!.width).toBeLessThanOrEqual(right!.x);
+  expect(Math.abs(left!.y - right!.y)).toBeLessThan(2);
 }
