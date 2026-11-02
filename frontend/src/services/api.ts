@@ -24,7 +24,7 @@ export class ApiService implements GradeMatchService {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.tokenKey = `gradematch.token:${this.baseUrl}`;
     try {
-      this.storage = storage === undefined ? (typeof window === "undefined" ? null : window.sessionStorage) : storage;
+      this.storage = storage === undefined ? (typeof window === "undefined" ? null : window.localStorage) : storage;
       this.token = this.storage?.getItem(this.tokenKey) ?? null;
     } catch { this.storage = null; }
   }

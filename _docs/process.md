@@ -74,3 +74,13 @@ assertions intact; leave #95 open for QA.
 The #95 browser check also requires a path-independent root SPA shell: render
 session/navigation UI on the client so direct `/login` and `/library` loads do
 not hydrate markup prerendered for `/`.
+
+## Authorized E2E QA blocker fixes (2026-11-02)
+
+The user authorized the Engineer to fix #112's frontend auth persistence if
+needed and add #116–#118's missing specs. Sessions must restore in an independent
+new tab in the same browser context; browser local storage holds the bearer
+token until logout or expiry. Use the user-requested `favorite-a-look.spec.ts`
+and `delete-a-look.spec.ts` filenames despite the older issue filenames. Run
+each affected spec alone and two full E2E runs, push to main, comment on all
+four issues, and leave them open for QA.
