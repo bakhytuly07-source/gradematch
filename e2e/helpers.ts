@@ -71,7 +71,8 @@ export async function dragDivider(page: Page, percent: number) {
   const start = Number(await divider.inputValue());
   await page.mouse.move(box.x + box.width * start / 100, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width * percent / 100, box.y + box.height / 2, { steps: 10 });
+  const edgeOffset = percent === 0 ? -10 : percent === 100 ? 10 : 0;
+  await page.mouse.move(box.x + box.width * percent / 100 + edgeOffset, box.y + box.height / 2, { steps: 10 });
   await page.mouse.up();
   // Pointer coordinates round to CSS pixels; allow one percentage point.
   await expect.poll(async () => Math.abs(Number(await divider.inputValue()) - percent)).toBeLessThanOrEqual(1);
