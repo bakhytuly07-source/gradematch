@@ -63,7 +63,7 @@ and its current [Blueprint reference](https://render.com/docs/blueprint-spec).
 | `key` | `DATABASE_URL`, existing backend configuration key. |
 | `fromDatabase` | Reference to the managed Postgres resource. |
 | `fromDatabase.name` | `gradematch-db`, matches the database resource. |
-| `property` | `connectionString`, private connection URL. |
+| `property` | `connectionString`, private connection URL. `internalConnectionString` is not a supported Blueprint property. |
 | `databases` | One PostgreSQL instance. |
 | `databases[].name` | `gradematch-db`, unique resource name. |
 | `databases[].plan` | `free`, supported database compute plan. |
