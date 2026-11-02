@@ -13,12 +13,19 @@ class Base(DeclarativeBase):
 DEFAULT_URL = f"sqlite:///{Path(__file__).resolve().parents[1] / 'gradematch.db'}"
 
 
+def normalize_database_url(url: str) -> str:
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
 def database_url():
-    return os.getenv("DATABASE_URL", DEFAULT_URL)
+    return normalize_database_url(os.getenv("DATABASE_URL", DEFAULT_URL))
 
 
 def make_engine(url: str | None = None):
-    return create_engine(database_url() if url is None else url)
+    return create_engine(database_url() if url is None else normalize_database_url(url))
 
 
 engine = make_engine()

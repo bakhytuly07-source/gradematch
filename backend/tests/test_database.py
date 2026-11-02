@@ -20,7 +20,7 @@ def test_urls(tmp_path, monkeypatch):
     engine.dispose()
     with patch('app.database.create_engine') as create:
         make_engine('postgresql://localhost/example')
-        create.assert_called_once_with('postgresql://localhost/example')
+        create.assert_called_once_with('postgresql+psycopg://localhost/example')
 
 
 def test_request_sessions_rollback_and_close(tmp_path):
@@ -46,3 +46,20 @@ def test_request_sessions_rollback_and_close(tmp_path):
     with app.state.session_factory() as db:
         assert list(db.scalars(select(User.email))) == ['ok@example.com']
     app.state.engine.dispose()
+
+
+@pytest.mark.parametrize("prefix,expected", [
+    ("postgres", "postgresql+psycopg"),
+    ("postgresql", "postgresql+psycopg"),
+    ("postgresql+psycopg", "postgresql+psycopg"),
+    ("postgresql+other", "postgresql+other"),
+    ("sqlite", "sqlite"),
+])
+def test_database_url_normalization(prefix, expected, monkeypatch):
+    # Deliberately synthetic URL suffix; verify exact preservation, no parsing.
+    suffix = "://placeholder%40user:placeholder%2Fvalue@host.invalid/db?sslmode=require"
+    monkeypatch.setenv("DATABASE_URL", prefix + suffix)
+    assert database_url() == expected + suffix
+    with patch("app.database.create_engine") as create:
+        make_engine()
+        create.assert_called_once_with(expected + suffix)

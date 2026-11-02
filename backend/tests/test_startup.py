@@ -15,6 +15,7 @@ def test_entrypoint_migration_gate_and_port(tmp_path):
 
     calls = tmp_path / 'calls'
     for name, body in {
+        'python': 'echo "readiness $*" >> "$CALLS"; exit "${READINESS_EXIT:-0}"',
         'alembic': 'echo "alembic $*" >> "$CALLS"; exit "${MIGRATION_EXIT:-0}"',
         'uvicorn': 'echo "uvicorn $*" >> "$CALLS"',
     }.items():
@@ -30,8 +31,13 @@ def test_entrypoint_migration_gate_and_port(tmp_path):
         result = subprocess.run(['/bin/sh', str(script)], env=env)
         assert result.returncode == 0
         assert calls.read_text().splitlines() == [
-            'alembic upgrade head', f'uvicorn app.main:app --host 0.0.0.0 --port {port or "8091"}']
+            'readiness -m app.readiness', 'alembic upgrade head', f'uvicorn app.main:app --host 0.0.0.0 --port {port or "8091"}']
         calls.unlink()
     result = subprocess.run(['/bin/sh', str(script)], env={**env, 'MIGRATION_EXIT': '7'})
     assert result.returncode == 7
-    assert calls.read_text().splitlines() == ['alembic upgrade head']
+    assert calls.read_text().splitlines() == ['readiness -m app.readiness', 'alembic upgrade head']
+
+    calls.unlink()
+    result = subprocess.run(['/bin/sh', str(script)], env={**env, 'READINESS_EXIT': '1'})
+    assert result.returncode == 1
+    assert calls.read_text().splitlines() == ['readiness -m app.readiness']
