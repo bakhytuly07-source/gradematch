@@ -11,7 +11,7 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: gradematch-db
-          property: connectionString
+          property: internalConnectionString
 
 databases:
   - name: gradematch-db
