@@ -47,7 +47,8 @@ it('restores the same owner draft after auth restoration, without rendering it w
   state.getLook.mockResolvedValue(privateLook);
   const first=mount(); await waitFor(() => expect(warmth()).toBe('41'));
   first.unmount();state.look='';state.me=undefined;
-  const next=mount();expect(warmth()).toBe('0');
+  const next=mount();expect(screen.queryByRole('slider', {name:'Warmth'})).toBeNull();
+  expect(screen.getByRole('status').textContent).toBe('Restoring session…');
   state.me={id:'a',email:'a@b.co'};next.rerender(<Studio/>);
   expect(warmth()).toBe('41');
 });
@@ -63,4 +64,16 @@ it('keeps a generated guest draft through sign-in for the save workflow', async 
   state.me={id:'b',email:'b@b.co'};view.rerender(<Studio/>);
   expect(screen.getByText('Preview')).toBeTruthy();
   expect(document.querySelector('img[src="blob:guest-reference"]')).toBeTruthy();
+});
+
+it('waits for auth restoration before accepting a reference upload', () => {
+  state.me=undefined;state.look='';
+  vi.stubGlobal('URL', {createObjectURL: () => 'blob:restored-reference'});
+  const view=mount();
+  expect(document.querySelector('input[type=file]')).toBeNull();
+  state.me={id:'b',email:'b@b.co'};view.rerender(<Studio/>);
+  const input=document.querySelector('input[type=file]')!;
+  fireEvent.change(input,{target:{files:[new File(['bytes'],'restored.jpg',{type:'image/jpeg'})]}});
+  expect(screen.getByRole('button',{name:'Generate Color Style'})).toBeEnabled();
+  expect(document.querySelector('img[src="blob:restored-reference"]')).toBeTruthy();
 });

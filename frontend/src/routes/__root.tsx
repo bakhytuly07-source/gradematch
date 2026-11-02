@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
+  ClientOnly,
   Link,
   createRootRouteWithContext,
   useRouter,
@@ -121,11 +122,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SiteHeader />
-      <Outlet />
-      <Toaster position="bottom-center" />
-    </QueryClientProvider>
+    // The shared static shell has no current-path or session-dependent UI.
+    <ClientOnly>
+      <QueryClientProvider client={queryClient}>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <SiteHeader />
+        <Outlet />
+        <Toaster position="bottom-center" />
+      </QueryClientProvider>
+    </ClientOnly>
   );
 }

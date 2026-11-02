@@ -62,3 +62,15 @@ that gate for this batch; it does not turn the failed extraction experiment into
 a pass. Preserve the evidence and limitations, implement in issue-number order,
 write tests and one commit per issue, comment on every addressed issue, leave
 issues open, and push to main at the end.
+
+## Authorized #95 scope extension (2026-11-02)
+
+The user authorized fixing the Studio upload/auth-restoration race discovered
+while running #95's unchanged E2E suite, then verifying E2E. The Engineer may
+change the Studio auth-loading behavior and add focused regression coverage
+in addition to the deployment scope. Keep the existing browser scenarios and
+assertions intact; leave #95 open for QA.
+
+The #95 browser check also requires a path-independent root SPA shell: render
+session/navigation UI on the client so direct `/login` and `/library` loads do
+not hydrate markup prerendered for `/`.

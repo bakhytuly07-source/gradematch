@@ -54,8 +54,11 @@ export const Route = createFileRoute("/")({
 
 function Studio() {
   const me = useMe();
+  // Wait before mounting editable state: restoring auth remounts the editor,
+  // which would otherwise discard a reference selected during that request.
+  if (me === undefined) return <p role="status" className="p-8 text-muted-foreground">Restoring session…</p>;
   // Remount account-owned editor state before rendering for another session.
-  return <StudioEditor key={me === undefined ? "loading" : me?.id ?? "guest"} me={me} />;
+  return <StudioEditor key={me?.id ?? "guest"} me={me} />;
 }
 
 function StudioEditor({ me }: { me: User | null | undefined }) {
