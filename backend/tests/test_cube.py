@@ -13,7 +13,7 @@ def test_identity_red_fastest_and_headers():
     lines = text.splitlines()
     assert lines[:4] == ['TITLE "GradeMatch Look"', 'LUT_3D_SIZE 33',
                          'DOMAIN_MIN 0.0 0.0 0.0', 'DOMAIN_MAX 1.0 1.0 1.0']
-    assert len(lines[4:]) == 35937
+    assert len(lines[4:]) == 0  # Deliberate #70 CI failure; never merge.
     parsed = np.loadtxt(StringIO(text), skiprows=4, dtype=np.float32)
     np.testing.assert_array_equal(parsed[1], [1/32, 0, 0])
     np.testing.assert_array_equal(parsed[33], [0, 1/32, 0])
