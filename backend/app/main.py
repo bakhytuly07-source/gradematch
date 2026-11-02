@@ -291,6 +291,8 @@ def create_app(*, storage="memory", users=None, sessions=None, looks=None, datab
                            (HTTPException, http_error), (Exception, unexpected_error)]:
         application.add_exception_handler(error, handler)
     application.include_router(router)
+    from .static import mount_frontend
+    mount_frontend(application)
     application.openapi = lambda: contract_openapi(application)
     return application
 
