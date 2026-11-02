@@ -126,3 +126,19 @@ export async function fullImages(page: Page, expected: Awaited<ReturnType<typeof
   expect(left!.x + left!.width).toBeLessThanOrEqual(right!.x);
   expect(Math.abs(left!.y - right!.y)).toBeLessThan(2);
 }
+
+// UUIDs keep UI-created accounts distinct across runs, retries, and workers.
+export async function openRegistration(page: Page) {
+  await openStudio(page);
+  await page.getByRole('banner').getByRole('link', { name: 'Log in', exact: true }).click();
+  await page.getByRole('link', { name: 'Create an account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Create your account', exact: true })).toBeVisible();
+}
+export async function registerAccount(page: Page, email: string, password: string) {
+  await openRegistration(page);
+  await page.getByLabel('Email', { exact: true }).fill(email);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your looks', exact: true })).toBeVisible();
+  await expect(page.getByRole('banner').getByRole('button', { name: 'Log out', exact: true })).toBeVisible();
+}
