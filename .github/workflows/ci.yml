@@ -9,12 +9,17 @@ on:
 permissions:
   contents: read
 
+# Limit overlapping workflow runs, not jobs within a run.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Both checks are eligible immediately. Hosted runner availability determines
+  # actual start times; independent jobs cannot guarantee identical timestamps.
+  # Keep concurrency at workflow scope so these jobs never share a job lock.
   backend:
+    needs: []
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -31,6 +36,7 @@ jobs:
       - run: uv run pytest
 
   frontend:
+    needs: []
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
