@@ -76,3 +76,23 @@ export async function dragDivider(page: Page, percent: number) {
   expect(Math.abs(parseFloat(geometry.clip.split(' ').at(-1)!) - percent)).toBeLessThanOrEqual(1);
   return box;
 }
+// Same production renderer and actual backend LUT, used only to calculate
+// expected pixels in a detached canvas (as in the legacy guest parity check).
+export async function expectedStyled(page: Page, src: string, lut: any) {
+  const fs = await import('node:fs');
+  const ts = await import('../frontend/node_modules/typescript/lib/typescript.js');
+  const renderer = ts.transpileModule(fs.readFileSync('frontend/src/lib/apply-lut.ts', 'utf8'), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
+  }).outputText.replaceAll('export ', '');
+  return page.evaluate(async ({ renderer, src, lut }) => {
+    const { loadImage, renderToCanvas } = new Function(renderer + ';return {loadImage,renderToCanvas}')();
+    lut.data = new Float32Array(lut.data);
+    const c = renderToCanvas(await loadImage(src), lut);
+    return { width: c.width, height: c.height, data: Array.from(c.getContext('2d').getImageData(0, 0, c.width, c.height).data) };
+  }, { renderer, src, lut });
+}
+export function observeLut(page: Page) {
+  let latest: any;
+  page.on('response', async r => { if (r.url().endsWith('/api/render-lut') && r.ok()) latest = await r.json(); });
+  return async () => { await expect.poll(() => !!latest).toBe(true); return latest; };
+}
