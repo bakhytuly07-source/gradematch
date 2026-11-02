@@ -11,6 +11,21 @@ See the [release checks and evidence](./_docs/release-checks.md), including #18'
 NO-GO and pending laptop measurements. Estimates cannot recover an exact original
 grade or separate lighting/scene colors reliably.
 
+## Render deployment
+
+Use the root [Render Blueprint](./render.yaml) and
+[dashboard deployment guide](./docs/deploy-render.md) for one free Docker web
+service and one free PostgreSQL database in Frankfurt.
+
+**Deployment pending:** the actual public HTTPS URL and database expiry date
+have not been verified. After creation, record the URL here and write down the
+database's actual expiry date (YYYY-MM-DD) from Render's database Info page.
+The free database expires after 30 days. The web service sleeps after 15 minutes
+without traffic; allow about a minute for its next request to wake it. Warm it
+before running tests. See [Render's free-plan limits](https://render.com/docs/free).
+Live suite verification is blocked by the existing runners' local-only operations;
+see [#123](https://github.com/bakhytuly07-source/gradematch/issues/123).
+
 ## Run the whole stack with Docker
 
 Prerequisites: Git and Docker with the Docker Compose plugin (Docker Desktop
