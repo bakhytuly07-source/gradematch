@@ -2,8 +2,10 @@ const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
 const ts = require('../../frontend/node_modules/typescript');
-const FRONTEND_URL = 'http://localhost:3000';
+const FRONTEND_URL = 'http://localhost:8091';
 const API_URL = 'http://localhost:8091';
+// The Docker frontend's VITE_API_URL=/ normalizes to an empty adapter base.
+const BROWSER_API_URL = '';
 // Compile the existing real adapter and its imports for injection into a built
 // frontend. No HTTP requests for Vite source modules or alternate app server.
 function adapterBundle() {
@@ -24,7 +26,7 @@ async function launch() {
     try {
       // Revoke still-signed-in UI sessions before opening temporary cleanup sessions.
       for (const context of browser.contexts()) for (const page of context.pages()) {
-        const token = await page.evaluate(api => sessionStorage.getItem(`gradematch.token:${api}`), API_URL).catch(() => null);
+        const token = await page.evaluate(api => sessionStorage.getItem(`gradematch.token:${api}`), BROWSER_API_URL).catch(() => null);
         if (token) await fetch(API_URL + '/api/auth/logout', {method:'POST', headers:{Authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(10000)});
       }
       for (const credentials of browser.e2eAccounts) {
@@ -80,6 +82,6 @@ async function prepare(page) {
     }
     window.ApiService = load('./api').ApiService;
     window.e2eApiUrl = api;
-  }, {modules, zodEntry, api: API_URL});
+  }, {modules, zodEntry, api: BROWSER_API_URL});
 }
 module.exports = {launch, prepare, FRONTEND_URL, API_URL};

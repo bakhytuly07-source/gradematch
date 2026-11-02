@@ -3,7 +3,7 @@
 See [root setup](../../README.md#browser-e2e-tests-against-compose) for Docker,
 Node, existing Playwright tooling and managed browser installation. From the
 repository root run `make e2e`. It starts Compose and waits for the production
-frontend at http://localhost:3000 and real API at http://localhost:8091.
+frontend at http://localhost:8091 and real API at http://localhost:8091.
 No development server or source-module HTTP imports are used.
 
 Individual scenarios: `node backend/integration/guest.cjs`,

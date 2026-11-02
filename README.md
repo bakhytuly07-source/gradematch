@@ -6,7 +6,7 @@ Guests can try/export; accounts add a private saved-look Library.
 
 **MVP engineering is reviewable; extraction quality is not release-approved.**
 See the [release checks and evidence](./_docs/release-checks.md), including #18's
-NO-GO, the current Library startup/upload timing failure, and pending laptop measurements. Estimates cannot recover an exact original
+NO-GO and pending laptop measurements. Estimates cannot recover an exact original
 grade or separate lighting/scene colors reliably.
 
 ## Run the whole stack with Docker
@@ -29,19 +29,20 @@ database's credentials.
 ```sh
 docker compose up --build -d   # make up
 docker compose ps            # make ps
+docker compose restart app   # make restart
 docker compose logs -f       # make logs (Ctrl-C stops following logs)
 docker compose down          # make down
 ```
 
-Open the application at **http://localhost:3000** and API docs at
-**http://localhost:8091/docs**. The three services are PostgreSQL 16 (`db`),
-`backend`, and `frontend`. PostgreSQL is available only inside the Compose
-network. The backend waits for PostgreSQL health, runs migrations, and serves
-the API; the frontend waits for backend health. Allow up to 90 seconds after
-startup for health checks to settle.
+Open the application at **http://localhost:8091** and API docs at
+**http://localhost:8091/docs**. The two services are PostgreSQL 16 (`db`) and
+`app`, built from the root multi-stage Dockerfile (Node 22 build, Python 3.12
+runtime). PostgreSQL is available only inside the Compose network. The app waits for PostgreSQL health, runs migrations, and serves
+the static frontend and API from the same origin. A failed migration stops
+startup. Allow up to 90 seconds for health checks to settle.
 
 Accounts and saved looks persist in the named `postgres_data` volume across
-backend restarts and `docker compose down` / `docker compose up -d`.
+app restarts and `docker compose down` / `docker compose up -d`.
 **`docker compose down -v` removes the database volume and all accounts and
 saved looks.** The next startup initializes an empty database.
 
@@ -61,7 +62,7 @@ failures return a nonzero exit code. To run only the suite against a running sta
 cd backend
 uv run pytest tests_integration
 # Optional HTTP target overrides (these are the defaults):
-BASE_URL=http://localhost:8091 FRONTEND_URL=http://localhost:3000 uv run pytest tests_integration
+BASE_URL=http://localhost:8091 FRONTEND_URL=http://localhost:8091 uv run pytest tests_integration
 ```
 
 `BASE_URL` changes the API target; `FRONTEND_URL` changes the frontend target.
@@ -70,8 +71,8 @@ printing `Integration stack unavailable` and an instruction to run `make up`.
 Default `uv run pytest` collects only `tests/`, excluding integration scenarios.
 
 The suite checks real HTTP services and uses local Compose for a read-only
-Postgres registration check and a backend restart. Overrides must therefore point
-to that same Compose stack. The persistence test restarts the backend, waits for
+Postgres registration check and an app restart. Overrides must therefore point
+to that same Compose stack. The persistence test restarts the app, waits for
 health, and checks the saved look with the original token. Avoid concurrent work
 against this stack while it runs. Each account uses a unique email; tests delete
 their own saved looks and revoke tokens where practical. Test accounts remain
@@ -103,10 +104,10 @@ The CLI and required module must come from that same installation so the managed
 browser revision matches. No machine-specific browser executable is required.
 
 `make e2e` invokes `make up`, waits up to 90 seconds total for
-**http://localhost:3000** and **http://localhost:8091/docs**, then runs guest,
+**http://localhost:8091** and **http://localhost:8091/docs**, then runs guest,
 account/Library, and Studio account-switch scenarios headlessly against the real
 API and Compose database. Override the HTTP readiness budget with
-`E2E_READY_TIMEOUT_MS=120000 make e2e`. The scripts use these fixed Compose URLs.
+`E2E_READY_TIMEOUT_MS=120000 make e2e`. The scripts use this fixed Compose origin.
 
 Success prints `E2E PASS guest`, `E2E PASS library`, `E2E PASS studio-session`, and
 `E2E PASS all scenarios`. Failures exit nonzero with `E2E FAIL <scenario>` and the
@@ -116,6 +117,13 @@ browser installation instruction. Browsers close in `finally` on assertion
 success/failure. Reports go to ignored `work/e2e/`. Individual scenarios can also
 run with `node backend/integration/guest.cjs` (or `library.cjs` /
 `studio-session.cjs`) after `make up`.
+
+The separate deployment check exercises direct/reloaded SPA routes and browser
+registration/save followed by an app restart and fresh login:
+
+```sh
+node backend/integration/static.cjs
+```
 
 Run twice against the same stack to check repeatability. Each run uses unique
 accounts and deletes their saved looks, including after assertion failure where
@@ -148,9 +156,8 @@ VITE_API_URL=http://localhost:8091 npm run dev -- --port 5173 --strictPort
 
 Open **http://localhost:5173**. API docs: **http://localhost:8091/docs**.
 First try generation/export without login, then register to save to the Library.
-After account navigation, wait for authentication restoration before uploading;
-if a selection is lost and Generate remains disabled, select the reference again.
-The current startup/upload timing limitation is recorded in the release checks.
+Studio waits for authentication restoration before showing its upload controls.
+The #95 deployment checks cover the previously documented upload timing failure.
 Do not use production credentials or real user images in disposable test runs.
 
 ## Configuration
@@ -170,7 +177,18 @@ Do not use production credentials or real user images in disposable test runs.
   `GRADEMATCH_STORAGE=memory` runs without a database; accounts/looks disappear
   on restart. ORM access is SQLAlchemy only. Other database URLs need their
   appropriate driver; no additional driver is installed by these instructions.
-- `CORS_ORIGINS` defaults to `http://localhost:5173`. Override with exact,
+- Docker uses `VITE_API_URL=/` at build time and needs no `CORS_ORIGINS` setting.
+  The runtime runs as UID 10001 and binds to `0.0.0.0` on `PORT` (default `8091`).
+  For another container port, supply `-e PORT=8092` and publish that port, e.g.
+  `docker run --rm -e DATABASE_URL="$DATABASE_URL" -e PORT=8092 -p 8092:8092 gradematch-app`
+  with a reachable, migrated database URL (startup runs migrations). Compose publishes 8091.
+- `STATIC_DIR=/app/static` is set in the image to the copied `.output/public`
+  directory. FastAPI serves files and the `_shell.html` SPA fallback for `/`,
+  `/login`, and `/library`; missing assets and API routes keep JSON 404s.
+  Unset `STATIC_DIR` or use a nonexistent directory to keep API-only behavior.
+  Static routes do not appear in OpenAPI.
+- Separate-origin development uses `VITE_API_URL=http://localhost:8091` and CORS.
+  `CORS_ORIGINS` defaults to `http://localhost:5173,http://localhost:8080`. Override with exact,
   comma-separated origins, for example
   `CORS_ORIGINS=https://app.example.com,https://preview.example.com` before the
   API command. No trailing slash or path; wildcards are rejected. An empty value
@@ -206,7 +224,7 @@ npx tsc --noEmit
 # Focused upload regressions:
 npm test -- src/test/reference-upload.test.tsx src/services/file.test.ts
 # Production compilation (use VITE_API_URL at build time for real API builds):
-VITE_API_URL=http://localhost:8091 npm run build
+VITE_API_URL=/ env -u NITRO_PRESET npm run build
 ```
 
 Focused auth/account regressions, from `frontend/`:

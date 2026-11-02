@@ -139,7 +139,7 @@ def test_library_crud_and_owner_isolation(api, account, saved_look):
 
 
 def test_cors_preflights(api):
-    for origin, allowed in [("http://localhost:3000", True), ("http://evil.example", False)]:
+    for origin, allowed in [("http://localhost:5173", True), ("http://evil.example", False)]:
         response = api.options("/api/generate", headers={
             "Origin": origin, "Access-Control-Request-Method": "POST"})
         if allowed:
@@ -151,11 +151,11 @@ def test_cors_preflights(api):
 
 def test_persistence_after_backend_restart(api, account, saved_look):
     headers = bearer(account)  # The exact same token must survive the restart.
-    compose("restart", "backend", timeout=60)
+    compose("restart", "app", timeout=60)
     deadline = time.monotonic() + 90
     diagnostic = "No health response"
     while time.monotonic() < deadline:
-        health = compose("ps", "--format", "{{.Health}}", "backend", timeout=5).strip()
+        health = compose("ps", "--format", "{{.Health}}", "app", timeout=5).strip()
         diagnostic = f"Compose backend health: {health!r}"
         if health == "healthy":
             try:

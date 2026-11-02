@@ -199,3 +199,13 @@ Expected diagnostic result: all assertions pass and `work/library-results.json`
 records the account/six-operation checks. The unmodified runner's early-upload
 failure remains a separate result requiring engineering/QA follow-up. Treat any
 new run's timings independently; do not overwrite historical release claims.
+
+## 2026-11-02 deployment follow-up (#95)
+
+The authorized Studio auth-restoration fix now waits before mounting upload
+controls. The unchanged `make e2e` passes all three scenarios against the
+single-image Compose stack, including the previously failing Library flow.
+Direct SPA routes, browser save/restart/login persistence, runtime security and
+all deployment checks are recorded in [deployment-95.md](./deployment-95.md).
+Earlier failure evidence above remains historical; independent QA and extraction
+quality/performance release gates are still required.

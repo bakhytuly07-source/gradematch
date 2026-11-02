@@ -9,7 +9,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:8091").rstrip("/")
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:8091").rstrip("/")
 
 
 def compose(*args, timeout=30):
