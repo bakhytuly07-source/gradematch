@@ -11,18 +11,24 @@ See the [release checks and evidence](./_docs/release-checks.md), including #18'
 NO-GO and pending laptop measurements. Estimates cannot recover an exact original
 grade or separate lighting/scene colors reliably.
 
+## Live demo
+
+Try GradeMatch at [https://gradematch-web.onrender.com](https://gradematch-web.onrender.com).
+
+The free instance sleeps after about 15 minutes without traffic; the first
+request after it sleeps can take up to a minute. The free database expires
+around **December 3, 2026 (2026-12-03)**, 30 days after creation. Confirm and
+write down the actual expiry date from Render's database Info page.
+
 ## Render deployment
 
 Use the root [Render Blueprint](./render.yaml) and
 [dashboard deployment guide](./docs/deploy-render.md) for one free Docker web
 service and one free PostgreSQL database in Frankfurt.
 
-**Deployment pending:** the actual public HTTPS URL and database expiry date
-have not been verified. After creation, record the URL here and write down the
-database's actual expiry date (YYYY-MM-DD) from Render's database Info page.
-The free database expires after 30 days. The web service sleeps after 15 minutes
-without traffic; allow about a minute for its next request to wake it. Warm it
-before running tests. See [Render's free-plan limits](https://render.com/docs/free).
+See the live demo above for the public URL and approximate database expiry
+date. Warm the service before running tests. See
+[Render's free-plan limits](https://render.com/docs/free).
 Live suite verification is blocked by the existing runners' local-only operations;
 see [#123](https://github.com/bakhytuly07-source/gradematch/issues/123).
 
