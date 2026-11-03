@@ -29,7 +29,7 @@ been recorded. Complete the evidence steps below before claiming #122 passes.
 6. On the web service's **Environment** page, confirm `DATABASE_URL` references
    the Blueprint database. Do not copy or reveal its resolved value. The
    `fromDatabase` / `connectionString` binding supplies the private URL; existing
-   normalization in `backend/app/database.py` accepts both `postgres://` and
+   normalization in `backend/app/database_url.py` accepts both `postgres://` and
    `postgresql://` through psycopg. Do not add another normalizer or use SQLite.
 7. Leave `CORS_ORIGINS` unset for same-origin hosting, leave `PORT` managed by
    Render, and keep Docker Command unset. No separate frontend service, build
@@ -109,9 +109,21 @@ its build and deploy logs. Open **Logs** for runtime output. Look for database
 readiness, Alembic migration completion, and Uvicorn startup before expecting
 `/docs` health checks to succeed. Never include resolved database URLs in evidence.
 
-Startup prints `Waiting for database readiness (30-second timeout).`, then
-`Database ready; starting migrations.`. A readiness timeout aborts startup:
-check database availability, matching region, and the `DATABASE_URL` reference.
+Startup prints `Waiting for database readiness (120-second timeout).`, then
+`Database ready; starting migrations.`. `READINESS_TIMEOUT` optionally overrides
+the total budget in seconds with a positive finite number (for example `180`).
+Invalid, zero, or negative values abort with `ConfigurationError` without
+printing the supplied value. Each connection subprocess has up to 10 seconds,
+including imports, capped by the total remaining budget. Failed attempts wait
+2 seconds before retrying, also capped by the deadline. Success has no delay.
+
+Failures produce one sanitized diagnostic per attempt, for example
+`Database readiness attempt failed: OperationalError: connection refused` or
+`Database readiness attempt failed: TimeoutExpired: connection attempt exceeded its allotted readiness budget`.
+The final timeout repeats the last sanitized reason:
+`Database readiness timeout after 120 seconds; startup aborted. Last failure: OperationalError: connection refused`.
+Passwords and connection URLs are redacted; no raw child traceback is printed.
+A readiness timeout aborts startup before migrations or the web server.
 A migration failure also stops startup; inspect the Alembic error before retrying.
 For an unhealthy deploy, check its runtime logs, `/docs` health path and the
 platform-provided port. Build failures belong in the selected event's build logs.
@@ -126,6 +138,16 @@ branch. Blueprint Auto Sync normally applies them automatically. If disabled,
 open the Blueprint page and click **Manual Sync**, review the changes, and sync.
 An app **Manual Deploy** rebuilds code; it does not replace Blueprint sync for
 configuration updates. Confirm plans/regions and database identity after sync.
+
+## Troubleshooting startup
+
+Check that the database status is **Available**, that `DATABASE_URL` exists on
+the web service, and that the app and database are in the **same region**.
+Inspect the sanitized attempt reason in runtime logs. Slow CPU/imports and
+connection setup share the readiness budget; raise `READINESS_TIMEOUT` if the
+120-second default is insufficient. Do not paste resolved connection URLs or
+credentials into logs or issues. The first request after sleep is slow: wait
+for the service to wake and `/docs` to return HTTP 200 before testing.
 
 ## Free-plan lifetime and wake-up
 
@@ -186,3 +208,80 @@ assertions, change tests within #122's three-file scope, or count local passes
 as live passes. After an authorized resolution, record each complete live
 command, target URL, deployed commit and passing totals in #122. Until then,
 the live-suite acceptance criteria remain unmet.
+
+## Local readiness regression evidence (#124)
+
+Verified 2026-11-03 (timestamps below are UTC; Asia/Almaty is UTC+05:00).
+After `make up` built the image, the delayed-database check used:
+
+```sh
+docker compose stop app db
+date -u '+%Y-%m-%dT%H:%M:%SZ'
+docker compose up -d --no-deps app
+docker compose ps -q app > /tmp/gradematch-readiness-container
+sleep 20
+date -u '+%Y-%m-%dT%H:%M:%SZ'
+docker compose up -d db
+docker compose logs --timestamps app
+docker compose ps app
+docker inspect --format '{{.Id}} restart_count={{.RestartCount}} status={{.State.Health.Status}}' gradematch-app-1
+cat /tmp/gradematch-readiness-container
+```
+
+App start command: `06:24:07Z`; database start command: `06:24:28Z`.
+Sanitized log excerpts from that startup:
+
+```text
+06:24:08.006787709Z Waiting for database readiness (120-second timeout).
+06:24:08.396026834Z Database readiness attempt failed: OperationalError: (psycopg.OperationalError) failed to resolve host 'db': [Errno -2] Name or service not known (Background on this error at: [redacted URL]
+06:24:27.504904718Z Database readiness attempt failed: OperationalError: (psycopg.OperationalError) failed to resolve host 'db': [Errno -2] Name or service not known (Background on this error at: [redacted URL]
+06:24:29.898897594Z Database ready; starting migrations.
+06:24:31.463651761Z Application startup complete.
+06:24:31.463736345Z Uvicorn running on http://0.0.0.0:8091
+06:24:33.261075887Z GET /docs HTTP/1.1 200 OK
+```
+
+There were nine failed attempts, each a single diagnostic. Container ID before
+and after recovery was
+`0772cbdc71c7d5621ce9d250e4bc0ed11faf9d39f2f740d240a76e9265aff117`;
+`restart_count=0 status=healthy`. The unchanged `set -e` entrypoint ran Alembic
+successfully before executing Uvicorn. An explicit in-container `/docs` request
+also returned 200 on the default port.
+
+For the non-default port check, a temporary override outside the repository
+(`/tmp/gradematch-port-override.yaml`) contained:
+
+```yaml
+services:
+  app:
+    environment:
+      PORT: "8092"
+    ports: !override
+      - "8092:8092"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8092/docs', timeout=3)"]
+```
+
+`docker compose -f docker-compose.yaml -f /tmp/gradematch-port-override.yaml up -d --wait app`
+passed, with `Uvicorn running on http://0.0.0.0:8092`, a healthy container, and an
+explicit in-container `GET /docs` returning HTTP 200. `make integration` restored
+the normal Compose configuration afterward.
+
+Verification commands and results (existing scenarios/assertions preserved):
+
+- `cd backend && UV_CACHE_DIR=/tmp/gradematch-uv-cache uv run pytest`:
+  **204 passed, 1 skipped** (the opt-in empty-database PostgreSQL journey needs
+  `TEST_DATABASE_URL`; local Compose integration ran separately).
+- `cd frontend && npm test -- --run`: **52 passed**, 12 files.
+- `make up`: **passed**, image built and services started.
+- `make integration`: **10 passed** against the default Compose stack.
+- `make e2e`: **passed** guest, library, and studio-session scenarios plus
+  **30 Playwright tests**. Existing performance observations above the preview
+  target were reported by the unchanged suite; all assertions passed.
+- `make down`: performed after verification.
+
+The implementation/evidence diff was reviewed for secrets: only synthetic test
+credentials are present; no real passwords, database connection URLs, or tokens
+are included. `openapi.yaml`, frontend behavior, startup ordering, and existing
+integration/E2E scenarios and assertions are unchanged. This is local Compose
+evidence; live Render deployment verification remains separate.
