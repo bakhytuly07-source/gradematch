@@ -65,6 +65,7 @@ def journey(label):
         'thumbnail': '',
     }).encode(), {**headers, 'Content-Type': 'application/json'}, 201)
     stamp(label + ' POST /api/looks -> 201 look_id=' + look['id'])
+    return {'styleParams': style, 'adjustments': {'intensity': 100, 'contrast': 0, 'saturation': 0, 'warmth': 0}}
 
 
 def main():

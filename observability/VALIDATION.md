@@ -88,3 +88,27 @@ its record. The narrow fix reinstates that context for the completion record;
 regression assertions require every request trace ID to occur in the logs.
 No endpoint/API-contract, dependency or Render changes. Telemetry remains off
 by default and was restored off after the final smoke.
+
+## Engineer #132 — 2026-11-14
+
+No dependency, API, backend or Render changes. Existing Collector conversion
+exports `gradematch_http_requests_total` with resource identity labels.
+Dashboard API returned `provisioned=true`, UID `gradematch`, URL
+`/d/gradematch/gradematch`; identical after actual obs-down/obs-up.
+
+Live `dashboard_smoke.py` ran two baseline/scenario journeys, 15s apart:
+
+- 07:18:42–07:18:59 UTC, local/dev: all six exact panel expressions returned
+  positive values. Styles/saves/users/failures ~0.0203/s, HTTP 0.1960/s,
+  p95 0.00975s; failure reason `invalid_request`.
+- 07:19:44–07:20:03 UTC, qa/test-build: all six expressions returned positive
+  values. Styles/saves/users/failures ~0.0198/s, HTTP 0.2751/s, p95 0.00975s.
+
+Each request used only its selected environment/version; business selectors
+match observation labels and HTTP selectors match the exported resource labels.
+Browser showed selected local/dev and qa/test-build with all six panel legends;
+qa/test-build Last 5 minutes displayed the second scenario's distinct 07:20
+traffic, excluding the first 07:18 scenario. Stable dashboard remained visible
+after restart. The nonexistent pair showed “No matching traffic” in all six panels, without errors.
+Frontend: 12 files / 52 tests passed. Backend initially hit sandbox loopback
+restrictions in two existing OTLP receiver tests; rerun with loopback permission passed: 222 passed, 1 optional PostgreSQL skip, 5 existing warnings in 17.73s.

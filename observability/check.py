@@ -35,3 +35,10 @@ if __name__ == '__main__':
             result = json.loads(get(f'http://localhost:3000/api/datasources/uid/{uid}/health', headers))
             assert result['status'] == 'OK', result
         print(uid + ': provisioned, health OK')
+
+    dashboard = json.loads(get('http://localhost:3000/api/dashboards/uid/gradematch', headers))
+    assert dashboard['meta']['provisioned']
+    assert dashboard['dashboard']['uid'] == 'gradematch'
+    assert dashboard['meta']['url'] == '/d/gradematch/gradematch'
+    assert len(dashboard['dashboard']['panels']) >= 6
+    print('gradematch: dashboard provisioned, stable URL, six panels')

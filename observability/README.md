@@ -159,3 +159,61 @@ OTEL_EXPORTER_OTLP_ENDPOINT= make e2e
 
 The fixture and payload never enter recorded evidence. See
 [VALIDATION.md](VALIDATION.md) for the Engineer's timestamped results.
+
+## Provisioned GradeMatch dashboard (#132)
+
+Open [GradeMatch](http://localhost:3000/d/gradematch/gradematch). The file provider
+loads `grafana/dashboards/gradematch.json` automatically, even on a clean volume.
+UID `gradematch` and URL survive obs-down/obs-up. Environment and Version are
+single-select variables from `gradematch_styles_generated_total`; versions depend
+on the selected environment. Default: Last 15 minutes, refresh 5s. Rates use
+`$__rate_interval` (at least four 5s scrapes). Allow up to 90s after traffic;
+the time picker also supports Last 5 minutes and absolute scenario windows.
+
+With the app opted in above, run `python3 observability/dashboard_smoke.py`.
+It supplements #131 with two register/generate/save journeys, successful
+`/api/render-lut` and missing-upload `/api/generate` (422, `invalid_request`)
+requests, 15 seconds apart to establish initial counters and subsequent rate
+samples. It queries all six exact committed expressions, waits up to 90s and
+prints the filtered dashboard URL. This creates two disposable local users/looks.
+
+| Panel | Prometheus metric | Populated by |
+| --- | --- | --- |
+| Styles generated / second | `gradematch_styles_generated_total` | successful generate |
+| Generate failures / second by reason | `gradematch_generate_failures_total` | rejected generate |
+| Looks saved / second | `gradematch_looks_saved_total` | authenticated save |
+| Users registered / second | `gradematch_users_registered_total` | unique registration |
+| LUT render p95, seconds | `gradematch_lut_render_seconds_bucket` | successful render |
+| HTTP requests / second | `gradematch_http_requests_total` | all HTTP requests |
+
+The p95 query is `histogram_quantile(0.95, sum by (le) (rate(...[$__rate_interval])))`.
+The HTTP instrument is existing `gradematch.http.requests`, normalized by the
+Collector Prometheus exporter. Resource conversion maps `service.name`,
+`deployment.environment`, `service.version` to `service_name`,
+`deployment_environment`, `service_version`. HTTP filters those labels; business
+panels filter observation `environment`, `version`. Every panel filters both
+chosen values. Failure legends show reasons; counts are rates per second.
+No matching traffic shows **No matching traffic**, idle counters show zero. Fewer
+than two samples cannot yield rates; a p95 without observations is undefined.
+
+Reproduce a second identity without editing tracked files or Render:
+
+```sh
+cat > /tmp/gradematch-qa-identity.yaml <<'YAML'
+services:
+  app:
+    environment:
+      DEPLOYMENT_ENVIRONMENT: qa
+      APP_VERSION: test-build
+YAML
+OTEL_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4318 docker compose -f docker-compose.yaml -f /tmp/gradematch-qa-identity.yaml up -d --force-recreate --wait app
+python3 observability/dashboard_smoke.py --environment qa --version test-build
+# Open the printed link; select qa/test-build, then local/dev.
+# Panel menu → Inspect → Query shows both selected filters on every panel.
+# The other group's history stays available within Last 15 minutes.
+OTEL_EXPORTER_OTLP_ENDPOINT= docker compose up -d --force-recreate --wait app
+```
+
+Use URL parameters `?var-environment=no-such-environment&var-version=no-such-version`
+to verify all six show No matching traffic without query errors. Bounded smoke failures (two)
+stay below #133's five-failure threshold. Restore telemetry off after local checks.
