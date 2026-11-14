@@ -9,3 +9,4 @@ __pycache__/
 *.db-journal
 *.db-wal
 *.db-shm
+/on-call-engineer/logs/
