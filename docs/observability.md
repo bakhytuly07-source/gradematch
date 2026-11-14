@@ -468,6 +468,14 @@ object. Only sanitized documentation/screenshots were later published.
 
 ## #136 documentation verification
 
+Actual GitHub rendering was verified on 2026-11-14 at approximately 08:50 UTC
+in Chromium on the published `main` document. GitHub's
+`viewscreen.githubusercontent.com/markdown/mermaid` iframe contained a visible
+`svg#diagram` with `aria-roledescription="flowchart-v2"`, showing all seven
+components, signal paths and ports without a parser error. The unmodified
+[GitHub rendering screenshot](img/github-mermaid-render.png) records the
+repository path, Preview tab, source commit `70f9312` and rendered diagram.
+
 At 2026-11-14 08:42:08 UTC, `python3 observability/check.py` passed all five
 readiness checks, three datasource checks and provisioned six-panel dashboard.
 Historical Prometheus HTTP series at 07:35:30 UTC confirmed the documented
