@@ -4,6 +4,7 @@ import os
 from contextlib import asynccontextmanager
 
 from opentelemetry.sdk.resources import Resource
+from opentelemetry.trace import SpanKind
 
 
 def resource():
@@ -31,6 +32,7 @@ class Telemetry:
 def configure(application):
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()
     application.state.telemetry = None
+    application.state.business_metrics = None
     if not endpoint:
         return
     from opentelemetry.sdk.trace import TracerProvider
@@ -47,7 +49,8 @@ def configure(application):
     traces = TracerProvider(resource=identity)
     traces.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(
         endpoint=endpoint.rstrip("/") + "/v1/traces", timeout=1), max_queue_size=256, max_export_batch_size=64))
-    metrics = MeterProvider(resource=identity, metric_readers=[PeriodicExportingMetricReader(
+    from .metrics import BusinessMetrics, views
+    metrics = MeterProvider(resource=identity, views=views(), metric_readers=[PeriodicExportingMetricReader(
         OTLPMetricExporter(endpoint=endpoint.rstrip("/") + "/v1/metrics", timeout=1),
         export_interval_millis=5000, export_timeout_millis=1500)])
     logs = LoggerProvider(resource=identity)
@@ -55,13 +58,14 @@ def configure(application):
         endpoint=endpoint.rstrip("/") + "/v1/logs", timeout=1), max_queue_size=256, max_export_batch_size=64))
     telemetry = Telemetry(traces, metrics, logs)
     application.state.telemetry = telemetry
+    application.state.business_metrics = BusinessMetrics(telemetry.meter)
     if application.state.engine is not None:
         from sqlalchemy import event
         # Engine-local events avoid global monkeypatching and never export SQL,
         # bind parameters, connection strings or exception messages.
         @event.listens_for(application.state.engine, "before_cursor_execute")
         def before(conn, cursor, statement, parameters, context, executemany):
-            context._telemetry_span = telemetry.tracer.start_span("SQLAlchemy query",
+            context._telemetry_span = telemetry.tracer.start_span("SQLAlchemy query", kind=SpanKind.CLIENT,
                 attributes={"db.system": application.state.engine.dialect.name})
         @event.listens_for(application.state.engine, "after_cursor_execute")
         def after(conn, cursor, statement, parameters, context, executemany):
@@ -78,7 +82,7 @@ def configure(application):
     async def request_telemetry(request, call_next):
         # Manual span lifecycle deliberately excludes exception events, query strings,
         # headers and URLs, any of which could contain credentials or uploaded data.
-        span = telemetry.tracer.start_span("HTTP " + request.method)
+        span = telemetry.tracer.start_span("HTTP " + request.method, kind=SpanKind.SERVER)
         from opentelemetry import trace
         from opentelemetry.trace import Status, StatusCode
         status = 500

@@ -1,5 +1,6 @@
 import logging
 import os
+from time import perf_counter
 from types import SimpleNamespace
 from typing import Annotated
 
@@ -16,6 +17,7 @@ from starlette.datastructures import UploadFile
 from starlette.concurrency import run_in_threadpool
 
 from . import models, schemas
+from .metrics import count
 from .auth import Db, Token, issue_token
 from .color import MAX_BYTES, analyze, build_lut
 from .cors import allowed_origins
@@ -53,9 +55,13 @@ def register(body: schemas.RegisterInput, db: Db, request: Request):
     memory = request.app.state.memory
     if memory is not None:
         user = memory.users.create(body.email, body.password)
-        return schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
+        result = schemas.AuthResult(user=user.public(), access_token=memory.sessions.issue(user.id))
+        count(request, "users_registered")
+        return result
     user = OrmUsers(db).create(body.email, body.password)
-    return issue_token(db, user)
+    result = issue_token(db, user)
+    count(request, "users_registered")
+    return result
 
 
 @router.post("/api/auth/login", response_model=schemas.AuthResult, operation_id="login")
@@ -120,6 +126,20 @@ class MemoryMultipartParser(MultiPartParser):
         "type": "object", "required": ["referenceFile"], "properties": {
             "referenceFile": {"type": "string", "format": "binary"}}}}}}})
 async def generate(request: Request):
+    try:
+        result = await generate_image(request)
+    except Exception as exc:
+        reason = "processing_error"
+        if isinstance(exc, ApiError):
+            reason = ("too_large" if exc.status == 413 else
+                      "invalid_image" if getattr(request.state, "decoding_image", False) else "invalid_request")
+        count(request, "generate_failures", reason)
+        raise
+    count(request, "styles_generated")
+    return result
+
+
+async def generate_image(request: Request):
     if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "multipart/form-data":
         raise ApiError(422, "Missing or malformed referenceFile upload.")
     async def bounded_stream():
@@ -149,6 +169,7 @@ async def generate(request: Request):
         data = await upload.read(MAX_BYTES + 1)
         if len(data) > MAX_BYTES:
             raise ApiError(413, "Reference image exceeds 15 MB.")
+        request.state.decoding_image = True
         return await run_in_threadpool(analyze, data)
     finally:
         await form.close()
@@ -158,8 +179,13 @@ async def generate(request: Request):
 
 
 @router.post("/api/render-lut", response_model=schemas.LutData, operation_id="renderLut")
-def render_lut(body: schemas.LutSettings):
-    return {"size": 33, "data": build_lut(body).ravel().tolist()}
+def render_lut(body: schemas.LutSettings, request: Request):
+    start = perf_counter()
+    result = {"size": 33, "data": build_lut(body).ravel().tolist()}
+    metrics = request.app.state.business_metrics
+    if metrics is not None:
+        metrics.rendered(perf_counter() - start)
+    return result
 
 
 @router.post("/api/download.cube", response_class=PlainTextResponse, operation_id="downloadLutCube")
@@ -184,8 +210,11 @@ OwnLook = Annotated[models.Look, Depends(own_look)]
 def save_look(body: schemas.SaveLookInput, db: Db, token: Token, request: Request):
     memory = request.app.state.memory
     if memory is not None:
-        return memory.looks.create(token.user_id, body)
-    return OrmLooks(db).create(token.user_id, body)
+        result = memory.looks.create(token.user_id, body)
+    else:
+        result = OrmLooks(db).create(token.user_id, body)
+    count(request, "looks_saved")
+    return result
 
 
 @router.get("/api/looks", response_model=list[schemas.Look], operation_id="listLooks")
