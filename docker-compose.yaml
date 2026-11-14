@@ -17,6 +17,10 @@ services:
       context: .
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-gradematch}:${POSTGRES_PASSWORD:-gradematch}@db:5432/${POSTGRES_DB:-gradematch}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-local}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8091:8091"
     depends_on:

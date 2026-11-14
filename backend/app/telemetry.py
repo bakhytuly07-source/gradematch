@@ -101,8 +101,11 @@ def configure(application):
                 span.set_status(Status(StatusCode.ERROR))
             span.end()
             telemetry.requests.add(1, {"http.route": route, "http.response.status_code": status})
-            telemetry.log_handler.handle(logging.LogRecord(
-                "gradematch.requests", logging.INFO, "", 0, "API request completed", (), None))
+            # Retain the request context while creating the completion record so
+            # Loki's trace_id links to this same Tempo request span.
+            with trace.use_span(span, end_on_exit=False):
+                telemetry.log_handler.handle(logging.LogRecord(
+                    "gradematch.requests", logging.INFO, "", 0, "API request completed", (), None))
 
     previous = application.router.lifespan_context
     @asynccontextmanager

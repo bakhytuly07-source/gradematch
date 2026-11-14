@@ -81,6 +81,13 @@ def test_actual_otlp_scenario(collector, monkeypatch, tmp_path, custom):
     spans = [s for p, m in collector if p == '/v1/traces' for r in m.resource_spans for scope in r.scope_spans for s in scope.spans]
     assert any(s.name == 'POST /api/generate' for s in spans)
     assert any(any(a.key == 'db.system' for a in s.attributes) for s in spans)
+    logs = [entry for p, m in collector if p == '/v1/logs'
+            for resource in m.resource_logs for scope in resource.scope_logs
+            for entry in scope.log_records]
+    request_ids = {s.trace_id for s in spans if s.name.startswith('POST /api/')}
+    assert request_ids
+    assert request_ids <= {entry.trace_id for entry in logs}
+    assert all(int.from_bytes(entry.trace_id, 'big') and int.from_bytes(entry.span_id, 'big') for entry in logs)
     exported = '\n'.join(str(m) for _, m in collector)
     for secret in (token, 'secret@example.com', 'Secret-password-123!', 'secret-photo.jpg', 'private-look', 'referenceFile', 'thumbnail_url'):
         assert secret not in exported
