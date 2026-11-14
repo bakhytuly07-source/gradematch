@@ -69,6 +69,11 @@ app restarts and `docker compose down` / `docker compose up -d`.
 **`docker compose down -v` removes the database volume and all accounts and
 saved looks.** The next startup initializes an empty database.
 
+## Local observability
+
+See the [observability runbook](./docs/observability.md) for the opt-in local
+metrics, logs, traces, dashboard, alert and on-call drill with verified evidence.
+
 ## Docker integration tests
 
 From the repository root, run `make up` to start the stack, or run the complete
