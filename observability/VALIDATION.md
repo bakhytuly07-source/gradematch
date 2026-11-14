@@ -112,3 +112,63 @@ traffic, excluding the first 07:18 scenario. Stable dashboard remained visible
 after restart. The nonexistent pair showed “No matching traffic” in all six panels, without errors.
 Frontend: 12 files / 52 tests passed. Backend initially hit sandbox loopback
 restrictions in two existing OTLP receiver tests; rerun with loopback permission passed: 222 passed, 1 optional PostgreSQL skip, 5 existing warnings in 17.73s.
+
+## Engineer #133 — 2026-11-14
+
+Pinned stack `prom/prometheus:v3.2.1` ran `promtool check rules` (one rule,
+SUCCESS) and `promtool test rules` (SUCCESS). Fixtures prove below threshold
+has no pending/firing alert; the threshold is pending at 5m, does not fire at
+6m55s, fires at 7m after the complete 2m hold, and resolves at 10m. Four reasons
+sum into local/dev; qa/test-build yields a separate alert. Required labels and
+both exact dashboard annotations are checked by promtool.
+
+Real `alert_smoke.py --environment qa --version test-build` queried the rule
+API after Prometheus recreation. Baseline 422 at 07:22:53 UTC, 15s settling,
+then one missing-upload 422 every 10s. Pending observed 07:23:38; firing
+observed 07:25:38.585561 UTC. Sanitized `/api/v1/alerts` evidence:
+
+```json
+{
+  "state": "firing",
+  "activeAt": "2026-11-14T07:23:33.695879708Z",
+  "labels": {
+    "alertname": "GradeMatchGenerateFailures",
+    "environment": "qa",
+    "version": "test-build",
+    "service": "gradematch",
+    "owner": "gradematch-maintainers"
+  },
+  "annotations": {
+    "summary": "Repeated GradeMatch generate failures in qa / test-build",
+    "description": "At least five generate failures over five minutes, sustained for two minutes. All failure reasons count. See the local runbook observability/README.md.",
+    "dashboard_url": "http://localhost:3000/d/gradematch/gradematch?var-environment=qa&var-version=test-build"
+  },
+  "value": "1.6212056047582273e+01"
+}
+```
+
+Browser opened that dashboard with Environment `qa` / Version `test-build`,
+all six panel legends and the failure series. Traffic stopped at 07:25:38 UTC;
+resolution check follows below. No fault-injection branch or production-code
+changes; no dependencies added. `check.py` passed all five readiness checks,
+three provisioned healthy data sources, stable provisioned six-panel dashboard.
+Compose config and Python compile checks passed.
+
+App defaults restored before normal suites: container assertion printed
+`telemetry off; environment=local; version=dev`. `make integration` passed
+10 tests in 8.13s. Backend full suite already passed 222 tests (one optional
+PostgreSQL skip, five existing warnings); frontend 52 tests passed. All changes
+after those suites are local observability configuration/scripts/docs.
+
+Telemetry-off `make e2e`: PASS guest/library/studio-session legacy journeys and
+30 Playwright tests in 1.0m. Existing preview diagnostic timings 376–441ms exceed
+the 300ms product target, without assertion failures; no related code changes.
+A fresh disposable Grafana 11.6.0 container, with only committed provisioning
+and dashboard mounts and an empty data directory, automatically returned the
+provisioned six-panel `gradematch` dashboard via its API. No manual import or
+upload was used; disposable container removed after verification.
+
+Live resolution PASS at **07:29:59.556441 UTC**: no matching alert remained in
+`/api/v1/alerts`, 261s after traffic stopped, within the 360s bound. App and DB
+remain running, observability stack remains available for QA, telemetry remains
+off in the normal app. Issues stay open for independent QA verification.

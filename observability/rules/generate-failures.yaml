@@ -1,0 +1,14 @@
+groups:
+  - name: gradematch
+    interval: 5s
+    rules:
+      - alert: GradeMatchGenerateFailures
+        expr: sum by (environment, version) (increase(gradematch_generate_failures_total[5m])) >= 5
+        for: 2m
+        labels:
+          service: gradematch
+          owner: gradematch-maintainers
+        annotations:
+          summary: 'Repeated GradeMatch generate failures in {{ $labels.environment }} / {{ $labels.version }}'
+          description: 'At least five generate failures over five minutes, sustained for two minutes. All failure reasons count. See the local runbook observability/README.md.'
+          dashboard_url: 'http://localhost:3000/d/gradematch/gradematch?var-environment={{ $labels.environment | urlquery }}&var-version={{ $labels.version | urlquery }}'

@@ -1,0 +1,133 @@
+{
+  "rule_files": [
+    "rules/generate-failures.yaml"
+  ],
+  "evaluation_interval": "5s",
+  "tests": [
+    {
+      "name": "isolated invalid requests stay inactive",
+      "interval": "1m",
+      "input_series": [
+        {
+          "series": "gradematch_generate_failures_total{environment=\"local\",version=\"dev\",reason=\"invalid_request\"}",
+          "values": "0 1 1 1 1 1 1 1 1 1 1"
+        }
+      ],
+      "alert_rule_test": [
+        {
+          "eval_time": "5m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        },
+        {
+          "eval_time": "7m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        },
+        {
+          "eval_time": "10m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "ALERTS{alertname=\"GradeMatchGenerateFailures\"}",
+          "eval_time": "7m",
+          "exp_samples": []
+        }
+      ]
+    },
+    {
+      "name": "pending full hold firing separate identities and resolution",
+      "interval": "1m",
+      "input_series": [
+        {
+          "series": "gradematch_generate_failures_total{environment=\"local\",version=\"dev\",reason=\"invalid_request\"}",
+          "values": "0 0 0 0 0 3 3 3 3 3 3 3"
+        },
+        {
+          "series": "gradematch_generate_failures_total{environment=\"local\",version=\"dev\",reason=\"too_large\"}",
+          "values": "0 0 0 0 0 1 1 1 1 1 1 1"
+        },
+        {
+          "series": "gradematch_generate_failures_total{environment=\"local\",version=\"dev\",reason=\"invalid_image\"}",
+          "values": "0 0 0 0 0 1 1 1 1 1 1 1"
+        },
+        {
+          "series": "gradematch_generate_failures_total{environment=\"local\",version=\"dev\",reason=\"processing_error\"}",
+          "values": "0 0 0 0 0 1 1 1 1 1 1 1"
+        },
+        {
+          "series": "gradematch_generate_failures_total{environment=\"qa\",version=\"test-build\",reason=\"processing_error\"}",
+          "values": "0 0 0 0 0 6 6 6 6 6 6 6"
+        }
+      ],
+      "promql_expr_test": [
+        {
+          "expr": "ALERTS{alertname=\"GradeMatchGenerateFailures\",alertstate=\"pending\"}",
+          "eval_time": "5m",
+          "exp_samples": [
+            {
+              "labels": "ALERTS{alertname=\"GradeMatchGenerateFailures\",alertstate=\"pending\",environment=\"local\",version=\"dev\",service=\"gradematch\",owner=\"gradematch-maintainers\"}",
+              "value": 1
+            },
+            {
+              "labels": "ALERTS{alertname=\"GradeMatchGenerateFailures\",alertstate=\"pending\",environment=\"qa\",version=\"test-build\",service=\"gradematch\",owner=\"gradematch-maintainers\"}",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "alert_rule_test": [
+        {
+          "eval_time": "6m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        },
+        {
+          "eval_time": "6m55s",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        },
+        {
+          "eval_time": "7m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": [
+            {
+              "exp_labels": {
+                "service": "gradematch",
+                "owner": "gradematch-maintainers",
+                "environment": "local",
+                "version": "dev"
+              },
+              "exp_annotations": {
+                "summary": "Repeated GradeMatch generate failures in local / dev",
+                "description": "At least five generate failures over five minutes, sustained for two minutes. All failure reasons count. See the local runbook observability/README.md.",
+                "dashboard_url": "http://localhost:3000/d/gradematch/gradematch?var-environment=local&var-version=dev"
+              }
+            },
+            {
+              "exp_labels": {
+                "service": "gradematch",
+                "owner": "gradematch-maintainers",
+                "environment": "qa",
+                "version": "test-build"
+              },
+              "exp_annotations": {
+                "summary": "Repeated GradeMatch generate failures in qa / test-build",
+                "description": "At least five generate failures over five minutes, sustained for two minutes. All failure reasons count. See the local runbook observability/README.md.",
+                "dashboard_url": "http://localhost:3000/d/gradematch/gradematch?var-environment=qa&var-version=test-build"
+              }
+            }
+          ]
+        },
+        {
+          "eval_time": "10m",
+          "alertname": "GradeMatchGenerateFailures",
+          "exp_alerts": []
+        }
+      ]
+    }
+  ]
+}

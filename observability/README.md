@@ -217,3 +217,67 @@ OTEL_EXPORTER_OTLP_ENDPOINT= docker compose up -d --force-recreate --wait app
 Use URL parameters `?var-environment=no-such-environment&var-version=no-such-version`
 to verify all six show No matching traffic without query errors. Bounded smoke failures (two)
 stay below #133's five-failure threshold. Restore telemetry off after local checks.
+
+## Repeated generate failure alert (#133)
+
+`rules/generate-failures.yaml` is mounted and loaded by Prometheus at startup.
+`GradeMatchGenerateFailures` uses exactly:
+
+```promql
+sum by (environment, version) (increase(gradematch_generate_failures_total[5m])) >= 5
+```
+
+The condition must hold for **two minutes** (`for: 2m`), evaluated every 5s.
+At least five failures over five minutes indicates repeated user impact; the
+hold avoids short spikes and isolated invalid requests. All four reasons count:
+`invalid_request`, `too_large`, `invalid_image`, `processing_error`. Sustained
+invalid traffic can therefore fire even when the server operates correctly.
+This absolute threshold can miss serious impact in low-traffic environments
+(fewer than five failures); it is not an error-ratio or availability guarantee.
+
+Every alert preserves the affected environment/version and adds
+`service=gradematch`, `owner=gradematch-maintainers`. Its summary identifies the
+group; `dashboard_url` opens #132 with `var-environment` / `var-version` selected.
+These bounded routing labels identify the local responder; no notification
+receiver or external message is configured by this issue.
+
+Validate with the stack's pinned Prometheus v3.2.1 binary:
+
+```sh
+docker compose -f observability/docker-compose.yaml run --rm --no-deps --entrypoint promtool -v "$PWD/observability:/work:ro" -w /work prometheus check rules rules/generate-failures.yaml
+docker compose -f observability/docker-compose.yaml run --rm --no-deps --entrypoint promtool -v "$PWD/observability:/work:ro" -w /work prometheus test rules rule-tests.yaml
+# Restart applies rule changes (no production or Render changes):
+docker compose -f observability/docker-compose.yaml up -d --force-recreate prometheus
+curl --fail http://localhost:9090/api/v1/rules
+```
+
+Fixtures cover inactive below threshold, pending, no firing before the full
+hold, firing at two minutes, resolution, aggregation across all four reasons,
+and separate local/dev and qa/test-build alerts.
+
+With the app opted in as local/dev above, run:
+
+```sh
+python3 observability/alert_smoke.py
+# For the documented second identity instead:
+# python3 observability/alert_smoke.py --environment qa --version test-build
+```
+
+The drill requires no branch, fault injection or tracked-file modification.
+Use an expendable local app only; first let any previous matching alert resolve.
+It checks `/api/v1/rules`, sends one missing-upload POST `/api/generate` (422),
+waits 15s for a baseline export/scrape, then sends **one 422 request every 10s**
+until firing. This maintains the rolling threshold throughout the hold. It
+prints transitions and the `/api/v1/alerts` firing record with `activeAt`, labels
+and dashboard annotation. Firing is bounded to **240s after the baseline wait**
+(255s overall); export/batch/scrape/evaluation typically add under 30s to the
+roughly 50s threshold buildup and 120s hold.
+
+Traffic then stops; the script polls for at most **360s** until the matching
+alert disappears (rolling 5m window plus export/evaluation delay). No other
+failure traffic may target that identity during the resolution check. Open the
+printed dashboard URL to see the same environment/version and failure spike.
+If it times out, check opted-in identity/Collector and the rule's health in
+`/api/v1/rules`; inspect rejected requests and recent deployments before assuming
+a code defect. The script emits no payloads, credentials or uploaded data.
+Finally restore normal telemetry-off operation as documented above.
