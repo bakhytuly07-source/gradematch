@@ -24,3 +24,10 @@ integration:
 # The runner waits for the same-origin app and API before launching managed Chromium.
 e2e: up
 	node backend/integration/run.cjs
+
+.PHONY: obs-up obs-down
+obs-up:
+	docker compose -f observability/docker-compose.yaml up -d
+
+obs-down:
+	docker compose -f observability/docker-compose.yaml down
