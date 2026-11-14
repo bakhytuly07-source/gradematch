@@ -11,7 +11,8 @@ pinned; this drill adds none. Keep the main checkout clean throughout the drill.
 Use three terminals, authenticated `codex` CLI (`codex login status`), Python
 with the existing backend environment, Git, Docker Compose and the existing
 local observability stack. Codex needs network access to its provider and Git
-write permission to the common repository metadata to create a local commit.
+scoped write permission to the assigned worktree metadata, common objects and
+oncall refs to create a local commit.
 In a restricted outer sandbox, request the narrow permissions needed for the
 poller/agent before starting. Do not replace a real agent with a fixture. If
 provider/auth/permissions fail, record BLOCKED and retain the claimed log;
@@ -114,11 +115,20 @@ working-tree change during the drill. Do not create a screenshot from fixture
 HTML or claim a JSON file is a screenshot.
 
 ```sh
-python3 "$MAIN/on-call-engineer/poller.py" --repo "$FAULT_TREE" --state "$STATE" \
-  --agent "codex exec --sandbox workspace-write --add-dir $MAIN/.git" --dry-run --once
-python3 "$MAIN/on-call-engineer/poller.py" --repo "$FAULT_TREE" --state "$STATE" \
-  --agent "codex exec --sandbox workspace-write --add-dir $MAIN/.git"
+python3 "$MAIN/on-call-engineer/poller.py" --repo "$FAULT_TREE" --state "$STATE" --dry-run --once
+python3 "$MAIN/on-call-engineer/poller.py" --repo "$FAULT_TREE" --state "$STATE"
 ```
+
+Use the default bundled `codex_agent.py` adapter. **Do not** pass the earlier
+`--sandbox workspace-write --add-dir MAIN/.git` command: linked-worktree Git
+metadata stays protected under that legacy policy. The adapter selects an
+explicit named permission profile without legacy settings or user config. It
+writes only the assigned worktree, its resolved Git directory, common objects,
+and oncall refs/logs; main index/refs/config and other checkouts remain read-only.
+Command network access is off; provider/auth traffic uses Codex's separate
+client connection. Managed restrictions still apply. The inherited push hook
+remains enabled. The adapter uses existing developer tools and an assigned Git
+metadata scratch directory, installing no dependencies.
 
 Let at least two 60s polls occur for the same firing identity, then Ctrl-C (the
 poller waits for active workers). Restart once with `--once` and the same state
@@ -130,8 +140,11 @@ still verifies restart behavior; preserve the actual observed poll timestamps.
 
 The log must show `base_branch=inject-bug-...`, `base_commit=INJECT_SHA`, actual
 oncall branch/worktree, invocation, investigation output, exit status, and a
-**different local_fix_commit SHA**. A successful exit without a fix commit is
-not a passing drill. The agent may run the focused existing generation test
+**different local_fix_commit SHA**. A successful process exit without a fix commit is
+not a passing drill. The launcher reports `investigation_result=no_new_commit`
+and `local_fix_commit=none` when HEAD is unchanged; only a new descendant commit
+on the assigned branch is reported as `local_commit_created`. That field does
+not assert the correction is valid: QA must still inspect/test it. The agent may run the focused existing generation test
 using `MAIN/backend/.venv/bin/python -m pytest tests/test_generate.py` from its
 own backend directory (no dependency install required). The inherited push hook
 and agent instructions prohibit pushes; the launcher never pushes.
@@ -187,3 +200,30 @@ Never commit auth material, uploaded bytes, full raw logs, fault code or fix
 branch. After the unchanged-main proof, QA may commit **only sanitized evidence**
 (screenshot and record); this later evidence commit is separate from the baseline
 and does not include the fault or fix. #136 consolidates final documentation.
+
+## Rerun on the same date without altering previous fault/fix branches
+
+If the exact dated branch already exists, **do not** reset, modify, delete or
+reuse the original branches/worktrees. Make a fresh independent local clone of
+clean, fixed main instead; it can create the same date-named branch in its own
+repository. No remote push occurs. This also gives the rerun new state/claims.
+After the Engineer's fix is on main:
+
+```sh
+SOURCE_MAIN=/Users/zhaksylykbakhytuly/gradematch
+RERUN_MAIN=/tmp/gradematch-drill-rerun-$(date -u +%Y%m%dT%H%M%SZ)
+git clone --no-hardlinks --single-branch --branch main "$SOURCE_MAIN" "$RERUN_MAIN"
+# Reuse installed dependencies read-only; .venv is ignored by Git.
+ln -s "$SOURCE_MAIN/backend/.venv" "$RERUN_MAIN/backend/.venv"
+cd "$RERUN_MAIN"
+```
+
+Now run the baseline/setup section from that clone, so MAIN, STATE, fault
+worktree and oncall worktree all point at the independent repository. Keep
+`SOURCE_MAIN` untouched. Use a new disposable database filename if desired.
+Wait for the earlier matching alert to resolve before firing again; activeAt
+will differ. Save the new screenshot/sanitized record in this clone, then copy
+**only reviewed evidence files** back to the original main checkout for QA's
+separate evidence commit. Record both the source implementation SHA and the
+rerun clone's before/after main SHA. A failed earlier session remains preserved
+as failed evidence; do not relabel it or remove its claim to simulate a pass.

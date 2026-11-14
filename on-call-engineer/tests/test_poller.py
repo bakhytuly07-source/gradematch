@@ -87,8 +87,19 @@ class PollerTests(unittest.TestCase):
         self.assertNotIn('push', calls.read_text())
         logs = '\n'.join(p.read_text() for p in self.state.glob('*.log'))
         self.assertIn('exit_status=0', logs)
-        self.assertIn('local_fix_commit=', logs)
+        self.assertIn('local_fix_commit=none', logs)
+        self.assertIn('investigation_result=no_new_commit', logs)
         self.assertNotIn('super-secret', logs)
+
+    def test_real_new_local_commit_is_reported(self):
+        (self.root / 'agent.py').write_text("import sys,subprocess\nsys.stdin.read()\nopen('fix','w').write('corrected')\nsubprocess.run(['git','add','fix'],check=True)\nsubprocess.run(['git','commit','-m','local fix'],check=True)\n")
+        p = self.make()
+        p.dispatch(alert())
+        self.join(p)
+        log = next(self.state.glob('*.log')).read_text()
+        self.assertIn('investigation_result=local_commit_created', log)
+        self.assertNotIn('local_fix_commit=none', log)
+        self.assertEqual(self.git('branch', '--show-current'), 'main')
 
     def test_launch_failure_is_not_retried(self):
         p = self.make()

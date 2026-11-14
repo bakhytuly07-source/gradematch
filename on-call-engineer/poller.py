@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shlex
 import subprocess
+import sys
 import threading
 import time
 import urllib.request
@@ -123,7 +124,13 @@ class Poller:
                 self.log(line.rstrip(), file)
             process.stdout.close()
             status = process.wait()
-            self.log(f'exit_status={status} local_fix_commit={self.git("rev-parse", "HEAD", cwd=worktree)} base_commit={base}', file)
+            head = self.git('rev-parse', 'HEAD', cwd=worktree)
+            actual_branch = self.git('branch', '--show-current', cwd=worktree)
+            changed = head != base and actual_branch == candidate
+            descendant = subprocess.run(['git', 'merge-base', '--is-ancestor', base, head], cwd=worktree).returncode == 0
+            fix = head if changed and descendant else 'none'
+            outcome = 'local_commit_created' if fix != 'none' else 'no_new_commit'
+            self.log(f'exit_status={status} investigation_result={outcome} local_fix_commit={fix} head_commit={head} base_commit={base}', file)
         except Exception as error:
             self.log('exit_status=launch_failed; launch/investigation failed; identity remains claimed: ' + str(error), file)
 
@@ -139,7 +146,7 @@ def main():
     parser.add_argument('--repo', default='.')
     parser.add_argument('--state', default=str(ROOT / 'logs'))
     parser.add_argument('--url', default='http://localhost:9090/api/v1/alerts')
-    parser.add_argument('--agent', default='codex exec --sandbox workspace-write')
+    parser.add_argument('--agent', default=shlex.join([sys.executable, str(ROOT / 'codex_agent.py')]))
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--once', action='store_true')
     args = parser.parse_args()
