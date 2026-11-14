@@ -294,6 +294,8 @@ def create_app(*, storage="memory", users=None, sessions=None, looks=None, datab
     from .static import mount_frontend
     mount_frontend(application)
     application.openapi = lambda: contract_openapi(application)
+    from .telemetry import configure
+    configure(application)
     return application
 
 

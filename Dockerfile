@@ -7,6 +7,8 @@ ENV VITE_API_URL=/
 RUN env -u NITRO_PRESET npm run build
 
 FROM python:3.12-slim AS runtime
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 RUN pip install --no-cache-dir uv==0.11.7
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
