@@ -1,6 +1,7 @@
 services:
   - type: web
     name: gradematch-web
+    autoDeployTrigger: checksPass
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .

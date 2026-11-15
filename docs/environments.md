@@ -54,6 +54,7 @@ specification section.
 | `services[].plan` | `free` both | Free compute, same reference |
 | `services[].region` | `frankfurt` both | Frankfurt deployment, same reference |
 | `services[].healthCheckPath` | `/docs` both | Existing HTTP health path, same reference |
+| `services[0].autoDeployTrigger` | `checksPass` | Dev waits for CI; [service fields](https://render.com/docs/blueprint-spec#service-fields) |
 | `services[1].autoDeployTrigger` | quoted `off` | Manual prod deployment; same reference. Quotes preserve the string under YAML 1.1 validators. |
 | `services[].envVars` | lists | [Environment entries](https://render.com/docs/blueprint-spec#environment-variables) |
 | `services[].envVars[].key` | `DATABASE_URL`, `DEPLOYMENT_ENVIRONMENT` | Backend configuration keys, same reference |
@@ -74,3 +75,31 @@ jsonschema 4.26.0, `validator_for(schema).check_schema(schema)` then
 `validator(schema).validate(yaml.safe_load(Path('../render.yaml').read_text()))`.
 Output: `PASS render.yaml: official Render JSON Schema`.
 This validates structure, not dashboard settings or successful deployment.
+
+## Automatic dev CI gate (#138)
+
+Dev uses `autoDeployTrigger: checksPass`; prod remains `off`. The existing
+`CI` workflow runs independent `backend` and `frontend` jobs, then dependent
+`stack`. Backend runs the full pytest suite; frontend runs TypeScript, tests and
+build; stack runs `make integration` and `make e2e`. No job or assertion changed.
+
+[Render CI integration](https://render.com/docs/deploys#integrating-with-ci)
+waits for checks on the exact new commit. GitHub conclusions `success`, `neutral`
+and `skipped` count as passed; zero checks or a failed check blocks automatic
+deployment. Keep all three jobs enabled. Privileged manual deploys and hooks
+are separate from this automatic gate. The promotion workflow's independent
+CI validation belongs to #139 and is outside this change.
+
+The complete field audit above and official schema validation were repeated on
+2026-11-15 after adding `checksPass`: `PASS render.yaml: official Render JSON Schema`
+(same schema SHA-256 and validator versions).
+
+Waiting for owner dashboard evidence: “After CI Checks Pass” on the unchanged
+dev service; successful commit SHA, CI run URL/conclusion and completion time,
+then Render event for that same SHA with timezone; endpoint HTTP 200 results.
+For an owner-controlled failed/pending/recovery experiment, retain the prior
+live SHA, failed SHA/run, terminal completion time and observation interval,
+Render event history showing no deploy for failed/pending SHA, then recovery
+CI completion and subsequent matching deploy event. Do not manufacture a broken
+main commit as part of this implementation. A green GitHub run alone does not
+prove the deployment gate or live service identity.
