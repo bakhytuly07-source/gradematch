@@ -1,0 +1,389 @@
+{
+  "observedAt": "2026-11-15T13:42:56.089482+00:00",
+  "observer": "independent QA",
+  "services": [
+    {
+      "id": "srv-dbson2jrjlhs739tg6ug",
+      "name": "gradematch-prod",
+      "createdAt": "2026-11-15T10:38:03.106965Z",
+      "autoDeploy": "no",
+      "branch": "main",
+      "settings": {
+        "plan": "free",
+        "region": "frankfurt",
+        "runtime": "docker",
+        "url": "https://gradematch-prod.onrender.com",
+        "healthCheckPath": "/docs",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "./Dockerfile"
+        }
+      },
+      "environment": "prod",
+      "database": {
+        "postgres": true,
+        "neonProvider": true
+      },
+      "telemetryEndpointConfigured": false,
+      "deploys": [
+        {
+          "id": "dep-dbsr1dnf3r2c73b5182g",
+          "status": "live",
+          "trigger": "service_updated",
+          "createdAt": "2026-11-15T13:16:38.234745Z",
+          "finishedAt": "2026-11-15T13:17:32.01925Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsplf6k1f9s739uls1g",
+          "status": "deactivated",
+          "trigger": "deploy_hook",
+          "createdAt": "2026-11-15T11:42:52.649429Z",
+          "finishedAt": "2026-11-15T11:43:55.709203Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbspjm8n74is73ai8dd0",
+          "status": "deactivated",
+          "trigger": "deploy_hook",
+          "createdAt": "2026-11-15T11:39:05.741285Z",
+          "finishedAt": "2026-11-15T11:40:19.802524Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsph2l6e07s73aglfdg",
+          "status": "deactivated",
+          "trigger": "deploy_hook",
+          "createdAt": "2026-11-15T11:33:30.363171Z",
+          "finishedAt": "2026-11-15T11:34:32.368467Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbspgf6k1f9s739u8nq0",
+          "status": "deactivated",
+          "trigger": "deploy_hook",
+          "createdAt": "2026-11-15T11:32:12.662069Z",
+          "finishedAt": "2026-11-15T11:33:16.5856Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsp7ad6e07s73afrbhg",
+          "status": "deactivated",
+          "trigger": "service_updated",
+          "createdAt": "2026-11-15T11:12:41.818128Z",
+          "finishedAt": "2026-11-15T11:13:43.391018Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2rrjlhs739tg800",
+          "status": "update_failed",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.952825Z",
+          "finishedAt": "2026-11-15T10:41:38.292442Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        }
+      ],
+      "logs": [
+        {
+          "queryText": "Database ready; starting migrations.",
+          "hasMore": false,
+          "results": [
+            {
+              "timestamp": "2026-11-15T13:16:55.254567744Z",
+              "message": "Database ready; starting migrations."
+            }
+          ]
+        },
+        {
+          "queryText": "Application startup complete.",
+          "hasMore": false,
+          "results": [
+            {
+              "timestamp": "2026-11-15T13:17:30.537381158Z",
+              "message": "INFO:     Application startup complete."
+            }
+          ]
+        },
+        {
+          "queryText": "API request completed",
+          "hasMore": false,
+          "results": []
+        }
+      ]
+    },
+    {
+      "id": "srv-dbkf7pl6e07s73c9u6n0",
+      "name": "gradematch-web",
+      "createdAt": "2026-11-02T20:34:47.557916Z",
+      "autoDeploy": "yes",
+      "branch": "main",
+      "settings": {
+        "plan": "free",
+        "region": "frankfurt",
+        "runtime": "docker",
+        "url": "https://gradematch-web.onrender.com",
+        "healthCheckPath": "/docs",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "./Dockerfile"
+        }
+      },
+      "environment": "dev",
+      "database": {
+        "postgres": true,
+        "neonProvider": false
+      },
+      "telemetryEndpointConfigured": false,
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        },
+        {
+          "id": "dep-dbkfefmk1f9s73d6v05g",
+          "status": "update_failed",
+          "trigger": "manual",
+          "createdAt": "2026-11-02T20:49:02.97336Z",
+          "finishedAt": "2026-11-02T20:51:05.85612Z",
+          "commitSha": "5fc973b223eded5baa50d86d2d4b6b0651ea519d"
+        },
+        {
+          "id": "dep-dbkfdl942hec7387uag0",
+          "status": "update_failed",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-02T20:47:17.9884Z",
+          "finishedAt": "2026-11-02T20:48:13.446192Z",
+          "commitSha": "5fc973b223eded5baa50d86d2d4b6b0651ea519d"
+        },
+        {
+          "id": "dep-dbkfbjgae00c73cj09hg",
+          "status": "update_failed",
+          "trigger": "manual",
+          "createdAt": "2026-11-02T20:42:54.913706Z",
+          "finishedAt": "2026-11-02T20:44:48.751626Z",
+          "commitSha": "e7adbc8a9de35741606eefd155904b8ffc724856"
+        },
+        {
+          "id": "dep-dbkfaf0ae00c73814v3g",
+          "status": "update_failed",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-02T20:40:28.167981Z",
+          "finishedAt": "2026-11-02T20:41:34.127147Z",
+          "commitSha": "e7adbc8a9de35741606eefd155904b8ffc724856"
+        },
+        {
+          "id": "dep-dbkf7q56e07s73c9u7g0",
+          "status": "update_failed",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-02T20:34:48.262328Z",
+          "finishedAt": "2026-11-02T20:36:48.169215Z",
+          "commitSha": "113de7e3a378fa20f3efbf3cef4cf376e5b5b340"
+        }
+      ],
+      "logs": [
+        {
+          "queryText": "Database ready; starting migrations.",
+          "hasMore": false,
+          "results": [
+            {
+              "timestamp": "2026-11-15T13:04:30.180220808Z",
+              "message": "Database ready; starting migrations."
+            },
+            {
+              "timestamp": "2026-11-15T13:36:20.82809076Z",
+              "message": "Database ready; starting migrations."
+            }
+          ]
+        },
+        {
+          "queryText": "Application startup complete.",
+          "hasMore": false,
+          "results": [
+            {
+              "timestamp": "2026-11-15T13:05:02.384318703Z",
+              "message": "INFO:     Application startup complete."
+            },
+            {
+              "timestamp": "2026-11-15T13:36:56.327817722Z",
+              "message": "INFO:     Application startup complete."
+            }
+          ]
+        },
+        {
+          "queryText": "API request completed",
+          "hasMore": false,
+          "results": []
+        }
+      ]
+    }
+  ],
+  "databases": [
+    {
+      "id": "dpg-dbket1ou01pc73bo6gcg-a",
+      "name": "gradematch-db",
+      "createdAt": "2026-11-02T20:11:52.479515Z",
+      "plan": "free",
+      "region": "frankfurt"
+    }
+  ],
+  "databaseDistinctHostAndName": true,
+  "devConnectionMatchesRetainedRenderDatabase": true
+}

@@ -41,16 +41,17 @@ Blueprint changes to confirm the existing resources are retained, only prod is
 added, and no database is replaced. After sync record both identities, actual
 URLs, plans, regions, deploy SHAs/events and successful migrations. The actual public URLs are listed above, corroborated by the successful
 promotion summary. Dev service ID is `srv-dbkf7pl6e07s73c9u6n0` (settings
-screenshot); prod is `srv-dbson2jrjlhs739tg6ug` (independent #139 QA). A before/after
-identity comparison still requires its historical record.
+screenshot); prod is `srv-dbson2jrjlhs739tg6ug` (independent #139 QA). Historical API creation/deploy records and the actual dev database binding are
+now independently corroborated in the settings evidence below.
 Verify `/`, `/login`, `/docs` each return 200 on both actual URLs after wake-up.
 
 Use two distinct disposable accounts: register on dev only, verify successful
 dev login and prod authentication error without registration; repeat in reverse.
 Save a synthetic look in each and verify it is absent from the other Library.
 Record sanitized statuses and look identifiers; omit credentials, emails,
-connection strings and tokens. The owner-supplied one-way check is recorded below; the reciprocal account
-and both saved-look checks remain unverified.
+connection strings and tokens. The owner-supplied one-way check and the later
+[independent reciprocal account/Library check](#independent-live-reciprocal-authentication-and-library-check)
+are recorded below.
 
 ## Complete Blueprint field audit
 
@@ -133,8 +134,8 @@ The complete field audit above and official schema validation were repeated on
 (same schema SHA-256 and validator versions).
 
 The supplied settings screenshot shows “After CI Checks Pass” for dev.
-Still needed for the full gate experiment: successful commit SHA, CI run URL/conclusion and completion time,
-then Render event for that same SHA with timezone; endpoint HTTP 200 results.
+The completed controlled gate experiment below records exact SHAs, CI run
+conclusions and matching timestamped Render deployment observations.
 For an owner-controlled failed/pending/recovery experiment, retain the prior
 live SHA, failed SHA/run, terminal completion time and observation interval,
 Render event history showing no deploy for failed/pending SHA, then recovery
@@ -535,32 +536,90 @@ the independently checked promotion evidence above and implies version
 `85c7655`; dev implies `591f8b0`. Deployment metadata alone does not prove
 emitted cloud telemetry has those version labels.
 
-### Controlled CI gate experiment status
+### Controlled CI gate experiment (2026-11-15 UTC)
 
-| Phase | Timestamp / interval UTC | Result |
+The owner supplied private Render API read access through ignored `.env`; the
+prior access blocker is resolved. The key and database values were never
+printed or committed. The owner authorized the temporary failure and recovery
+on `main`. Only a new standalone pytest assertion was added, then removed;
+all original assertions, application code, dependencies and workflows are unchanged.
+
+[Sanitized experiment snapshots](img/ci-gate-experiment.json) retain the full
+baseline/pending/failed/recovery deployment lists and exact-SHA CI job timestamps.
+All times below are UTC on November 15, 2026.
+
+| Phase | Exact commit / UTC time | Observation |
 | --- | --- | --- |
-| Baseline | Owner API event `2026-11-15T13:04:05.519984Z`–`13:05:09.4806Z` | Dev `591f8b0` live after successful CI, as supplied above |
-| Access preflight | 2026-11-15 Engineer session | No Render API credential available in task environment or supported connector; native Chrome access stalled then was aborted |
-| Controlled pending / failure | Not run | No failing commit was created or pushed; no no-deploy or retained-live-SHA claim |
-| Recovery | Not applicable | Main retains its passing assertions; no failure to revert |
+| Baseline | `55231e877e8a76d6c728574595b1aee275be2d55`, snapshot `13:40:07.344480` | Live `dep-dbsraeu417fc73fr69fg` |
+| Temporary failure pushed | `29b3c9da819141ca586fd81a251ec43704854fd9`, push observed `13:40:20` | Only a new standalone pytest file; original assertions preserved |
+| Pending | Snapshot `13:40:48.636253`; CI in progress | No failed-SHA deployment; baseline SHA remains live |
+| Terminal failure | [CI 43720213078](https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078), backend completed `13:40:57`, run updated `13:40:58` | Intentional assertion failed; frontend passed `13:40:50`, stack skipped |
+| Failure observed | Snapshots `13:41:19.799899` and `13:41:31.197359` | No failed-SHA deployment; baseline SHA remains live through post-failure/pre-recovery window |
+| Recovery pushed | `5c22a9b0aa7b0cb3423fe4740584f27a074c0f36`, push observed `13:41:33` | Removed only temporary test; tree equals baseline |
+| Recovery pending | Snapshots `13:42:42.767925` and `13:46:03.001706` | Baseline remains live; failed and recovery SHAs absent from deployment list |
+| Recovery CI passed | [CI 43720318934](https://github.com/bakhytuly07-source/gradematch/actions/runs/43720318934), backend `13:42:19`, frontend `13:41:58`, stack `13:46:42` | All three jobs successful |
+| Automatic recovery deploy | `dep-dbsrfhajnfac73cjnagg`, `new_commit`, created `13:46:45.343318`, finished `13:47:49.911813` | Exact recovery SHA; begins 3.343318 seconds after final successful CI job; observed live `13:48:32.900651` |
 
-The experiment is authorized but blocked on usable private Render read access.
-Supply `RENDER_API_KEY` privately in the task environment or an accessible
-authenticated dashboard; never put it in an issue, document or chat. Read access
-must produce timestamped deployment-list snapshots before, during pending CI,
-after terminal failure and after recovery. A successful baseline does not
-replace this experiment. Existing tests and workflow checks were not changed.
+Failure logs contain exactly the intended failure:
+`tests/test_ci_gate_experiment.py::test_controlled_ci_gate_blocks_failed_commit`,
+`AssertionError: Intentional #138 CI-gate experiment; remove in recovery commit`;
+result **1 failed, 224 passed, 1 skipped**. Recovery restored the original suite:
+**224 backend passed / 1 skipped**, **52 frontend passed**, **10 integration
+passed**, and existing guest/Library/Studio-session scenarios plus **30 Playwright
+passed** (1.6m), independently corroborated by QA from recovery CI logs.
+Engineer smoke checks returned **200** for `/`, `/login`, `/docs` on dev at
+`13:48:33`–`13:48:34` and prod at `13:49:01`–`13:49:02` (HTTP Date UTC).
+Independent QA repeated all six successfully at `13:49:05 GMT` after a bounded
+retry of an initial free-instance wake-up timeout; both observations are in the
+sanitized artifact. No synthetic accounts were created during this experiment.
+
+The observation establishes no deployment for the failed commit in the sampled
+history and retained live SHA through the recorded interval; it does not claim
+continuous observation outside those timestamped snapshots.
+
+### Independent Render settings and migration evidence
+
+[Sanitized independent API evidence](img/render-settings-evidence.json), observed
+`2026-11-15T13:42:56.089482+00:00`, verifies both services are free Frankfurt
+Docker services using `./Dockerfile`, context `.`, health path `/docs`, empty
+Docker command, and environment labels `dev` / `prod`. Production API
+`autoDeploy=no` corroborates Off; dev `yes` plus the settings screenshot and
+controlled gate experiment identify its checks-pass behavior.
+
+The retained dev service was created `2026-11-02T20:34:47.557916Z`; its database
+`dpg-dbket1ou01pc73bo6gcg-a` (`gradematch-db`, free Frankfurt) was created
+`2026-11-02T20:11:52.479515Z`. Both predate the November 15 environment split.
+Dev deploy history spans the original November 2 Blueprint event and November 15
+`blueprint_sync` event `dep-dbson2knjr1c73barl30`, retaining the same service ID.
+This historical API record corroborates preservation of the existing resources.
+Private database inspection confirms PostgreSQL for both, distinct database
+host/name pairs, a Neon provider for prod, and dev’s exact binding matching the
+retained Render database connection information. Only comparison/provider
+booleans are retained, never connection strings.
+
+The current production live deployment observed independently is
+`dep-dbsr1dnf3r2c73b5182g`, trigger `service_updated`, SHA
+`85c7655c25335235844cb0aa7e202b9a0d69affa`, created
+`2026-11-15T13:16:38.234745Z`, finished `13:17:32.01925Z`.
+This later startup supersedes the earlier owner-supplied live deployment ID
+without changing the promoted SHA. Production logs show “Database ready;
+starting migrations.” at `13:16:55.254567744Z` and “Application startup complete.”
+at `13:17:30.537381158Z`. Dev shows the same sequence at `13:36:20.82809076Z`
+and `13:36:56.327817722Z`. Given the unchanged `start.sh` uses `set -eu`, runs
+`alembic upgrade head` before starting Uvicorn, and Docker command is empty,
+application startup establishes successful migration-command exit by inference;
+the artifact does not claim explicit Alembic revision log lines.
 
 ### Evidence still required for full acceptance
 
-Still unresolved: historical before/after dev and database identities; complete
-live service settings; independently corroborated Neon configuration/migration
-logs; controlled pending/failed/recovery event history; cloud request-log,
-trace and metric environment/version identity matching actual deployments.
-Actual expiry and prod auto-deploy Off are now supported by owner screenshots.
-Reciprocal authentication and saved-Library results are recorded separately
-below when independently observed. Full #137/#138/#140/#141 acceptance remains
-for QA; no unobserved criterion is called passed.
+Both live services currently lack `OTEL_EXPORTER_OTLP_ENDPOINT`; independent
+API checks found no “API request completed” telemetry log records. Ordinary
+access logs, successful startup and correct deployed SHAs do not establish
+cloud trace/metric identities. Live cloud request-log, trace and business metric
+environment/version identity matching actual deployments remains unresolved
+for #140 and the dependent #141 evidence. No telemetry configuration was changed
+and no production deployment was invoked in this experiment. QA determines
+final acceptance; unobserved criteria remain unverified.
 
 ### Independent live reciprocal authentication and Library check
 
@@ -586,7 +645,9 @@ repeated the complete flow successfully as above. The transient failure is
 retained as an operational observation, not erased by the passing retry.
 Owner-reported successful reverse authentication and repaired Neon migrations
 are consistent with the successful retry, but no independent migration log or
-private database configuration was available to this Engineer.
+private database configuration was available at that earlier review. The later
+[independent settings/migration evidence](#independent-render-settings-and-migration-evidence)
+now corroborates database binding and successful migration-command exit.
 
 This docs-only follow-up reuses the exact implementation test evidence above
 (backend 224 passed/1 skipped, frontend 52, integration 10 and existing E2E

@@ -1,0 +1,1680 @@
+{
+  "date": "2026-11-15",
+  "timezone": "UTC",
+  "observer": "Engineer using private Render API and GitHub CLI",
+  "failedSha": "29b3c9da819141ca586fd81a251ec43704854fd9",
+  "recoverySha": "5c22a9b0aa7b0cb3423fe4740584f27a074c0f36",
+  "snapshots": {
+    "baseline": {
+      "observedAt": "2026-11-15T13:40:07.344480+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "pending": {
+      "observedAt": "2026-11-15T13:40:48.636253+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "failed": {
+      "observedAt": "2026-11-15T13:41:19.799899+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "before-recovery": {
+      "observedAt": "2026-11-15T13:41:31.197359+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "recovery-pending": {
+      "observedAt": "2026-11-15T13:42:42.767925+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "recovery-current": {
+      "observedAt": "2026-11-15T13:46:03.001706+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkntqm7bikc7396fkt0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T06:27:54.048131Z",
+          "updatedAt": "2026-11-03T07:06:43.618649Z",
+          "finishedAt": "2026-11-03T06:29:15.90755Z",
+          "commitSha": "8f0d694a07e4e4bb18736950b7bded9fffaa8f51"
+        }
+      ]
+    },
+    "recovery-deploy-started": {
+      "observedAt": "2026-11-15T13:47:05.420087+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsrfhajnfac73cjnagg",
+          "status": "update_in_progress",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:46:45.343318Z",
+          "updatedAt": "2026-11-15T13:46:59.295606Z",
+          "finishedAt": null,
+          "commitSha": "5c22a9b0aa7b0cb3423fe4740584f27a074c0f36"
+        },
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:37:29.636023Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        }
+      ]
+    },
+    "recovery-live": {
+      "observedAt": "2026-11-15T13:48:32.900651+00:00",
+      "serviceId": "srv-dbkf7pl6e07s73c9u6n0",
+      "deploys": [
+        {
+          "id": "dep-dbsrfhajnfac73cjnagg",
+          "status": "live",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:46:45.343318Z",
+          "updatedAt": "2026-11-15T13:48:20.335635Z",
+          "finishedAt": "2026-11-15T13:47:49.911813Z",
+          "commitSha": "5c22a9b0aa7b0cb3423fe4740584f27a074c0f36"
+        },
+        {
+          "id": "dep-dbsraeu417fc73fr69fg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:35:55.609328Z",
+          "updatedAt": "2026-11-15T13:47:49.910454Z",
+          "finishedAt": "2026-11-15T13:36:59.924527Z",
+          "commitSha": "55231e877e8a76d6c728574595b1aee275be2d55"
+        },
+        {
+          "id": "dep-dbsqrhc9v7es73c7ci2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T13:04:05.519984Z",
+          "updatedAt": "2026-11-15T13:36:59.923283Z",
+          "finishedAt": "2026-11-15T13:05:09.4806Z",
+          "commitSha": "591f8b0181d5232c38cead26d711e2d93a69b96a"
+        },
+        {
+          "id": "dep-dbsq0ldbedkc73cf5ai0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T12:06:45.131855Z",
+          "updatedAt": "2026-11-15T13:05:09.478582Z",
+          "finishedAt": "2026-11-15T12:07:47.514443Z",
+          "commitSha": "f75742a2d091978e593829ada458ca6be897f808"
+        },
+        {
+          "id": "dep-dbson2knjr1c73barl30",
+          "status": "deactivated",
+          "trigger": "blueprint_sync",
+          "createdAt": "2026-11-15T10:38:03.19411Z",
+          "updatedAt": "2026-11-15T12:07:47.513678Z",
+          "finishedAt": "2026-11-15T10:40:12.989688Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbson2e7bikc73fa4g7g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:38:01.251376Z",
+          "updatedAt": "2026-11-15T10:40:12.988808Z",
+          "finishedAt": "2026-11-15T10:39:09.959315Z",
+          "commitSha": "85c7655c25335235844cb0aa7e202b9a0d69affa"
+        },
+        {
+          "id": "dep-dbsoci15efls73evuv2g",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-15T10:15:36.780775Z",
+          "updatedAt": "2026-11-15T10:39:09.958544Z",
+          "finishedAt": "2026-11-15T10:16:47.643959Z",
+          "commitSha": "fca76eb6aa31fdb34c9aaba10254cea3cd4aced0"
+        },
+        {
+          "id": "dep-dbs21jijnfac73bphpcg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:50:22.652697Z",
+          "updatedAt": "2026-11-15T10:16:47.642203Z",
+          "finishedAt": "2026-11-14T08:51:40.559395Z",
+          "commitSha": "c4663ec2973864def9793c12a9613ea4677365f1"
+        },
+        {
+          "id": "dep-dbs1uak9v7es73bdaa50",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:43:22.119838Z",
+          "updatedAt": "2026-11-14T08:51:40.558343Z",
+          "finishedAt": "2026-11-14T08:44:26.402412Z",
+          "commitSha": "70f93123fa8151eda2151d9b45bdf52265182921"
+        },
+        {
+          "id": "dep-dbs1lie7bikc73ei4ir0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:24:41.07541Z",
+          "updatedAt": "2026-11-14T08:44:26.401593Z",
+          "finishedAt": "2026-11-14T08:40:32.076344Z",
+          "commitSha": "12ab565c9fb28ca248874df3c86245ee30142cd3"
+        },
+        {
+          "id": "dep-dbs1e6mq1p3s73e9rk80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T08:08:58.724026Z",
+          "updatedAt": "2026-11-14T08:40:32.07533Z",
+          "finishedAt": "2026-11-14T08:10:03.676693Z",
+          "commitSha": "64be0f40f5044b16a5d41299229ec99c69cccbe8"
+        },
+        {
+          "id": "dep-dbs1892jnfac73borjb0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:56:20.936995Z",
+          "updatedAt": "2026-11-14T08:10:03.675756Z",
+          "finishedAt": "2026-11-14T07:57:24.772662Z",
+          "commitSha": "3831548975860ece89bf77350f5f26036e4c46a3"
+        },
+        {
+          "id": "dep-dbs0s3u7bikc73eheem0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:30:24.034397Z",
+          "updatedAt": "2026-11-14T07:57:24.771832Z",
+          "finishedAt": "2026-11-14T07:31:45.525761Z",
+          "commitSha": "61971bdf5c647ba85922b12cab4ba985f7933107"
+        },
+        {
+          "id": "dep-dbs0f42jnfac73bo7780",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T07:02:40.775697Z",
+          "updatedAt": "2026-11-14T07:31:45.524922Z",
+          "finishedAt": "2026-11-14T07:03:45.15709Z",
+          "commitSha": "c93962b0f74cac0a24953be242991d4bc67c5fc5"
+        },
+        {
+          "id": "dep-dbs06q49v7es73bbqd80",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:44:56.352617Z",
+          "updatedAt": "2026-11-14T07:03:45.156208Z",
+          "finishedAt": "2026-11-14T06:45:59.380853Z",
+          "commitSha": "705f971061bee1c2b9774ec1a4c335c541c118ef"
+        },
+        {
+          "id": "dep-dbs04pff3r2c73dret10",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:40:37.905936Z",
+          "updatedAt": "2026-11-14T06:45:59.38001Z",
+          "finishedAt": "2026-11-14T06:41:52.577028Z",
+          "commitSha": "8ab900b1801a05c2ad7d993c605c305c7ba7c573"
+        },
+        {
+          "id": "dep-dbrvqsu8bjmc73dvubtg",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-14T06:19:31.584894Z",
+          "updatedAt": "2026-11-14T06:41:52.576251Z",
+          "finishedAt": "2026-11-14T06:21:51.672123Z",
+          "commitSha": "66d2aa8bf00d4db45967ca5594a35c4140609f7d"
+        },
+        {
+          "id": "dep-dbkootflk1mc73e3r0k0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:25:41.50977Z",
+          "updatedAt": "2026-11-14T06:21:51.670853Z",
+          "finishedAt": "2026-11-03T07:27:01.63565Z",
+          "commitSha": "4a169e37d5d0a9ee8712d265171a3f91ea568cb1"
+        },
+        {
+          "id": "dep-dbkoiqajnfac739hrb1g",
+          "status": "deactivated",
+          "trigger": "manual",
+          "createdAt": "2026-11-03T07:12:41.246335Z",
+          "updatedAt": "2026-11-03T07:27:01.634318Z",
+          "finishedAt": "2026-11-03T07:13:54.859531Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        },
+        {
+          "id": "dep-dbkofbks728c738tqvu0",
+          "status": "deactivated",
+          "trigger": "new_commit",
+          "createdAt": "2026-11-03T07:05:18.333415Z",
+          "updatedAt": "2026-11-03T07:13:54.858694Z",
+          "finishedAt": "2026-11-03T07:06:43.619794Z",
+          "commitSha": "4b7f1ed73b75bd088a77cecf0ad3faa58248672b"
+        }
+      ]
+    }
+  },
+  "ci": {
+    "failure-ci-pending": {
+      "conclusion": "",
+      "createdAt": "2026-11-15T13:40:22Z",
+      "headSha": "29b3c9da819141ca586fd81a251ec43704854fd9",
+      "jobs": [
+        {
+          "name": "frontend",
+          "databaseId": 132830358327,
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-11-15T13:40:24Z",
+          "completedAt": "0001-01-01T00:00:00Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078/job/132830358327"
+        },
+        {
+          "name": "backend",
+          "databaseId": 132830358564,
+          "status": "in_progress",
+          "conclusion": "",
+          "startedAt": "2026-11-15T13:40:24Z",
+          "completedAt": "0001-01-01T00:00:00Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078/job/132830358564"
+        }
+      ],
+      "status": "in_progress",
+      "updatedAt": "2026-11-15T13:40:32Z",
+      "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078"
+    },
+    "failure-ci": {
+      "conclusion": "failure",
+      "createdAt": "2026-11-15T13:40:22Z",
+      "headSha": "29b3c9da819141ca586fd81a251ec43704854fd9",
+      "jobs": [
+        {
+          "name": "frontend",
+          "databaseId": 132830358327,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-15T13:40:24Z",
+          "completedAt": "2026-11-15T13:40:50Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078/job/132830358327"
+        },
+        {
+          "name": "backend",
+          "databaseId": 132830358564,
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-15T13:40:24Z",
+          "completedAt": "2026-11-15T13:40:57Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078/job/132830358564"
+        },
+        {
+          "name": "stack",
+          "databaseId": 132830517483,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-15T13:40:58Z",
+          "completedAt": "2026-11-15T13:40:57Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078/job/132830517483"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-11-15T13:40:58Z",
+      "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720213078"
+    },
+    "recovery-ci": {
+      "conclusion": "success",
+      "createdAt": "2026-11-15T13:41:35Z",
+      "headSha": "5c22a9b0aa7b0cb3423fe4740584f27a074c0f36",
+      "jobs": [
+        {
+          "name": "backend",
+          "databaseId": 132830682763,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-15T13:41:37Z",
+          "completedAt": "2026-11-15T13:42:19Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720318934/job/132830682763"
+        },
+        {
+          "name": "frontend",
+          "databaseId": 132830682925,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-15T13:41:37Z",
+          "completedAt": "2026-11-15T13:41:58Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720318934/job/132830682925"
+        },
+        {
+          "name": "stack",
+          "databaseId": 132830872526,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-15T13:42:20Z",
+          "completedAt": "2026-11-15T13:46:42Z",
+          "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720318934/job/132830872526"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-11-15T13:46:43Z",
+      "url": "https://github.com/bakhytuly07-source/gradematch/actions/runs/43720318934"
+    }
+  },
+  "intentionalFailureEvidence": [
+    "tests/test_ci_gate_experiment.py::test_controlled_ci_gate_blocks_failed_commit",
+    "AssertionError: Intentional #138 CI-gate experiment; remove in recovery commit",
+    "1 failed, 224 passed, 1 skipped"
+  ],
+  "engineerSmoke": [
+    {
+      "url": "https://gradematch-web.onrender.com/",
+      "status": 200,
+      "observedAt": "2026-11-15T13:48:33.155664+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:48:33 GMT"
+    },
+    {
+      "url": "https://gradematch-web.onrender.com/login",
+      "status": 200,
+      "observedAt": "2026-11-15T13:48:33.325982+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:48:34 GMT"
+    },
+    {
+      "url": "https://gradematch-web.onrender.com/docs",
+      "status": 200,
+      "observedAt": "2026-11-15T13:48:33.510429+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:48:34 GMT"
+    },
+    {
+      "url": "https://gradematch-prod.onrender.com/",
+      "status": 200,
+      "observedAt": "2026-11-15T13:49:00.997124+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:49:01 GMT"
+    },
+    {
+      "url": "https://gradematch-prod.onrender.com/login",
+      "status": 200,
+      "observedAt": "2026-11-15T13:49:01.465109+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:49:02 GMT"
+    },
+    {
+      "url": "https://gradematch-prod.onrender.com/docs",
+      "status": 200,
+      "observedAt": "2026-11-15T13:49:01.635317+00:00",
+      "httpDate": "Sun, 15 Nov 2026 13:49:02 GMT"
+    }
+  ],
+  "independentQaSmoke": {
+    "observedAt": "2026-11-15T13:49:04.820879+00:00",
+    "requests": [
+      {
+        "url": "https://gradematch-web.onrender.com/",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      },
+      {
+        "url": "https://gradematch-web.onrender.com/login",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      },
+      {
+        "url": "https://gradematch-web.onrender.com/docs",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      },
+      {
+        "url": "https://gradematch-prod.onrender.com/",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      },
+      {
+        "url": "https://gradematch-prod.onrender.com/login",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      },
+      {
+        "url": "https://gradematch-prod.onrender.com/docs",
+        "status": 200,
+        "date": "Sun, 15 Nov 2026 13:49:05 GMT"
+      }
+    ],
+    "priorAttempt": "One sequential request exceeded45s; bounded full parallel retry after wake-up"
+  }
+}
