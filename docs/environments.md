@@ -471,9 +471,10 @@ the same credentials returned **401**. The returned dev user identifier was
 `a0691d36-d5fa-4552-ba45-5460415e17e3`. Email, password and tokens are omitted.
 This is owner-supplied evidence, not an independently replayed request; no exact
 request timestamp or sanitized error body was supplied. It supports one-way
-dev-to-prod account isolation. The reverse prod-only registration/login check
-and saved-look absence in both Libraries have not been supplied, so complete
-database/Library isolation is still unverified.
+dev-to-prod account isolation. At that earlier review, the reverse prod-only registration/login check
+and saved-look absence in both Libraries had not yet been supplied. The later
+[independent live reciprocal check](#independent-live-reciprocal-authentication-and-library-check)
+now supplies both directions and both Library checks.
 
 ### Local telemetry evidence
 
