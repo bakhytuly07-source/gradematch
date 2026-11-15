@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-11-15T13:27:30.589206+00:00",
+  "checks": [
+    {
+      "registered_only": "dev",
+      "register": 201,
+      "own_login": 200,
+      "other_login": 401,
+      "other_error": {
+        "code": "auth",
+        "message": "Email or password is incorrect."
+      }
+    },
+    {
+      "registered_only": "prod",
+      "register": 201,
+      "own_login": 200,
+      "other_login": 401,
+      "other_error": {
+        "code": "auth",
+        "message": "Email or password is incorrect."
+      }
+    },
+    {
+      "saved_on": "dev",
+      "save": 201,
+      "own_library_contains_look": true,
+      "other_library_absent": true,
+      "other_get": 404,
+      "other_error": {
+        "code": "not_found",
+        "message": "Look was not found."
+      },
+      "cleanup_delete": 204
+    },
+    {
+      "saved_on": "prod",
+      "save": 201,
+      "own_library_contains_look": true,
+      "other_library_absent": true,
+      "other_get": 404,
+      "other_error": {
+        "code": "not_found",
+        "message": "Look was not found."
+      },
+      "cleanup_delete": 204
+    }
+  ],
+  "result": "PASS"
+}

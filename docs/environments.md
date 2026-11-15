@@ -26,9 +26,9 @@ database**. Never copy dev's connection string. The unchanged entrypoint waits
 for the database and runs Alembic before serving requests.
 
 Render allows [one active free PostgreSQL database per workspace](https://render.com/docs/free),
-so prod uses Neon. Render's free database expires after 30 days; the **actual dev
-expiry notice/date is waiting for owner dashboard evidence**, not calculated
-from this document. Free web instances sleep after 15 idle minutes; review the
+so prod uses Neon. Render's free database expires after 30 days; the actual dev
+database dashboard notice states **December 3, 2026 (2026-12-03)**; see the
+owner screenshot below. Free web instances sleep after 15 idle minutes; review the
 linked current limits before relying on this environment.
 
 For an existing Blueprint, `sync: false` does **not** apply a new secret on
@@ -138,8 +138,11 @@ then Render event for that same SHA with timezone; endpoint HTTP 200 results.
 For an owner-controlled failed/pending/recovery experiment, retain the prior
 live SHA, failed SHA/run, terminal completion time and observation interval,
 Render event history showing no deploy for failed/pending SHA, then recovery
-CI completion and subsequent matching deploy event. Do not manufacture a broken
-main commit as part of this implementation. A green GitHub run alone does not
+CI completion and subsequent matching deploy event. The owner explicitly authorized a controlled temporary failing assertion on
+`main`, observing pending and failed CI with no Render deployment, then reverting
+that assertion and verifying successful recovery. Preserve all existing assertions
+and always recover `main`. Establish usable Render read access before pushing
+the temporary failure so the gate can actually be observed. A green GitHub run alone does not
 prove the deployment gate or live service identity.
 
 ## Telemetry identity and repeatable local demo (#140)
@@ -489,16 +492,102 @@ Both environments and supplied versions selected, six populated panels.
 2026-11-15 local demo, matching metric labels, request logs and trace resources.
 These are local synthetic instances, not live Render telemetry evidence.
 
+### Owner dashboard and API evidence follow-up (2026-11-15)
+
+The Engineer inspected these owner-provided screenshots for readability and
+visible secrets before committing. Hook text remains masked; no credentials,
+connection strings or private emails are visible.
+
+![Production auto-deploy Off](img/render-prod-settings.png)
+
+Production service `srv-dbson2jrjlhs739tg6ug` shows Auto-Deploy **Off**.
+This screenshot does not show every service setting or database configuration.
+
+![Actual dev database expiry notice](img/render-db-expiry.png)
+
+Dev database `gradematch-db`, dashboard identity
+`dpg-dbket1ou01pc73bb6gcg-a`, is Available in Frankfurt and its actual notice
+states **December 3, 2026**. This replaces the earlier estimated expiry.
+
+![Production application request logs](img/render-cloud-logs.png)
+
+Prod logs show `GET /docs` 200 and a `GET /api/library` 404. The Library API
+is `/api/looks`; that 404 does not verify saved-look isolation. The screenshot's
+Nov 15 local clock has no explicit timezone. These ordinary request lines do
+not expose OpenTelemetry environment/version resources, trace identity or
+business metric labels; cloud telemetry acceptance is still unverified.
+
+Owner-supplied Render API deployment metadata (UTC; not independently fetched
+by this Engineer):
+
+| Environment | Deploy ID / trigger / status | Commit | Created UTC | Finished UTC |
+| --- | --- | --- | --- | --- |
+| Dev | `dep-dbsqrhc9v7es73c7ci2g` / `new_commit` / `live` | `591f8b0181d5232c38cead26d711e2d93a69b96a` | `2026-11-15T13:04:05.519984Z` | `2026-11-15T13:05:09.4806Z` |
+| Prod | `dep-dbsplf6k1f9s739uls1g` / `deploy_hook` / `live` | `85c7655c25335235844cb0aa7e202b9a0d69affa` | `2026-11-15T11:42:52.649429Z` | `2026-11-15T11:43:55.709203Z` |
+
+[Dev CI 43716607781](https://github.com/bakhytuly07-source/gradematch/actions/runs/43716607781)
+for full SHA `591f8b0181d5232c38cead26d711e2d93a69b96a` completed
+successfully at `2026-11-15T13:04:02Z`; the supplied matching Render event begins
+3.519984 seconds later. This supports the successful exact-SHA gate timeline,
+with Render timestamps attributed to the owner. Prod metadata corresponds to
+the independently checked promotion evidence above and implies version
+`85c7655`; dev implies `591f8b0`. Deployment metadata alone does not prove
+emitted cloud telemetry has those version labels.
+
+### Controlled CI gate experiment status
+
+| Phase | Timestamp / interval UTC | Result |
+| --- | --- | --- |
+| Baseline | Owner API event `2026-11-15T13:04:05.519984Z`–`13:05:09.4806Z` | Dev `591f8b0` live after successful CI, as supplied above |
+| Access preflight | 2026-11-15 Engineer session | No Render API credential available in task environment or supported connector; native Chrome access stalled then was aborted |
+| Controlled pending / failure | Not run | No failing commit was created or pushed; no no-deploy or retained-live-SHA claim |
+| Recovery | Not applicable | Main retains its passing assertions; no failure to revert |
+
+The experiment is authorized but blocked on usable private Render read access.
+Supply `RENDER_API_KEY` privately in the task environment or an accessible
+authenticated dashboard; never put it in an issue, document or chat. Read access
+must produce timestamped deployment-list snapshots before, during pending CI,
+after terminal failure and after recovery. A successful baseline does not
+replace this experiment. Existing tests and workflow checks were not changed.
+
 ### Evidence still required for full acceptance
 
-The owner reports live verification, but the supplied durable artifacts do not
-establish: actual dev database dashboard expiry (README's 2026-12-03 is only an
-estimate); before/after dev/database identity; both Free plans and prod auto-deploy
-off in live settings; private Neon separation and migration completion;
-the reciprocal prod-only account login and both saved-look isolation checks
-(the owner-supplied dev-only check above is now recorded); controlled
-failed/pending/recovery CI event history; cloud request-log/trace/metric identity
-matching both deployed SHAs. Full #137/#138/#140 acceptance remains for QA to
-assess against owner evidence. #141 now includes the dedicated rejected
-summary screenshot, but its combined operational evidence is still incomplete.
-No missing check is described here as passed.
+Still unresolved: historical before/after dev and database identities; complete
+live service settings; independently corroborated Neon configuration/migration
+logs; controlled pending/failed/recovery event history; cloud request-log,
+trace and metric environment/version identity matching actual deployments.
+Actual expiry and prod auto-deploy Off are now supported by owner screenshots.
+Reciprocal authentication and saved-Library results are recorded separately
+below when independently observed. Full #137/#138/#140/#141 acceptance remains
+for QA; no unobserved criterion is called passed.
+
+### Independent live reciprocal authentication and Library check
+
+Fresh QA ran the complete two-environment flow at
+`2026-11-15T13:27:30.589206+00:00` against the actual public URLs above.
+[Sanitized live outputs](img/live-isolation-evidence.json) contain only statuses,
+booleans and contract errors; credentials and private email addresses remained
+in memory. This is independent QA evidence, not an Engineer replay.
+
+| Disposable account / saved look | Own environment | Other environment |
+| --- | --- | --- |
+| Dev-only account | Register 201; login 200 | Prod login 401, `auth`: `Email or password is incorrect.` |
+| Prod-only account | Register 201; login 200 | Dev login 401, same contract error |
+| Look saved on dev | Save 201; own Library contains it | Prod Library absent; direct look GET 404, `not_found`: `Look was not found.` |
+| Look saved on prod | Save 201; own Library contains it | Dev Library absent; direct look GET 404, same contract error |
+
+Both synthetic looks were deleted (204) and both sessions logged out. Accounts
+were fresh and distinct; failed cross-logins did not register an account.
+An earlier QA attempt observed a transient prod cross-login 500 with
+`unknown`: `Unexpected processing or server failure.`; a bounded retry first
+confirmed prod unknown login 401 and registration 201 at `13:27:19Z`, then
+repeated the complete flow successfully as above. The transient failure is
+retained as an operational observation, not erased by the passing retry.
+Owner-reported successful reverse authentication and repaired Neon migrations
+are consistent with the successful retry, but no independent migration log or
+private database configuration was available to this Engineer.
+
+This docs-only follow-up reuses the exact implementation test evidence above
+(backend 224 passed/1 skipped, frontend 52, integration 10 and existing E2E
+scenarios plus 30 Playwright tests). No dependencies, API contract, application
+code, workflow checks or test assertions changed.

@@ -17,8 +17,8 @@ Try GradeMatch at [https://gradematch-web.onrender.com](https://gradematch-web.o
 
 The free instance sleeps after about 15 minutes without traffic; the first
 request after it sleeps can take up to a minute. The free database expires
-around **December 3, 2026 (2026-12-03)**, 30 days after creation. Confirm and
-write down the actual expiry date from Render's database Info page.
+on **December 3, 2026 (2026-12-03)**, confirmed by its actual
+[Render database Info notice](docs/environments.md#owner-dashboard-and-api-evidence-follow-up-2026-11-15).
 
 ## Environments & Promotion
 
