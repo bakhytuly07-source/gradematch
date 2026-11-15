@@ -185,3 +185,73 @@ Existing dev deployment, Blueprint sync/identities, Neon migrations, account/loo
 isolation, CI-gate event experiment and cloud telemetry matching actual deployed
 SHAs remain **waiting for owner evidence**. These are required acceptance
 criteria and must be verified before QA closes their issues.
+
+## Manual production promotion (#139)
+
+`.github/workflows/promote-production.yml` is dispatch-only. Configure the GitHub
+`production` environment with any required reviewers and restrict deployment
+branches to `main`. Its job grants only `actions: read` (exact-SHA CI inspection)
+and `contents: write` (atomic release tag creation). The single job concurrency
+group `production-promotion`, with cancellation disabled, serializes production
+promotions. GitHub allows one running and one pending job per group; a newer
+pending job can replace an older pending job, but does not cancel the running
+promotion. Dispatch confirmations on `main` only; the runner is checked out from
+`main` and the deployed commit is independently frozen from Render dev metadata.
+
+Required secrets (repository or `production` environment): `RENDER_API_KEY`,
+`RENDER_DEV_SERVICE_ID`, `RENDER_PROD_DEPLOY_HOOK_URL`. The API key needs read
+access to deploy metadata for both services. Set repository/environment variables
+`DEV_URL=https://gradematch-web.onrender.com`,
+`PROD_URL=https://gradematch-prod.onrender.com`, and `RENDER_PROD_SERVICE_ID` to the
+actual non-secret Render `srv-…` production service ID. Verify the actual URLs
+and ID against Render before enabling promotion. The first two repository
+variables exist; the production service ID was absent at implementation time.
+No service identity is inferred from its name. Missing configuration fails
+before the hook. The hook URL must target `https://api.render.com` with its
+existing authentication query and no preconfigured `ref`.
+
+The standard-library runner reads Render's official
+[deployment-list response](https://api-docs.render.com/reference/list-deploys)
+(`deployWithCursor` array, `deploy.commit.id`, `deploy.status`; pagination is
+followed). Exactly one `live` dev deployment is required. Newer queued/building
+or failed entries cannot replace it. CI is read by full SHA from `ci.yml`, with
+the latest updated run/attempt required successful, including all three jobs.
+Dev `/docs` must return the Swagger application before deploying. Public HTTP
+requests refuse redirects; wake-up retries are bounded to two minutes for dev.
+
+The [documented hook behavior](https://render.com/docs/deploy-hooks) preserves
+existing query parameters and appends URL-encoded `ref=<full SHA>`. HTTP 200
+supplies `deploy.id`; HTTP 202 requires discovery of a new matching hook deploy,
+excluding all pre-hook deploy IDs. Metadata must identify the frozen SHA as live,
+then the actual prod Swagger `/docs` must be healthy, within 600 seconds measured
+from hook invocation, including hook time. Per-request timeouts never exceed
+the remaining deadline. No previous healthy deployment can satisfy this gate.
+Smoke requests then require `/`, `/login`, `/docs` 200 and `/api/auth/me` 401 with
+the existing JSON error shape. Only then an atomic GitHub ref creation publishes
+`prod-YYYYMMDD-HHMMSS-<first seven SHA characters>` in UTC. Existing refs fail;
+tags are never overwritten. No tag is created on earlier failures.
+
+A false confirmation exits with zero metadata/deployment calls and no tag.
+Summaries report outcome, full SHA, public URLs, UTC timestamps, elapsed time,
+note, CI URL, deployment ID, hook-call count and successful tag. Untrusted note
+characters are numeric HTML entities, preventing Markdown/HTML/mention execution;
+secrets and raw HTTP error bodies are suppressed. A failure after the hook can
+leave the new production deployment live; the workflow does not roll back.
+
+Isolated checks: `python3 -m unittest discover -s scripts/tests -v`. They cover
+false confirmation, missing/pending/failed CI, unhealthy dev, hook HTTP error,
+wrong prod SHA, the simulated full 600-second deadline, queued-deploy matching,
+smoke failure, frozen SHA/query preservation and untrusted summary text. Real
+rejected/successful dispatch, Render event, release tag and concurrent-confirmation
+evidence are intentionally left to QA; implementation never invokes the live hook.
+
+Implementation verification on 2026-11-15: promotion isolated checks **7 passed**;
+workflow parsed with existing PyYAML and dispatch/input/permission/concurrency
+invariants passed; backend **224 passed, 1 opt-in PostgreSQL test skipped**;
+frontend **52 passed**; `make integration` **10 passed**; `make e2e` guest,
+Library and Studio-session scenarios plus **30 Playwright tests passed** (1.1m).
+Backend required sandbox escalation for its loopback OTLP receiver; Docker
+checks required local Docker socket access. Existing product preview timings
+above 300ms remain visible in the unchanged E2E suite. `openapi.yaml` is unchanged,
+no dependency was added, and no existing CI/test assertion was changed. Actual
+dev `/docs` availability and all live-promotion evidence remain QA checks.

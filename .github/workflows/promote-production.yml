@@ -1,0 +1,44 @@
+name: Promote production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Confirm promotion of the current live dev commit
+        required: true
+        type: boolean
+        default: false
+      note:
+        description: Optional release note
+        required: false
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    concurrency:
+      group: production-promotion
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Validate, promote and verify
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          DISPATCH_NOTE: ${{ inputs.note }}
+          GH_TOKEN: ${{ github.token }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_DEV_SERVICE_ID: ${{ secrets.RENDER_DEV_SERVICE_ID }}
+          RENDER_PROD_DEPLOY_HOOK_URL: ${{ secrets.RENDER_PROD_DEPLOY_HOOK_URL }}
+          RENDER_PROD_SERVICE_ID: ${{ vars.RENDER_PROD_SERVICE_ID }}
+          DEV_URL: ${{ vars.DEV_URL }}
+          PROD_URL: ${{ vars.PROD_URL }}
+        run: python3 scripts/promote_production.py
