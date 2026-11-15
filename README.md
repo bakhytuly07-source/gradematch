@@ -20,17 +20,26 @@ request after it sleeps can take up to a minute. The free database expires
 around **December 3, 2026 (2026-12-03)**, 30 days after creation. Confirm and
 write down the actual expiry date from Render's database Info page.
 
-## Render deployment
+## Environments & Promotion
 
-Use the root [Render Blueprint](./render.yaml) and
-[dashboard deployment guide](./docs/deploy-render.md) for one free Docker web
-service and one free PostgreSQL database in Frankfurt.
+[Dev — gradematch-web](https://gradematch-web.onrender.com) retains the original
+URL and automatically deploys `main` after CI checks pass.
+[Production — gradematch-prod](https://gradematch-prod.onrender.com) is a separate
+Frankfurt Docker service with automatic deployment off and a separate Neon
+PostgreSQL database. Dev uses the existing Render PostgreSQL database; Render
+allows only one active free PostgreSQL database per workspace.
 
-See the live demo above for the public URL and approximate database expiry
-date. Warm the service before running tests. See
-[Render's free-plan limits](https://render.com/docs/free).
-Live suite verification is blocked by the existing runners' local-only operations;
-see [#123](https://github.com/bakhytuly07-source/gradematch/issues/123).
+Use the manual [Promote production workflow](https://github.com/bakhytuly07-source/gradematch/actions/workflows/promote-production.yml)
+with confirmation to promote dev's live commit after independent CI and health
+checks. See the [environment and promotion guide](./docs/environments.md) for
+setup, secrets, release tags, troubleshooting and observed evidence. Free web
+services sleep after idle periods; see [Render limits](https://render.com/docs/free).
+
+Run `make obs-demo` for two local environment/version views in Grafana; clean up
+with `make obs-demo-down`. Prerequisites, ports and sample traffic are in the guide.
+The root [Render Blueprint](./render.yaml) defines both services; the older
+[initial deployment guide](./docs/deploy-render.md) describes the original
+single-service setup. Use the environment guide for the current topology.
 
 ## Run the whole stack with Docker
 

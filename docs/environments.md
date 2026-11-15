@@ -1,4 +1,20 @@
-# Environments
+# Environments and promotion
+
+## Architecture
+
+Each Render Docker web service serves the React frontend and FastAPI API from
+one origin. They use separate PostgreSQL databases; accounts and saved looks
+are not shared. Uploaded originals remain in memory.
+
+| Role | Service / public URL | Database | Deployment |
+| --- | --- | --- | --- |
+| Dev | [gradematch-web](https://gradematch-web.onrender.com) | Existing Render `gradematch-db` | `main`, after CI checks pass |
+| Production | [gradematch-prod](https://gradematch-prod.onrender.com) | Separate Neon PostgreSQL | Manual confirmed promotion, auto-deploy off |
+
+Both services use the root Dockerfile, Free compute and Frankfurt in
+[render.yaml](../render.yaml). Dev retains its original public URL. The owner
+reports both live environments verified; the evidence below distinguishes
+recorded observations from checks still lacking durable evidence.
 
 ## Environment and database setup (#137)
 
@@ -23,8 +39,10 @@ On first Blueprint creation Render prompts for it. See the
 Before sync, record dev's actual service ID, URL and database identity. Review
 Blueprint changes to confirm the existing resources are retained, only prod is
 added, and no database is replaced. After sync record both identities, actual
-URLs, plans, regions, deploy SHAs/events and successful migrations. Actual dev
-and prod URLs and IDs are **waiting for owner evidence**; names are not URLs.
+URLs, plans, regions, deploy SHAs/events and successful migrations. The actual public URLs are listed above, corroborated by the successful
+promotion summary. Dev service ID is `srv-dbkf7pl6e07s73c9u6n0` (settings
+screenshot); prod is `srv-dbson2jrjlhs739tg6ug` (independent #139 QA). A before/after
+identity comparison still requires its historical record.
 Verify `/`, `/login`, `/docs` each return 200 on both actual URLs after wake-up.
 
 Use two distinct disposable accounts: register on dev only, verify successful
@@ -76,6 +94,25 @@ jsonschema 4.26.0, `validator_for(schema).check_schema(schema)` then
 Output: `PASS render.yaml: official Render JSON Schema`.
 This validates structure, not dashboard settings or successful deployment.
 
+Reproduce from the repository root using existing backend development dependencies:
+
+```sh
+curl -fsSL https://render.com/schema/render.yaml.json -o /tmp/gradematch-render-schema.json
+cd backend
+uv run python - <<'PYTHON'
+import json
+from pathlib import Path
+import jsonschema
+import yaml
+schema = json.loads(Path('/tmp/gradematch-render-schema.json').read_text())
+validator = jsonschema.validators.validator_for(schema)
+validator.check_schema(schema)
+validator(schema).validate(yaml.safe_load(Path('../render.yaml').read_text()))
+print('PASS render.yaml: official Render JSON Schema')
+PYTHON
+```
+
+
 ## Automatic dev CI gate (#138)
 
 Dev uses `autoDeployTrigger: checksPass`; prod remains `off`. The existing
@@ -88,14 +125,15 @@ waits for checks on the exact new commit. GitHub conclusions `success`, `neutral
 and `skipped` count as passed; zero checks or a failed check blocks automatic
 deployment. Keep all three jobs enabled. Privileged manual deploys and hooks
 are separate from this automatic gate. The promotion workflow's independent
-CI validation belongs to #139 and is outside this change.
+CI validation is implemented by the [promotion workflow](../.github/workflows/promote-production.yml),
+described below.
 
 The complete field audit above and official schema validation were repeated on
 2026-11-15 after adding `checksPass`: `PASS render.yaml: official Render JSON Schema`
 (same schema SHA-256 and validator versions).
 
-Waiting for owner dashboard evidence: “After CI Checks Pass” on the unchanged
-dev service; successful commit SHA, CI run URL/conclusion and completion time,
+The supplied settings screenshot shows “After CI Checks Pass” for dev.
+Still needed for the full gate experiment: successful commit SHA, CI run URL/conclusion and completion time,
 then Render event for that same SHA with timezone; endpoint HTTP 200 results.
 For an owner-controlled failed/pending/recovery experiment, retain the prior
 live SHA, failed SHA/run, terminal completion time and observation interval,
@@ -181,16 +219,21 @@ deployment or production promotion.
   while the unchanged E2E suite continued running.
 - `git diff -- openapi.yaml`: empty. No dependency added or assertion weakened.
 
-Existing dev deployment, Blueprint sync/identities, Neon migrations, account/look
-isolation, CI-gate event experiment and cloud telemetry matching actual deployed
-SHAs remain **waiting for owner evidence**. These are required acceptance
-criteria and must be verified before QA closes their issues.
+These results apply to implementation commit
+[`85c7655c25335235844cb0aa7e202b9a0d69affa`](https://github.com/bakhytuly07-source/gradematch/commit/85c7655c25335235844cb0aa7e202b9a0d69affa).
+[Independent QA](https://github.com/bakhytuly07-source/gradematch/issues/140#issuecomment-6893145350)
+repeated backend/frontend/integration/E2E with the same totals. This docs-only
+follow-up reuses those exact results; it does not claim a new suite run.
+Remaining cloud evidence is itemized below; owner verification is not silently
+substituted for missing per-criterion artifacts.
 
 ## Manual production promotion (#139)
 
-`.github/workflows/promote-production.yml` is dispatch-only. Configure the GitHub
-`production` environment with any required reviewers and restrict deployment
-branches to `main`. Its job grants only `actions: read` (exact-SHA CI inspection)
+`.github/workflows/promote-production.yml` is dispatch-only. Use the GitHub
+`production` environment. Final #139 QA found it exists with no reviewer or
+branch protection rules. Operators can add required reviewers and a `main`
+deployment-branch restriction under Settings → Environments → production;
+these protections are recommendations, not observed current settings. Its job grants only `actions: read` (exact-SHA CI inspection)
 and `contents: write` (atomic release tag creation). The single job concurrency
 group `production-promotion`, with cancellation disabled, serializes production
 promotions. GitHub allows one running and one pending job per group; a newer
@@ -204,8 +247,9 @@ access to deploy metadata for both services. Set repository/environment variable
 `DEV_URL=https://gradematch-web.onrender.com`,
 `PROD_URL=https://gradematch-prod.onrender.com`, and `RENDER_PROD_SERVICE_ID` to the
 actual non-secret Render `srv-…` production service ID. Verify the actual URLs
-and ID against Render before enabling promotion. The first two repository
-variables exist; the production service ID was absent at implementation time.
+and ID against Render before enabling promotion. The production service ID was initially missing;
+[final QA](https://github.com/bakhytuly07-source/gradematch/issues/139#issuecomment-6893816989)
+verified it was configured as `srv-dbson2jrjlhs739tg6ug`.
 No service identity is inferred from its name. Missing configuration fails
 before the hook. The hook URL must target `https://api.render.com` with its
 existing authentication query and no preconfigured `ref`.
@@ -241,9 +285,9 @@ leave the new production deployment live; the workflow does not roll back.
 Isolated checks: `python3 -m unittest discover -s scripts/tests -v`. They cover
 false confirmation, missing/pending/failed CI, unhealthy dev, hook HTTP error,
 wrong prod SHA, the simulated full 600-second deadline, queued-deploy matching,
-smoke failure, frozen SHA/query preservation and untrusted summary text. Real
-rejected/successful dispatch, Render event, release tag and concurrent-confirmation
-evidence are intentionally left to QA; implementation never invokes the live hook.
+smoke failure, frozen SHA/query preservation and untrusted summary text. Real rejected/successful dispatch, release tag and concurrent-confirmation
+evidence was subsequently verified by #139 QA (linked below). The Engineer
+implementation checks did not invoke the live hook.
 
 Implementation verification on 2026-11-15: promotion isolated checks **7 passed**;
 workflow parsed with existing PyYAML and dispatch/input/permission/concurrency
@@ -253,8 +297,7 @@ Library and Studio-session scenarios plus **30 Playwright tests passed** (1.1m).
 Backend required sandbox escalation for its loopback OTLP receiver; Docker
 checks required local Docker socket access. Existing product preview timings
 above 300ms remain visible in the unchanged E2E suite. `openapi.yaml` is unchanged,
-no dependency was added, and no existing CI/test assertion was changed. Actual
-dev `/docs` availability and all live-promotion evidence remain QA checks.
+no dependency was added, and no existing CI/test assertion was changed. Subsequent live-promotion QA is recorded below.
 
 QA correction (2026-11-15): urllib raises `HTTPError` for the expected auth 401.
 The promotion transport must retain its JSON body for smoke contract validation,
@@ -276,3 +319,141 @@ not upload environment variables, response bodies or the working directory;
 it preserves the promotion step's failure status. An unavailable summary is
 reported as a missing artifact, never as successful verification. The summary
 regression checks byte equality between the written summary and artifact file.
+
+
+## Operator steps and troubleshooting
+
+1. Review [render.yaml](../render.yaml), the field audit above and Render's
+   Blueprint changes. Preserve existing dev and database identities. Create a
+   separate Neon PostgreSQL database for prod, then supply its connection URL
+   privately in Render → gradematch-prod → Environment → `DATABASE_URL`.
+   On an existing Blueprint, enter it manually; `sync: false` does not update it.
+   Keep Docker Command unset so the existing database readiness/migration
+   entrypoint runs. Verify migration completion in sanitized runtime logs.
+2. In GitHub → Settings → Secrets and variables → Actions (or the production
+   environment), enter the three secrets named above. Enter `DEV_URL`,
+   `PROD_URL`, `RENDER_PROD_SERVICE_ID` as variables. Obtain API keys from Render
+   account settings and service IDs from the actual service pages. Obtain the
+   production deploy hook from prod Settings; never paste it into a command,
+   issue, screenshot or repository. Rotate by creating/replacing the Render API
+   key or regenerating the prod hook and immediately replacing the corresponding
+   GitHub secret; revoke the old credential. Update private Neon credentials in
+   Render when rotating them, then redeploy and verify migrations/health.
+3. Wait for dev's exact commit `CI` backend/frontend/stack checks and Render
+   deployment to complete. Inspect the current live dev deployment SHA and
+   `/docs`; a green main checkout does not identify the running dev version.
+4. Open [Promote production](https://github.com/bakhytuly07-source/gradematch/actions/workflows/promote-production.yml),
+   choose Run workflow on `main`, check the required `confirm` boolean and
+   optionally enter a note. Leaving confirmation false deliberately rejects the
+   request without metadata/deployment calls. No push, PR or schedule promotes.
+5. Inspect the job summary, matching Render prod deploy, four smoke statuses and
+   release tag. The tag targets the frozen live dev SHA, which can be older than
+   main. A success tag is created only after all gates pass. The 600-second
+   production verification budget begins at the hook invocation; the workflow's
+   outer job timeout is 20 minutes. Use the retained summary artifact if the
+   summary viewer is unavailable (30-day retention).
+
+Missing configuration, absent/ambiguous live dev metadata, non-successful latest
+exact-SHA CI or unhealthy dev fail before deployment. A hook error, wrong live
+prod SHA, verification timeout, smoke-contract error or tag collision fails the
+run without a success tag. After any failure, first open prod's Render Deploys
+page, inspect the live commit and compare it with the frozen SHA in the summary;
+then check deploy/runtime logs and `/docs`. A post-hook failure can leave the new
+version live. There is no automatic rollback. Resolve the reported cause before
+running a fresh confirmed promotion; inspect its newly frozen SHA again.
+
+If `/docs` initially fails, allow the free instance about a minute to wake and
+retry within the documented health budget. A readiness/migration error needs
+Render runtime-log inspection and correct private database configuration. For
+empty Grafana panels rerun `make obs-demo`, select Last 5 minutes, refresh, and
+select the matching Environment/Version pair; use the emitted evidence JSON to
+separate missing traffic from filter errors. If ports are occupied, stop only
+the conflicting local demo with `make obs-demo-down` before retrying.
+
+### Build once limitation (post-MVP)
+
+Promotion pins source with `ref=<full SHA>`. Render rebuilds the repository's
+Dockerfile for production; it does not reuse dev's exact built image digest.
+The current workflow has no image-registry publish/pull step. “Build once,
+promote the same immutable image” therefore remains a post-MVP registry-based
+change, not a guarantee of this workflow. The local two-instance demo likewise
+labels current-working-tree builds with supplied versions.
+
+## Observed deployment and promotion evidence
+
+Reviewed 2026-11-15 (Asia/Almaty, UTC+05:00). Owner supplied the four cloud
+screenshots below and reports live dev/prod verified. Images are readable and
+contain no visible hook URL, connection string, token or private account email;
+the Render deploy hook is masked. The screenshots do not display capture times;
+relative “minutes ago” text is not an absolute timestamp.
+
+![Render services deployed in Frankfurt](img/render-environments.png)
+
+Both `gradematch-prod` and `gradematch-web` show Deployed / Docker / Frankfurt;
+`gradematch-db` shows Available / PostgreSQL 18 / Frankfurt. This overview does
+not itself show compute plans, secret database binding or migration logs.
+
+![Dev auto-deploy waits for CI](img/render-dev-ci-gate.png)
+
+Dev's settings show “After CI Checks Pass” and its service ID in the address
+bar. This proves the setting, not the controlled failed/pending/recovery deploy
+experiment or a timestamped successful CI-to-Render event sequence.
+
+![Manual promotion run history](img/promote-workflow-runs.png)
+
+The workflow history shows successful and failed manual runs on main. A red
+status alone does not prove `confirm=false`; use the linked rejection below.
+
+![Successful promotion job summary](img/promote-job-summary.png)
+
+[Successful run 43710227720](https://github.com/bakhytuly07-source/gradematch/actions/runs/43710227720)
+shows full frozen SHA `85c7655c25335235844cb0aa7e202b9a0d69affa`, both actual
+public URLs, UTC start `2026-11-15T11:42:50.814504+00:00`, end
+`2026-11-15T11:44:00.968283+00:00`, 70.2-second measured promotion time,
+[exact-SHA CI 43705022420](https://github.com/bakhytuly07-source/gradematch/actions/runs/43705022420),
+Render deploy `dep-dbsplf6k1f9s739uls1g`, and one deployment call.
+[Release tag prod-20261115-114400-85c7655](https://github.com/bakhytuly07-source/gradematch/releases/tag/prod-20261115-114400-85c7655)
+targets that full SHA, independently checked by
+[final #139 QA](https://github.com/bakhytuly07-source/gradematch/issues/139#issuecomment-6893816989).
+That QA record also verifies `/`, `/login`, `/docs` = 200 and unauthenticated
+`/api/auth/me` = 401 with the expected JSON error. These smoke statuses are
+reported from QA; they are not visible in the summary screenshot.
+
+[Rejected confirm=false run 43710223977](https://github.com/bakhytuly07-source/gradematch/actions/runs/43710223977)
+had zero deployment calls and empty SHA/tag, verified by QA from its exact
+submitted summary artifact. A dedicated screenshot of this rejected summary
+is still missing. Historical concurrent confirmed runs
+[43709381466](https://github.com/bakhytuly07-source/gradematch/actions/runs/43709381466)
+and [43709425539](https://github.com/bakhytuly07-source/gradematch/actions/runs/43709425539)
+showed serialization: first ended 11:33:24 UTC, second started 11:33:25 UTC on
+2026-11-15. Both failed the subsequently corrected auth-smoke transport bug;
+they demonstrate queue behavior, not successful releases.
+
+### Local telemetry evidence
+
+![Dev telemetry filtered to version 4717cb7](img/obs-demo-dev.png)
+
+Dev-only filter `dev` / `4717cb7`, six populated panels around 10:35 UTC.
+
+![Prod telemetry filtered to version a3ce833](img/obs-demo-prod.png)
+
+Prod-only filter `prod` / `a3ce833`, six populated panels in the same interval.
+
+![Both environments and versions selected](img/obs-demo-both.png)
+
+Both environments and supplied versions selected, six populated panels.
+[Sanitized query and correlation results](img/obs-demo-evidence.json) record the
+2026-11-15 local demo, matching metric labels, request logs and trace resources.
+These are local synthetic instances, not live Render telemetry evidence.
+
+### Evidence still required for full acceptance
+
+The owner reports live verification, but the supplied durable artifacts do not
+establish: actual dev database dashboard expiry (README's 2026-12-03 is only an
+estimate); before/after dev/database identity; both Free plans and prod auto-deploy
+off in live settings; private Neon separation and migration completion;
+reciprocal dev-only/prod-only account login and saved-look isolation; controlled
+failed/pending/recovery CI event history; cloud request-log/trace/metric identity
+matching both deployed SHAs. Full #137/#138/#140 acceptance remains for QA to
+assess against owner evidence. #141 additionally needs the dedicated rejected
+summary screenshot. No missing check is described here as passed.
