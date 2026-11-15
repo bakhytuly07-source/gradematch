@@ -49,8 +49,8 @@ Use two distinct disposable accounts: register on dev only, verify successful
 dev login and prod authentication error without registration; repeat in reverse.
 Save a synthetic look in each and verify it is absent from the other Library.
 Record sanitized statuses and look identifiers; omit credentials, emails,
-connection strings and tokens. This cloud isolation evidence remains waiting
-for owner access.
+connection strings and tokens. The owner-supplied one-way check is recorded below; the reciprocal account
+and both saved-look checks remain unverified.
 
 ## Complete Blueprint field audit
 
@@ -381,7 +381,7 @@ labels current-working-tree builds with supplied versions.
 
 ## Observed deployment and promotion evidence
 
-Reviewed 2026-11-15 (Asia/Almaty, UTC+05:00). Owner supplied the four cloud
+Reviewed 2026-11-15 (Asia/Almaty, UTC+05:00). Owner supplied the six cloud
 screenshots below and reports live dev/prod verified. Images are readable and
 contain no visible hook URL, connection string, token or private account email;
 the Render deploy hook is masked. The screenshots do not display capture times;
@@ -398,6 +398,15 @@ not itself show compute plans, secret database binding or migration logs.
 Dev's settings show “After CI Checks Pass” and its service ID in the address
 bar. This proves the setting, not the controlled failed/pending/recovery deploy
 experiment or a timestamped successful CI-to-Render event sequence.
+
+![Dev deployment history](img/render-dev-deploys.png)
+
+Dev service `srv-dbkf7pl6e07s73c9u6n0` shows successful Auto-Deploy of
+`f75742a` (duration 1m 2s), plus successful `85c7655` Auto-Deploy and Blueprint
+entries. This corroborates deployed commits on the retained service. Its
+relative “40m ago” / “2h ago” labels do not establish absolute deployment times
+or ordering against exact-SHA CI completion; failed/pending/recovery evidence
+remains absent.
 
 ![Manual promotion run history](img/promote-workflow-runs.png)
 
@@ -421,13 +430,47 @@ reported from QA; they are not visible in the summary screenshot.
 
 [Rejected confirm=false run 43710223977](https://github.com/bakhytuly07-source/gradematch/actions/runs/43710223977)
 had zero deployment calls and empty SHA/tag, verified by QA from its exact
-submitted summary artifact. A dedicated screenshot of this rejected summary
-is still missing. Historical concurrent confirmed runs
+submitted summary artifact. The dedicated owner screenshot now corroborates that artifact:
+
+![Rejected confirmation summary with zero deployment calls](img/promote-rejected-summary.png)
+
+It shows “Confirmation rejected; zero deployment calls”, empty commit SHA/tag,
+and UTC start `2026-11-15T11:42:42.215260+00:00`, end
+`2026-11-15T11:42:42.222028+00:00`. No hook, token, connection string or private
+account email is visible in either new screenshot. Historical concurrent confirmed runs
 [43709381466](https://github.com/bakhytuly07-source/gradematch/actions/runs/43709381466)
 and [43709425539](https://github.com/bakhytuly07-source/gradematch/actions/runs/43709425539)
 showed serialization: first ended 11:33:24 UTC, second started 11:33:25 UTC on
 2026-11-15. Both failed the subsequently corrected auth-smoke transport bug;
 they demonstrate queue behavior, not successful releases.
+
+### Live `/api/health` observation
+
+Engineer read-only requests on 2026-11-15 returned the following results
+(times are the HTTP response `Date` header, UTC):
+
+| URL | Observed time | HTTP | JSON body |
+| --- | --- | --- | --- |
+| [Dev health](https://gradematch-web.onrender.com/api/health) | 12:58:08 UTC | 404 | `{"code":"not_found","message":"Not Found"}` |
+| [Prod health](https://gradematch-prod.onrender.com/api/health) | 12:58:20 UTC | 404 | `{"code":"not_found","message":"Not Found"}` |
+
+Neither response provides environment, version or deployed commit metadata.
+These requests do not validate deployed telemetry identity or migrations, and
+`/api/health` is not substituted for the documented `/docs` readiness check.
+No application or API-contract change was made for this docs-only follow-up.
+
+### Owner-supplied account isolation check
+
+The owner reports a disposable account registered **only on dev** on 2026-11-15:
+`POST /api/auth/register` on dev returned **200**, dev
+`POST /api/auth/login` returned **200**, and prod `POST /api/auth/login` with
+the same credentials returned **401**. The returned dev user identifier was
+`a0691d36-d5fa-4552-ba45-5460415e17e3`. Email, password and tokens are omitted.
+This is owner-supplied evidence, not an independently replayed request; no exact
+request timestamp or sanitized error body was supplied. It supports one-way
+dev-to-prod account isolation. The reverse prod-only registration/login check
+and saved-look absence in both Libraries have not been supplied, so complete
+database/Library isolation is still unverified.
 
 ### Local telemetry evidence
 
@@ -452,8 +495,10 @@ The owner reports live verification, but the supplied durable artifacts do not
 establish: actual dev database dashboard expiry (README's 2026-12-03 is only an
 estimate); before/after dev/database identity; both Free plans and prod auto-deploy
 off in live settings; private Neon separation and migration completion;
-reciprocal dev-only/prod-only account login and saved-look isolation; controlled
+the reciprocal prod-only account login and both saved-look isolation checks
+(the owner-supplied dev-only check above is now recorded); controlled
 failed/pending/recovery CI event history; cloud request-log/trace/metric identity
 matching both deployed SHAs. Full #137/#138/#140 acceptance remains for QA to
-assess against owner evidence. #141 additionally needs the dedicated rejected
-summary screenshot. No missing check is described here as passed.
+assess against owner evidence. #141 now includes the dedicated rejected
+summary screenshot, but its combined operational evidence is still incomplete.
+No missing check is described here as passed.
