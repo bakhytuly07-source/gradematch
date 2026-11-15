@@ -40,7 +40,15 @@ class Promotion:
             with self.opener.open(urllib.request.Request(url, headers=headers, method=method), timeout=timeout) as r:
                 return r.status, r.headers.get('Content-Type', ''), r.read()
         except urllib.error.HTTPError as e:
-            return e.code, e.headers.get('Content-Type', ''), b''
+            # Expected errors (notably auth smoke HTTP 401) still carry the
+            # application contract. Keep a bounded body in memory, never log it.
+            try:
+                body = e.read(1024 * 1024)
+            except Exception:
+                raise Failure('HTTP error response read failed') from None
+            finally:
+                e.close()
+            return e.code, e.headers.get('Content-Type', ''), body
         except Exception:
             raise Failure('HTTP transport failed') from None
 

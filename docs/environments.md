@@ -255,3 +255,13 @@ checks required local Docker socket access. Existing product preview timings
 above 300ms remain visible in the unchanged E2E suite. `openapi.yaml` is unchanged,
 no dependency was added, and no existing CI/test assertion was changed. Actual
 dev `/docs` availability and all live-promotion evidence remain QA checks.
+
+QA correction (2026-11-15): urllib raises `HTTPError` for the expected auth 401.
+The promotion transport must retain its JSON body for smoke contract validation,
+rather than replacing every error response body with empty bytes. Error bodies
+are now read only into memory with a 1 MiB limit and never logged. A regression
+uses a real loopback HTTP server and the real urllib transport: valid 401 JSON
+passes all smoke checks; an empty error message fails. All **8 isolated promotion
+tests passed** after this correction. Earlier live attempts reached production
+but failed this smoke check and created no tag; they are not successful releases.
+The application/OpenAPI and existing CI workflow are unchanged by the fix.

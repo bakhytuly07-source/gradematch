@@ -110,6 +110,41 @@ class Tests(unittest.TestCase):
         self.assertEqual(p.sha, SHA)
         self.assertIn('key=secret&ref=' + SHA, p.requests[0])
 
+    def test_real_http_401_body_reaches_auth_smoke_check(self):
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        import threading
+
+        class Handler(BaseHTTPRequestHandler):
+            auth_body = b'{"code":"auth","message":"Missing, expired or invalid bearer token."}'
+
+            def do_GET(self):
+                auth = self.path == '/api/auth/me'
+                self.send_response(401 if auth else 200)
+                self.send_header('Content-Type', 'application/json' if auth else 'text/html')
+                self.end_headers()
+                self.wfile.write(self.auth_body if auth else b'<html>GradeMatch</html>')
+
+            def log_message(self, *args):
+                pass
+
+        with ThreadingHTTPServer(('127.0.0.1', 0), Handler) as server:
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                origin = f'http://127.0.0.1:{server.server_port}'
+                p = m.Promotion({'PROD_URL': origin})
+                status, content_type, body = p.request(origin + '/api/auth/me')
+                self.assertEqual(status, 401)
+                self.assertEqual(content_type, 'application/json')
+                self.assertEqual(body, Handler.auth_body)
+                p.smoke()
+                Handler.auth_body = b'{"code":"auth","message":""}'
+                with self.assertRaisesRegex(m.Failure, 'contract mismatch'):
+                    p.smoke()
+            finally:
+                server.shutdown()
+                thread.join()
+
     def test_summary_untrusted_note(self):
         import tempfile
         p = Fake()
