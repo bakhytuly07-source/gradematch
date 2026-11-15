@@ -1,0 +1,302 @@
+{
+  "timestamp_utc": "2026-11-15T10:34:38Z",
+  "instances": {
+    "dev": {
+      "metric_query": "gradematch_styles_generated_total{environment=\"dev\",version=\"4717cb7\"}",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "dev",
+            "environment": "dev",
+            "exported_instance": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "service_name": "gradematch",
+            "service_version": "4717cb7",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "4717cb7"
+          },
+          "value": [
+            1794738886.321,
+            "2"
+          ]
+        }
+      ],
+      "panels": {
+        "Styles generated / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.323,
+              "0.01983816264838163"
+            ]
+          }
+        ],
+        "Generate failures / second by reason": [
+          {
+            "metric": {
+              "reason": "invalid_request"
+            },
+            "value": [
+              1794738886.324,
+              "0.019839268598392686"
+            ]
+          }
+        ],
+        "Looks saved / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.325,
+              "0.019840374548403747"
+            ]
+          }
+        ],
+        "Users registered / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.326,
+              "0.0198414804984148"
+            ]
+          }
+        ],
+        "LUT render latency p95 (seconds)": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.327,
+              "0.00975"
+            ]
+          }
+        ],
+        "HTTP requests / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.33,
+              "0.19845904298459044"
+            ]
+          }
+        ]
+      },
+      "log_query": "{service_name=\"gradematch\",deployment_environment=\"dev\",service_version=\"4717cb7\"} |= \"API request completed\"",
+      "log_streams": 19,
+      "trace_id": "faf01c29c64f7bfb443768e2aa59ccde",
+      "trace_resource": {
+        "deployment.environment": "dev",
+        "service.version": "4717cb7"
+      }
+    },
+    "prod": {
+      "metric_query": "gradematch_styles_generated_total{environment=\"prod\",version=\"a3ce833\"}",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "prod",
+            "environment": "prod",
+            "exported_instance": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "service_name": "gradematch",
+            "service_version": "a3ce833",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "a3ce833"
+          },
+          "value": [
+            1794738886.343,
+            "2"
+          ]
+        }
+      ],
+      "panels": {
+        "Styles generated / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.344,
+              "0.019861387598613875"
+            ]
+          }
+        ],
+        "Generate failures / second by reason": [
+          {
+            "metric": {
+              "reason": "invalid_request"
+            },
+            "value": [
+              1794738886.345,
+              "0.019862493548624936"
+            ]
+          }
+        ],
+        "Looks saved / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.345,
+              "0.019862493548624936"
+            ]
+          }
+        ],
+        "Users registered / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.346,
+              "0.019863599498635996"
+            ]
+          }
+        ],
+        "LUT render latency p95 (seconds)": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.347,
+              "0.00975"
+            ]
+          }
+        ],
+        "HTTP requests / second": [
+          {
+            "metric": {},
+            "value": [
+              1794738886.347,
+              "0.19864705448647052"
+            ]
+          }
+        ]
+      },
+      "log_query": "{service_name=\"gradematch\",deployment_environment=\"prod\",service_version=\"a3ce833\"} |= \"API request completed\"",
+      "log_streams": 19,
+      "trace_id": "9bd79af54ad79f84c00803bc532d2fbb",
+      "trace_resource": {
+        "deployment.environment": "prod",
+        "service.version": "a3ce833"
+      }
+    }
+  },
+  "filters": {
+    "dev": {
+      "query": "gradematch_styles_generated_total{environment=~\"dev\",version=~\"4717cb7\"}",
+      "result": [
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "dev",
+            "environment": "dev",
+            "exported_instance": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "service_name": "gradematch",
+            "service_version": "4717cb7",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "4717cb7"
+          },
+          "value": [
+            1794738886.353,
+            "2"
+          ]
+        }
+      ]
+    },
+    "prod": {
+      "query": "gradematch_styles_generated_total{environment=~\"prod\",version=~\"a3ce833\"}",
+      "result": [
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "prod",
+            "environment": "prod",
+            "exported_instance": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "service_name": "gradematch",
+            "service_version": "a3ce833",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "a3ce833"
+          },
+          "value": [
+            1794738886.354,
+            "2"
+          ]
+        }
+      ]
+    },
+    "dev|prod": {
+      "query": "gradematch_styles_generated_total{environment=~\"dev|prod\",version=~\"4717cb7|a3ce833\"}",
+      "result": [
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "dev",
+            "environment": "dev",
+            "exported_instance": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "f1f61276-4879-4c96-8940-525a022d0c62",
+            "service_name": "gradematch",
+            "service_version": "4717cb7",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "4717cb7"
+          },
+          "value": [
+            1794738886.355,
+            "2"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "gradematch_styles_generated_total",
+            "deployment_environment": "prod",
+            "environment": "prod",
+            "exported_instance": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "exported_job": "gradematch",
+            "instance": "collector:8889",
+            "job": "gradematch",
+            "service_instance_id": "d06fab0a-3c6e-4161-8030-72a91eb4f52b",
+            "service_name": "gradematch",
+            "service_version": "a3ce833",
+            "telemetry_sdk_language": "python",
+            "telemetry_sdk_name": "opentelemetry",
+            "telemetry_sdk_version": "1.45.1",
+            "version": "a3ce833"
+          },
+          "value": [
+            1794738886.355,
+            "2"
+          ]
+        }
+      ]
+    }
+  },
+  "environment_options": [
+    "dev",
+    "prod"
+  ],
+  "version_options": [
+    "4717cb7",
+    "a3ce833"
+  ]
+}

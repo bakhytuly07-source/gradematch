@@ -1,0 +1,34 @@
+# Combined with docker-compose.yaml in this directory, with a fixed private project.
+services:
+  demo-dev:
+    build:
+      context: ..
+    image: gradematch-obs-demo-app
+    environment:
+      DATABASE_URL: sqlite:////tmp/demo.db
+      DEPLOYMENT_ENVIRONMENT: dev
+      APP_VERSION: ${DEMO_DEV_VERSION:?Run make obs-demo}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+    ports: ["127.0.0.1:18091:8091"]
+    depends_on: [collector]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/docs', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 60
+  demo-prod:
+    image: gradematch-obs-demo-app
+    build:
+      context: ..
+    environment:
+      DATABASE_URL: sqlite:////tmp/demo.db
+      DEPLOYMENT_ENVIRONMENT: prod
+      APP_VERSION: ${DEMO_PROD_VERSION:?Run make obs-demo}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+    ports: ["127.0.0.1:18092:8091"]
+    depends_on: [collector]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8091/docs', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 60

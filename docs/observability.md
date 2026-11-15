@@ -492,3 +492,13 @@ existing warnings; frontend `npm test -- --run` **52 passed**. The installed
 backend environment used Python 3.14.7 for this check; documented setup remains
 Python 3.12. This change introduces documentation/images only, with no new
 behavior, packages or contract changes.
+
+## Two-environment demo
+
+Run `make obs-demo` from the repository root for isolated dev/prod instances plus
+the existing stack. It waits for health and generates real sample traffic, then
+checks populated metrics, correlated logs/traces and environment/version filters.
+Use `make obs-demo-down` to remove only demo resources. See
+[environments](environments.md#telemetry-identity-and-repeatable-local-demo-140)
+for prerequisites, ports, overrides, identity derivation and evidence. The normal
+`make obs-up` ports, project and resources remain unchanged by default.

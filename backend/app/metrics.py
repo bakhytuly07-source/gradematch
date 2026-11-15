@@ -1,6 +1,8 @@
 """Bounded business instruments; no provider is created here."""
 import os
 
+from .telemetry import app_version
+
 from opentelemetry.sdk.metrics.view import View, ExplicitBucketHistogramAggregation
 
 RENDER_BUCKETS = (0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5)
@@ -15,7 +17,7 @@ def views():
 class BusinessMetrics:
     def __init__(self, meter):
         self.labels = {'environment': os.getenv('DEPLOYMENT_ENVIRONMENT', 'local'),
-                       'version': os.getenv('APP_VERSION', 'dev')}
+                       'version': app_version()}
         self.counters = {name: meter.create_counter('gradematch_' + name) for name in (
             'styles_generated', 'generate_failures', 'looks_saved', 'users_registered')}
         # Name includes seconds; omit unit to avoid duplicate suffixes in Prometheus.

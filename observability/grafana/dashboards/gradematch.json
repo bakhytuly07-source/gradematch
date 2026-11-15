@@ -30,8 +30,8 @@
         "definition": "label_values(gradematch_styles_generated_total, environment)",
         "refresh": 1,
         "sort": 1,
-        "multi": false,
-        "includeAll": false,
+        "multi": true,
+        "includeAll": true,
         "current": {}
       },
       {
@@ -43,14 +43,14 @@
           "uid": "prometheus"
         },
         "query": {
-          "query": "label_values(gradematch_styles_generated_total{environment=\"$environment\"}, version)",
+          "query": "label_values(gradematch_styles_generated_total{environment=~\"$environment\"}, version)",
           "refId": "version"
         },
-        "definition": "label_values(gradematch_styles_generated_total{environment=\"$environment\"}, version)",
+        "definition": "label_values(gradematch_styles_generated_total{environment=~\"$environment\"}, version)",
         "refresh": 1,
         "sort": 1,
-        "multi": false,
-        "includeAll": false,
+        "multi": true,
+        "includeAll": true,
         "current": {}
       }
     ]
@@ -91,7 +91,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(gradematch_styles_generated_total{environment=\"$environment\",version=\"$version\"}[$__rate_interval]))",
+          "expr": "sum(rate(gradematch_styles_generated_total{environment=~\"$environment\",version=~\"$version\"}[$__rate_interval]))",
           "legendFormat": "styles / s",
           "range": true,
           "interval": "5s"
@@ -133,7 +133,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (reason) (rate(gradematch_generate_failures_total{environment=\"$environment\",version=\"$version\"}[$__rate_interval]))",
+          "expr": "sum by (reason) (rate(gradematch_generate_failures_total{environment=~\"$environment\",version=~\"$version\"}[$__rate_interval]))",
           "legendFormat": "{{reason}}",
           "range": true,
           "interval": "5s"
@@ -175,7 +175,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(gradematch_looks_saved_total{environment=\"$environment\",version=\"$version\"}[$__rate_interval]))",
+          "expr": "sum(rate(gradematch_looks_saved_total{environment=~\"$environment\",version=~\"$version\"}[$__rate_interval]))",
           "legendFormat": "looks / s",
           "range": true,
           "interval": "5s"
@@ -217,7 +217,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(gradematch_users_registered_total{environment=\"$environment\",version=\"$version\"}[$__rate_interval]))",
+          "expr": "sum(rate(gradematch_users_registered_total{environment=~\"$environment\",version=~\"$version\"}[$__rate_interval]))",
           "legendFormat": "users / s",
           "range": true,
           "interval": "5s"
@@ -259,7 +259,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(gradematch_lut_render_seconds_bucket{environment=\"$environment\",version=\"$version\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(gradematch_lut_render_seconds_bucket{environment=~\"$environment\",version=~\"$version\"}[$__rate_interval])))",
           "legendFormat": "p95 seconds",
           "range": true,
           "interval": "5s"
@@ -301,7 +301,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(gradematch_http_requests_total{service_name=\"gradematch\",deployment_environment=\"$environment\",service_version=\"$version\"}[$__rate_interval]))",
+          "expr": "sum(rate(gradematch_http_requests_total{service_name=\"gradematch\",deployment_environment=~\"$environment\",service_version=~\"$version\"}[$__rate_interval]))",
           "legendFormat": "requests / s",
           "range": true,
           "interval": "5s"

@@ -103,3 +103,85 @@ Render event history showing no deploy for failed/pending SHA, then recovery
 CI completion and subsequent matching deploy event. Do not manufacture a broken
 main commit as part of this implementation. A green GitHub run alone does not
 prove the deployment gate or live service identity.
+
+## Telemetry identity and repeatable local demo (#140)
+
+Render's [actual deployment commit](https://render.com/docs/environment-variables#render_git_commit)
+`RENDER_GIT_COMMIT` takes precedence over build defaults: startup exports its first
+seven characters as `APP_VERSION`, and telemetry resource/business identity uses
+the same resolution. Thus manually deploying an older SHA identifies that older
+SHA. Explicit local `APP_VERSION` remains supported; telemetry stays opt-in via
+`OTEL_EXPORTER_OTLP_ENDPOINT`. Resources expose `deployment.environment` and
+`service.version`; business instruments expose matching `environment`/`version`.
+Cloud request log/trace/metric identity versus actual deployment metadata remains
+waiting for owner evidence on both services.
+
+Prerequisites: Docker Desktop/Engine with Compose v2 supporting `--wait`, Python
+3 standard library, Git, available image registry access, and this checkout with
+its existing JPEG fixture. No cloud credentials or additional packages required.
+From repository root:
+
+```sh
+make obs-demo
+# Optional distinct seven-character lowercase hex commit overrides:
+DEMO_DEV_VERSION=4717cb7 DEMO_PROD_VERSION=a3ce833 make obs-demo
+make obs-demo-down
+```
+
+Defaults derive dev from `git rev-parse --short=7 HEAD` and prod from `HEAD^`.
+Overrides identify the supplied demonstration versions; both containers run the
+current working-tree image, not separate historical builds. Dev uses
+`http://localhost:18091`, prod `http://localhost:18092`, Grafana
+`http://localhost:13000` (local-only demo login `admin` / `admin`). Prometheus is
+`:19090`, Loki `:13100`, Tempo `:13200`, Collector OTLP `:14318`, Collector health
+`:13134`; every published port binds loopback. Internal app ports are both 8091.
+
+The fixed project `gradematch-obs-demo` owns its network, containers and named
+observability volumes. Each app has an independent SQLite database in its own
+container `/tmp/demo.db`; recreation resets only that app's synthetic accounts.
+No uploaded image is stored. Cleanup removes only this project's containers,
+network and volumes, preserving normal app/integration/E2E and observability
+projects and all cloud services. The demo overrides inherited Compose project
+and OTLP binding settings. A second invocation reuses resources safely, waits
+for readiness and sends new synthetic traffic. Shutdown is explicit even after
+a failed run (`make obs-demo-down`).
+
+The sample sends register, generate, save-look, render-LUT and rejected missing
+upload actions from each app twice, separated by scrapes. Credentials remain in
+memory. It asserts all six real dashboard queries are populated, metrics carry
+matching resource/business identity, Loki request logs correlate to Tempo traces,
+and exact dev/prod/both environment/version selections return the intended
+nonempty series. Grafana's Environment and Version filters support multiple
+values and All; version options follow selected environments using regex
+selectors. The script prints URLs and writes sanitized query evidence to
+`/tmp/gradematch-obs-demo-evidence.json` (override `DEMO_EVIDENCE_PATH`).
+
+See [observability runbook](observability.md). Saved local evidence is in
+`docs/img/obs-demo-evidence.json` and `obs-demo-dev.png`, `obs-demo-prod.png`,
+`obs-demo-both.png`. These demonstrate local synthetic instances, not a cloud
+deployment or production promotion.
+
+## Local implementation verification (2026-11-15)
+
+- Backend `UV_CACHE_DIR=/tmp/gradematch-uv-cache uv run pytest`: **224 passed,
+  1 skipped** (opt-in PostgreSQL journey); includes actual older Render SHA
+  precedence and local explicit-version regressions.
+- Frontend `npm test -- --run`: **52 passed**, 12 files.
+- `make integration`: **10 passed**, unchanged scenarios/assertions.
+- `make e2e`: **PASS** guest, Library and Studio session scenarios plus **30
+  Playwright tests** (1.2m), unchanged assertions. Existing preview timing
+  observations above the product target remain reported by the suite.
+- `make obs-demo`: PASS at 10:34:46 UTC; second invocation PASS at
+  10:36:12 UTC. Supplied/default identities were dev `4717cb7`, prod `a3ce833`.
+  Actual metrics, correlated request logs/traces and dev/prod/both filters are
+  recorded in `docs/img/obs-demo-evidence.json`; populated Grafana screenshots
+  show each selection. No cloud identity is claimed by these local results.
+- `make obs-demo-down`: all demo containers and named volumes removed. Normal
+  Compose container IDs before/after were identical; its `/docs` returned 200
+  while the unchanged E2E suite continued running.
+- `git diff -- openapi.yaml`: empty. No dependency added or assertion weakened.
+
+Existing dev deployment, Blueprint sync/identities, Neon migrations, account/look
+isolation, CI-gate event experiment and cloud telemetry matching actual deployed
+SHAs remain **waiting for owner evidence**. These are required acceptance
+criteria and must be verified before QA closes their issues.

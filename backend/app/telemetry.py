@@ -7,11 +7,17 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.trace import SpanKind
 
 
+def app_version():
+    """Render deployment identity takes precedence over image/build defaults."""
+    commit = os.getenv("RENDER_GIT_COMMIT", "").strip()
+    return commit[:7] if commit else os.getenv("APP_VERSION", "dev")
+
+
 def resource():
     return Resource.create({
         "service.name": "gradematch",
         "deployment.environment": os.getenv("DEPLOYMENT_ENVIRONMENT", "local"),
-        "service.version": os.getenv("APP_VERSION", "dev"),
+        "service.version": app_version(),
     })
 
 

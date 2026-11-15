@@ -31,3 +31,10 @@ obs-up:
 
 obs-down:
 	docker compose -f observability/docker-compose.yaml down
+
+.PHONY: obs-demo obs-demo-down
+obs-demo:
+	./observability/demo.sh up
+
+obs-demo-down:
+	./observability/demo.sh down
