@@ -505,12 +505,12 @@ This screenshot does not show every service setting or database configuration.
 
 ![Actual dev database expiry notice](img/render-db-expiry.png)
 
-Dev database `gradematch-db`, dashboard identity
-`dpg-dbket1ou01pc73bb6gcg-a`, is Available in Frankfurt and its actual notice
+Dev database `gradematch-db` is Available in Frankfurt and its actual notice
 states **December 3, 2026**. This replaces the earlier estimated expiry.
 
 ![Production application request logs](img/render-cloud-logs.png)
 
+The dashboard banner corroborates prod is a Free instance.
 Prod logs show `GET /docs` 200 and a `GET /api/library` 404. The Library API
 is `/api/looks`; that 404 does not verify saved-look isolation. The screenshot's
 Nov 15 local clock has no explicit timezone. These ordinary request lines do
