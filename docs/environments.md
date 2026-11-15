@@ -265,3 +265,14 @@ passes all smoke checks; an empty error message fails. All **8 isolated promotio
 tests passed** after this correction. Earlier live attempts reached production
 but failed this smoke check and created no tag; they are not successful releases.
 The application/OpenAPI and existing CI workflow are unchanged by the fix.
+
+Promotion summary evidence: the runner copies its own `GITHUB_STEP_SUMMARY` file
+byte-for-byte to `$RUNNER_TEMP/promotion-summary.md` immediately after writing
+its sanitized summary, on success or handled failure. An `always()` artifact
+step uploads only that explicit file as
+`promotion-summary-<run ID>-<attempt>` with 30-day retention. This supports
+independent verification when GitHub's summary viewer is inaccessible. It does
+not upload environment variables, response bodies or the working directory;
+it preserves the promotion step's failure status. An unavailable summary is
+reported as a missing artifact, never as successful verification. The summary
+regression checks byte equality between the written summary and artifact file.

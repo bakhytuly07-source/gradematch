@@ -148,10 +148,11 @@ class Tests(unittest.TestCase):
     def test_summary_untrusted_note(self):
         import tempfile
         p = Fake()
-        with tempfile.NamedTemporaryFile() as f:
-            p.env.update(GITHUB_STEP_SUMMARY=f.name, DISPATCH_NOTE='<script>$(touch /tmp/bad)</script> @all')
+        with tempfile.NamedTemporaryFile() as f, tempfile.NamedTemporaryFile() as artifact:
+            p.env.update(GITHUB_STEP_SUMMARY=f.name, SUMMARY_ARTIFACT_PATH=artifact.name, DISPATCH_NOTE='<script>$(touch /tmp/bad)</script> @all')
             p.summary('rejected')
             content = Path(f.name).read_text()
+            self.assertEqual(Path(f.name).read_bytes(), Path(artifact.name).read_bytes())
         self.assertNotIn('<script>', content)
         self.assertNotIn('$(touch', content)
         self.assertNotIn('@all', content)

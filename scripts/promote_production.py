@@ -4,6 +4,7 @@ import html
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import urllib.error
@@ -230,6 +231,9 @@ class Promotion:
         if self.env.get('GITHUB_STEP_SUMMARY'):
             with open(self.env['GITHUB_STEP_SUMMARY'], 'a') as f:
                 f.write(result + '\n')
+            if self.env.get('SUMMARY_ARTIFACT_PATH'):
+                # Copy this step's exact sanitized summary, not another step's file.
+                shutil.copyfile(self.env['GITHUB_STEP_SUMMARY'], self.env['SUMMARY_ARTIFACT_PATH'])
         print('Deployment calls: ' + str(self.hook_calls))
 
 
